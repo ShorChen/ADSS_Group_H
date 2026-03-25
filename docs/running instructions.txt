@@ -1,0 +1,3 @@
+in order to run the jar file release/adss_v0.jar,
+open the cmd inside the release folder and type java -jar adss_v0.jar
+you should see Hello World! printed to the screen.
