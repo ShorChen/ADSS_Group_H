@@ -8,4 +8,8 @@ public class SuperLeeService {
     public SuperLeeService(SupplierFacade supplierFacade) {
         this.supplierFacade = supplierFacade;
     }
+
+    public void addOrder() {
+        //TODO
+    }
 }
