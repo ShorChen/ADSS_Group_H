@@ -1,22 +1,18 @@
 package presentation;
 
+import contex.SessionManager;
 import domain.AuthFacade;
-import domain.Employee;
-
-import java.util.ArrayList;
-import java.util.List;
 
 public class AuthService {
-    private AuthFacade facade;
-    private List<Employee> employees;
+    private final AuthFacade facade;
     public AuthService(AuthFacade facade){
-        employees = new ArrayList<>();
         this.facade = facade;
     }
-    public boolean login(String username, String password){
-        return facade.login(username, password);
+    public boolean login(String id, String password){
+        SessionManager.login(facade.login(id, password));
+        return SessionManager.hasContext();
     }
-    public boolean logout(){
-        return facade.logout();
+    public void logout(){
+        SessionManager.logout();
     }
 }
