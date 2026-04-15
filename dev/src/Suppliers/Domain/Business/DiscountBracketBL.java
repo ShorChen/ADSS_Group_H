@@ -4,7 +4,7 @@ public class DiscountBracketBL {
     private final int minQuantity;
     private double discountPercentage;
 
-    public DiscountBracketBL(int minQuantity, double discountPercentage) {
+    DiscountBracketBL(int minQuantity, double discountPercentage) {
         this.minQuantity = minQuantity;
         this.discountPercentage = discountPercentage;
     }

@@ -1,12 +1,12 @@
 package Suppliers.Presentation;
 
 public class ContactPersonPL {
-    private String name;
-    private String phone;
-    private String email;
+    private final String name;
+    private final String phone;
+    private final String email;
 
     public ContactPersonPL(String name, String phone, String email) {
-        this.name  = name;
+        this.name = name;
         this.phone = phone;
         this.email = email;
     }

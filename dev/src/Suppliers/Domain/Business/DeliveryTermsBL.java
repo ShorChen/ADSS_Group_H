@@ -9,7 +9,7 @@ public class DeliveryTermsBL {
     private List<DayOfWeek> fixedDeliveryDays;
     private boolean supplierTransports;
 
-    public DeliveryTermsBL(List<DayOfWeek> fixedDeliveryDays, boolean supplierTransports) {
+    DeliveryTermsBL(List<DayOfWeek> fixedDeliveryDays, boolean supplierTransports) {
         this.fixedDeliveryDays = fixedDeliveryDays != null ? new ArrayList<>(fixedDeliveryDays) : new ArrayList<>();
         this.supplierTransports = supplierTransports;
     }
@@ -21,4 +21,5 @@ public class DeliveryTermsBL {
 
     public List<DayOfWeek> getFixedDeliveryDays() { return Collections.unmodifiableList(fixedDeliveryDays); }
     public boolean isSupplierTransports() { return supplierTransports; }
+    public boolean isOnDemand() { return fixedDeliveryDays == null || fixedDeliveryDays.isEmpty(); }
 }

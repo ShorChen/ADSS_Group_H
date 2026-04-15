@@ -13,13 +13,15 @@ public class SupplierFacade {
         this.suppliers = new HashMap<>();
     }
 
-    public SupplierBL addSupplier(String businessNumber, String iban, String paymentTerms) {
+    public SupplierBL addSupplier(String name, String businessNumber, String address, String iban, String paymentTerms) {
         businessNumberValidation(businessNumber);
+        stringValidation(name, "Name");
+        stringValidation(address, "Address");
         stringValidation(iban, "IBAN");
         stringValidation(paymentTerms, "paymentTerms");
         if (suppliers.containsKey(businessNumber))
             throw new IllegalArgumentException("A supplier with this business number already exists");
-        SupplierBL supplierBL = new SupplierBL(businessNumber, new PaymentDetails(iban, paymentTerms));
+        SupplierBL supplierBL = new SupplierBL(name, businessNumber, address, new PaymentDetails(iban, paymentTerms));
         suppliers.put(businessNumber, supplierBL);
         return supplierBL;
     }
@@ -50,31 +52,32 @@ public class SupplierFacade {
         return true;
     }
 
-    public ProductLineBL addProductLine(String businessNumber, int agreementId, int internalCatalogId, int supplierCatalogId, double price) {
-        return getSupplierOrThrow(businessNumber).getAgreementOrThrow(agreementId).addProductLine(internalCatalogId, supplierCatalogId, price);
+    public ProductLineBL addProductLine(String businessNumber, int agreementId, int supplierCatalogId, String name, double price) {
+        stringValidation(name, "Product Name");
+        return getSupplierOrThrow(businessNumber).getAgreementOrThrow(agreementId).addProductLine(supplierCatalogId, name, price);
     }
 
-    public boolean removeProductLine(String businessNumber, int agreementId, int internalCatalogId) {
-        getSupplierOrThrow(businessNumber).getAgreementOrThrow(agreementId).removeProductLine(internalCatalogId);
+    public boolean removeProductLine(String businessNumber, int agreementId, int supplierCatalogId) {
+        getSupplierOrThrow(businessNumber).getAgreementOrThrow(agreementId).removeProductLine(supplierCatalogId);
         return true;
     }
 
-    public ProductLineBL updateProductLine(String businessNumber, int agreementId, int internalCatalogId, double newPrice) {
-        return getSupplierOrThrow(businessNumber).getAgreementOrThrow(agreementId).updateProductLine(internalCatalogId, newPrice);
+    public ProductLineBL updateProductLine(String businessNumber, int agreementId, int supplierCatalogId, double newPrice) {
+        return getSupplierOrThrow(businessNumber).getAgreementOrThrow(agreementId).updateProductLine(supplierCatalogId, newPrice);
     }
 
-    public boolean addDiscount(String businessNumber, int agreementId, int internalCatalogId, int minQuantity, double discountPercentage) {
-        getSupplierOrThrow(businessNumber).getAgreementOrThrow(agreementId).addDiscount(internalCatalogId, minQuantity, discountPercentage);
+    public boolean addDiscount(String businessNumber, int agreementId, int supplierCatalogId, int minQuantity, double discountPercentage) {
+        getSupplierOrThrow(businessNumber).getAgreementOrThrow(agreementId).addDiscount(supplierCatalogId, minQuantity, discountPercentage);
         return true;
     }
 
-    public boolean removeDiscount(String businessNumber, int agreementId, int internalCatalogId, int minQuantity) {
-        getSupplierOrThrow(businessNumber).getAgreementOrThrow(agreementId).removeDiscount(internalCatalogId, minQuantity);
+    public boolean removeDiscount(String businessNumber, int agreementId, int supplierCatalogId, int minQuantity) {
+        getSupplierOrThrow(businessNumber).getAgreementOrThrow(agreementId).removeDiscount(supplierCatalogId, minQuantity);
         return true;
     }
 
-    public boolean updateDiscount(String businessNumber, int agreementId, int internalCatalogId, int minQuantity, double newDiscountPercentage) {
-        getSupplierOrThrow(businessNumber).getAgreementOrThrow(agreementId).updateDiscount(internalCatalogId, minQuantity, newDiscountPercentage);
+    public boolean updateDiscount(String businessNumber, int agreementId, int supplierCatalogId, int minQuantity, double newDiscountPercentage) {
+        getSupplierOrThrow(businessNumber).getAgreementOrThrow(agreementId).updateDiscount(supplierCatalogId, minQuantity, newDiscountPercentage);
         return true;
     }
 
@@ -95,6 +98,23 @@ public class SupplierFacade {
         return true;
     }
 
+    public boolean updateAddress(String businessNumber, String newAddress) {
+        stringValidation(newAddress, "Address");
+        getSupplierOrThrow(businessNumber).setAddress(newAddress);
+        return true;
+    }
+
+    public boolean addManufacturer(String businessNumber, String manufacturer) {
+        stringValidation(manufacturer, "Manufacturer");
+        getSupplierOrThrow(businessNumber).addManufacturer(manufacturer);
+        return true;
+    }
+
+    public boolean removeManufacturer(String businessNumber, String manufacturer) {
+        getSupplierOrThrow(businessNumber).removeManufacturer(manufacturer);
+        return true;
+    }
+
     public ContactPersonBL updateContactName(String businessNumber, String phone, String newName) {
         stringValidation(newName, "New Name");
         return getSupplierOrThrow(businessNumber).updateContactName(phone, newName);
@@ -110,17 +130,23 @@ public class SupplierFacade {
         return getSupplierOrThrow(businessNumber).updateContactEmail(phone, newEmail);
     }
 
+    public SupplierBL getSupplier(String businessNumber) {
+        return getSupplierOrThrow(businessNumber);
+    }
+
+    public List<SupplierBL> getAllSuppliers() {
+        return List.copyOf(suppliers.values());
+    }
+
     private SupplierBL getSupplierOrThrow(String businessNumber) {
         businessNumberValidation(businessNumber);
         SupplierBL supplierBL = suppliers.get(businessNumber);
-        if (supplierBL == null)
-            throw new NoSuchElementException("This supplier does not exist in the system.");
+        if (supplierBL == null) throw new NoSuchElementException("This supplier does not exist.");
         return supplierBL;
     }
 
     private void stringValidation(String str, String name) {
-        if (str == null || str.trim().isEmpty())
-            throw new IllegalArgumentException(name + " Cannot be empty");
+        if (str == null || str.trim().isEmpty()) throw new IllegalArgumentException(name + " Cannot be empty");
     }
 
     private void businessNumberValidation(String businessNumber) {

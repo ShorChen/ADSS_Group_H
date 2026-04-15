@@ -1,9 +1,12 @@
 package Suppliers.Presentation.Controller;
 
+import Suppliers.Domain.Business.Role;
+import Suppliers.Domain.Business.SessionManager;
 import Suppliers.Domain.Service.*;
 import Suppliers.Presentation.*;
 
 import java.time.DayOfWeek;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -15,17 +18,36 @@ public class SupplierController {
         this.supplierService = supplierService;
     }
 
-    public SupplierPL addSupplier(String businessNumber, String iban, String paymentTerms) throws Exception {
-        Response<SupplierSL> response = supplierService.addSupplier(businessNumber, iban, paymentTerms);
-        if (response.isSuccess()) return new SupplierPL(response.getData().getBusinessNumber());
+    private void ensureSupplierManager() {
+        SessionManager.getInstance().requireRole(Role.SUPPLIER_MANAGER);
+    }
+
+    public SupplierPL addSupplier(String name, String businessNumber, String address, String iban, String paymentTerms) throws Exception {
+        ensureSupplierManager();
+        Response<SupplierSL> response = supplierService.addSupplier(name, businessNumber, address, iban, paymentTerms);
+        if (response.isSuccess()) {
+            SupplierSL supplierSL = response.getData();
+            List<ContactPersonPL> contacts = supplierSL.getContactPersonnel().stream()
+                    .map(cp -> new ContactPersonPL(cp.getName(), cp.getPhone(), cp.getEmail()))
+                    .collect(Collectors.toList());
+            List<AgreementPL> agreements = supplierSL.getAgreements().stream()
+                    .map(this::convertAgreementSLToPL)
+                    .collect(Collectors.toList());
+            List<String> manufacturers = new ArrayList<>(supplierSL.getManufacturers());
+            return new SupplierPL(supplierSL.getName(), supplierSL.getBusinessNumber(), supplierSL.getAddress(),
+                    contacts, agreements, manufacturers
+            );
+        }
         throw new Exception(response.getErrorMessage());
     }
 
     public boolean deleteSupplier(String businessNumber) throws Exception {
+        ensureSupplierManager();
         return extractBooleanOrThrow(supplierService.deleteSupplier(businessNumber));
     }
 
     public ContactPersonPL addContactPerson(String businessNumber, String cpName, String phone, String email) throws Exception {
+        ensureSupplierManager();
         Response<ContactPersonSL> response = supplierService.addContactPerson(businessNumber, cpName, phone, email);
         if (response.isSuccess()) {
             ContactPersonSL data = response.getData();
@@ -35,81 +57,111 @@ public class SupplierController {
     }
 
     public boolean removeContactPerson(String businessNumber, String phone) throws Exception {
+        ensureSupplierManager();
         return extractBooleanOrThrow(supplierService.removeContactPerson(businessNumber, phone));
     }
 
     public AgreementPL addAgreement(String businessNumber, List<DayOfWeek> fixedDeliveryDays, boolean supplierTransports) throws Exception {
+        ensureSupplierManager();
         Response<AgreementSL> response = supplierService.addAgreement(businessNumber, fixedDeliveryDays, supplierTransports);
         if (response.isSuccess()) return convertAgreementSLToPL(response.getData());
         throw new Exception(response.getErrorMessage());
     }
 
     public boolean removeAgreement(String businessNumber, int agreementId) throws Exception {
+        ensureSupplierManager();
         return extractBooleanOrThrow(supplierService.removeAgreement(businessNumber, agreementId));
     }
 
-    public ProductLinePL addProductLine(String businessNumber, int agreementId, int internalCatalogId, int supplierCatalogId, double price) throws Exception {
-        Response<ProductLineSL> response = supplierService.addProductLine(businessNumber, agreementId, internalCatalogId, supplierCatalogId, price);
+    public ProductLinePL addProductLine(String businessNumber, int agreementId, int supplierCatalogId, String name, double price) throws Exception {
+        ensureSupplierManager();
+        Response<ProductLineSL> response = supplierService.addProductLine(businessNumber, agreementId, supplierCatalogId, name, price);
         if (response.isSuccess()) {
             ProductLineSL data = response.getData();
-            return new ProductLinePL(data.getInternalCatalogId(), data.getSupplierCatalogId(), data.getAgreedPrice());
+            return new ProductLinePL(data.getSupplierCatalogId(), data.getName(), data.getAgreedPrice());
         }
         throw new Exception(response.getErrorMessage());
     }
 
-    public boolean removeProductLine(String businessNumber, int agreementId, int internalCatalogId) throws Exception {
-        return extractBooleanOrThrow(supplierService.removeProductLine(businessNumber, agreementId, internalCatalogId));
+    public boolean removeProductLine(String businessNumber, int agreementId, int supplierCatalogId) throws Exception {
+        ensureSupplierManager();
+        return extractBooleanOrThrow(supplierService.removeProductLine(businessNumber, agreementId, supplierCatalogId));
     }
 
-    public ProductLinePL updateProductLine(String businessNumber, int agreementId, int internalCatalogId, double newPrice) throws Exception {
-        Response<ProductLineSL> response = supplierService.updateProductLine(businessNumber, agreementId, internalCatalogId, newPrice);
+    public ProductLinePL updateProductLine(String businessNumber, int agreementId, int supplierCatalogId, double newPrice) throws Exception {
+        ensureSupplierManager();
+        Response<ProductLineSL> response = supplierService.updateProductLine(businessNumber, agreementId, supplierCatalogId, newPrice);
         if (response.isSuccess()) {
             ProductLineSL data = response.getData();
-            return new ProductLinePL(data.getInternalCatalogId(), data.getSupplierCatalogId(), data.getAgreedPrice());
+            return new ProductLinePL(data.getSupplierCatalogId(), data.getName(), data.getAgreedPrice());
         }
         throw new Exception(response.getErrorMessage());
     }
 
-    public boolean addDiscount(String businessNumber, int agreementId, int internalCatalogId, int minQuantity, double discountPercentage) throws Exception {
-        return extractBooleanOrThrow(supplierService.addDiscount(businessNumber, agreementId, internalCatalogId, minQuantity, discountPercentage));
+    public boolean addDiscount(String businessNumber, int agreementId, int supplierCatalogId, int minQuantity, double discountPercentage) throws Exception {
+        ensureSupplierManager();
+        return extractBooleanOrThrow(supplierService.addDiscount(businessNumber, agreementId, supplierCatalogId, minQuantity, discountPercentage));
     }
 
-    public boolean removeDiscount(String businessNumber, int agreementId, int internalCatalogId, int minQuantity) throws Exception {
-        return extractBooleanOrThrow(supplierService.removeDiscount(businessNumber, agreementId, internalCatalogId, minQuantity));
+    public boolean removeDiscount(String businessNumber, int agreementId, int supplierCatalogId, int minQuantity) throws Exception {
+        ensureSupplierManager();
+        return extractBooleanOrThrow(supplierService.removeDiscount(businessNumber, agreementId, supplierCatalogId, minQuantity));
     }
 
-    public boolean updateDiscount(String businessNumber, int agreementId, int internalCatalogId, int minQuantity, double newDiscountPercentage) throws Exception {
-        return extractBooleanOrThrow(supplierService.updateDiscount(businessNumber, agreementId, internalCatalogId, minQuantity, newDiscountPercentage));
+    public boolean updateDiscount(String businessNumber, int agreementId, int supplierCatalogId, int minQuantity, double newDiscountPercentage) throws Exception {
+        ensureSupplierManager();
+        return extractBooleanOrThrow(supplierService.updateDiscount(businessNumber, agreementId, supplierCatalogId, minQuantity, newDiscountPercentage));
     }
 
     public boolean updateDeliveryTerms(String businessNumber, int agreementId, List<DayOfWeek> fixedDeliveryDays, boolean supplierTransports) throws Exception {
+        ensureSupplierManager();
         return extractBooleanOrThrow(supplierService.updateDeliveryTerms(businessNumber, agreementId, fixedDeliveryDays, supplierTransports));
     }
 
     public boolean updateBankAccount(String businessNumber, String newIban) throws Exception {
+        ensureSupplierManager();
         return extractBooleanOrThrow(supplierService.updateBankAccount(businessNumber, newIban));
     }
 
     public boolean updatePaymentTerms(String businessNumber, String newTerms) throws Exception {
+        ensureSupplierManager();
         return extractBooleanOrThrow(supplierService.updatePaymentTerms(businessNumber, newTerms));
     }
 
+    public boolean updateAddress(String businessNumber, String newAddress) throws Exception {
+        ensureSupplierManager();
+        return extractBooleanOrThrow(supplierService.updateAddress(businessNumber, newAddress));
+    }
+
+    public boolean addManufacturer(String businessNumber, String manufacturer) throws Exception {
+        ensureSupplierManager();
+        return extractBooleanOrThrow(supplierService.addManufacturer(businessNumber, manufacturer));
+    }
+
+    public boolean removeManufacturer(String businessNumber, String manufacturer) throws Exception {
+        ensureSupplierManager();
+        return extractBooleanOrThrow(supplierService.removeManufacturer(businessNumber, manufacturer));
+    }
+
     public ContactPersonPL updateContactName(String businessNumber, String phone, String newName) throws Exception {
+        ensureSupplierManager();
         return extractContactOrThrow(supplierService.updateContactName(businessNumber, phone, newName));
     }
 
     public ContactPersonPL updateContactPhone(String businessNumber, String oldPhone, String newPhone) throws Exception {
+        ensureSupplierManager();
         return extractContactOrThrow(supplierService.updateContactPhone(businessNumber, oldPhone, newPhone));
     }
 
     public ContactPersonPL updateContactEmail(String businessNumber, String phone, String newEmail) throws Exception {
+        ensureSupplierManager();
         return extractContactOrThrow(supplierService.updateContactEmail(businessNumber, phone, newEmail));
     }
 
     private AgreementPL convertAgreementSLToPL(AgreementSL data) {
         DeliveryTermsPL deliveryTermsPL = new DeliveryTermsPL(data.getDeliveryTerms().getFixedDeliveryDays(), data.getDeliveryTerms().isSupplierTransports());
         List<ProductLinePL> productLinesPL = data.getProductLines().stream()
-                .map(pl -> new ProductLinePL(pl.getInternalCatalogId(), pl.getSupplierCatalogId(), pl.getAgreedPrice()))
+                .map(pl -> new ProductLinePL(pl.getSupplierCatalogId(), pl.getName(), pl.getAgreedPrice()))
                 .collect(Collectors.toList());
         Map<Integer, List<DiscountBracketPL>> discountPolicyPL = data.getDiscountPolicy().entrySet().stream()
                 .collect(Collectors.toMap(

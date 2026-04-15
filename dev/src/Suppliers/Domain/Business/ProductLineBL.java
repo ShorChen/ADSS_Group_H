@@ -1,18 +1,18 @@
 package Suppliers.Domain.Business;
 
 public class ProductLineBL {
-    private final int internalCatalogId;
     private final int supplierCatalogId;
+    private final String name;
     private double agreedPrice;
 
-    public ProductLineBL(int internalCatalogId, int supplierCatalogId, double agreedPrice) {
-        this.internalCatalogId = internalCatalogId;
+    ProductLineBL(int supplierCatalogId, String name, double agreedPrice) {
         this.supplierCatalogId = supplierCatalogId;
+        this.name = name;
         this.agreedPrice = agreedPrice;
     }
 
-    public int getInternalCatalogId() { return internalCatalogId; }
     public int getSupplierCatalogId() { return supplierCatalogId; }
+    public String getName() { return name; }
     public double getAgreedPrice() { return agreedPrice; }
     public void setAgreedPrice(double agreedPrice) { this.agreedPrice = agreedPrice; }
 }

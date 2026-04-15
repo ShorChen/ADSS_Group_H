@@ -11,8 +11,8 @@ public class SupplierService {
         this.supplierFacade = supplierFacade;
     }
 
-    public Response<SupplierSL> addSupplier(String businessNumber, String iban, String paymentTerms) {
-        try { return new Response<>(new SupplierSL(supplierFacade.addSupplier(businessNumber, iban, paymentTerms))); }
+    public Response<SupplierSL> addSupplier(String name, String businessNumber, String address, String iban, String paymentTerms) {
+        try { return new Response<>(new SupplierSL(supplierFacade.addSupplier(name, businessNumber, address, iban, paymentTerms))); }
         catch (Exception ex) { return new Response<>(ex.getMessage()); }
     }
 
@@ -41,33 +41,33 @@ public class SupplierService {
         catch (Exception ex) { return new Response<>(ex.getMessage()); }
     }
 
-    public Response<ProductLineSL> addProductLine(String businessNumber, int agreementId, int internalCatalogId, int supplierCatalogId, double price) {
-        try { return new Response<>(new ProductLineSL(supplierFacade.addProductLine(businessNumber, agreementId, internalCatalogId, supplierCatalogId, price))); }
+    public Response<ProductLineSL> addProductLine(String businessNumber, int agreementId, int supplierCatalogId, String name, double price) {
+        try { return new Response<>(new ProductLineSL(supplierFacade.addProductLine(businessNumber, agreementId, supplierCatalogId, name, price))); }
         catch (Exception ex) { return new Response<>(ex.getMessage()); }
     }
 
-    public Response<Boolean> removeProductLine(String businessNumber, int agreementId, int internalCatalogId) {
-        try { return new Response<>(supplierFacade.removeProductLine(businessNumber, agreementId, internalCatalogId)); }
+    public Response<Boolean> removeProductLine(String businessNumber, int agreementId, int supplierCatalogId) {
+        try { return new Response<>(supplierFacade.removeProductLine(businessNumber, agreementId, supplierCatalogId)); }
         catch (Exception ex) { return new Response<>(ex.getMessage()); }
     }
 
-    public Response<ProductLineSL> updateProductLine(String businessNumber, int agreementId, int internalCatalogId, double newPrice) {
-        try { return new Response<>(new ProductLineSL(supplierFacade.updateProductLine(businessNumber, agreementId, internalCatalogId, newPrice))); }
+    public Response<ProductLineSL> updateProductLine(String businessNumber, int agreementId, int supplierCatalogId, double newPrice) {
+        try { return new Response<>(new ProductLineSL(supplierFacade.updateProductLine(businessNumber, agreementId, supplierCatalogId, newPrice))); }
         catch (Exception ex) { return new Response<>(ex.getMessage()); }
     }
 
-    public Response<Boolean> addDiscount(String businessNumber, int agreementId, int internalCatalogId, int minQuantity, double discountPercentage) {
-        try { return new Response<>(supplierFacade.addDiscount(businessNumber, agreementId, internalCatalogId, minQuantity, discountPercentage)); }
+    public Response<Boolean> addDiscount(String businessNumber, int agreementId, int supplierCatalogId, int minQuantity, double discountPercentage) {
+        try { return new Response<>(supplierFacade.addDiscount(businessNumber, agreementId, supplierCatalogId, minQuantity, discountPercentage)); }
         catch (Exception ex) { return new Response<>(ex.getMessage()); }
     }
 
-    public Response<Boolean> removeDiscount(String businessNumber, int agreementId, int internalCatalogId, int minQuantity) {
-        try { return new Response<>(supplierFacade.removeDiscount(businessNumber, agreementId, internalCatalogId, minQuantity)); }
+    public Response<Boolean> removeDiscount(String businessNumber, int agreementId, int supplierCatalogId, int minQuantity) {
+        try { return new Response<>(supplierFacade.removeDiscount(businessNumber, agreementId, supplierCatalogId, minQuantity)); }
         catch (Exception ex) { return new Response<>(ex.getMessage()); }
     }
 
-    public Response<Boolean> updateDiscount(String businessNumber, int agreementId, int internalCatalogId, int minQuantity, double newDiscountPercentage) {
-        try { return new Response<>(supplierFacade.updateDiscount(businessNumber, agreementId, internalCatalogId, minQuantity, newDiscountPercentage)); }
+    public Response<Boolean> updateDiscount(String businessNumber, int agreementId, int supplierCatalogId, int minQuantity, double newDiscountPercentage) {
+        try { return new Response<>(supplierFacade.updateDiscount(businessNumber, agreementId, supplierCatalogId, minQuantity, newDiscountPercentage)); }
         catch (Exception ex) { return new Response<>(ex.getMessage()); }
     }
 
@@ -83,6 +83,21 @@ public class SupplierService {
 
     public Response<Boolean> updatePaymentTerms(String businessNumber, String newTerms) {
         try { return new Response<>(supplierFacade.updatePaymentTerms(businessNumber, newTerms)); }
+        catch (Exception ex) { return new Response<>(ex.getMessage()); }
+    }
+
+    public Response<Boolean> updateAddress(String businessNumber, String newAddress) {
+        try { return new Response<>(supplierFacade.updateAddress(businessNumber, newAddress)); }
+        catch (Exception ex) { return new Response<>(ex.getMessage()); }
+    }
+
+    public Response<Boolean> addManufacturer(String businessNumber, String manufacturer) {
+        try { return new Response<>(supplierFacade.addManufacturer(businessNumber, manufacturer)); }
+        catch (Exception ex) { return new Response<>(ex.getMessage()); }
+    }
+
+    public Response<Boolean> removeManufacturer(String businessNumber, String manufacturer) {
+        try { return new Response<>(supplierFacade.removeManufacturer(businessNumber, manufacturer)); }
         catch (Exception ex) { return new Response<>(ex.getMessage()); }
     }
 

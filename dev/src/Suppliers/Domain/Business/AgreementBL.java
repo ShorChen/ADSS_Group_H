@@ -15,7 +15,7 @@ public class AgreementBL {
     private final List<ProductLineBL> productLines;
     private final DiscountPolicyBL discountPolicy;
 
-    public AgreementBL(List<DayOfWeek> fixedDeliveryDays, boolean supplierTransports) {
+    AgreementBL(List<DayOfWeek> fixedDeliveryDays, boolean supplierTransports) {
         this.agreementId = ++idCounter;
         this.startDate = LocalDate.now();
         this.deliveryTerms = new DeliveryTermsBL(fixedDeliveryDays, supplierTransports);
@@ -23,27 +23,28 @@ public class AgreementBL {
         this.discountPolicy = new DiscountPolicyBL();
     }
 
-    public ProductLineBL addProductLine(int internalCatalogId, int supplierCatalogId, double price) {
+    public ProductLineBL addProductLine(int supplierCatalogId, String name, double price) {
         if (price < 0) throw new IllegalArgumentException("Price cannot be negative");
-        for (ProductLineBL pl : productLines)
-            if (pl.getInternalCatalogId() == internalCatalogId) throw new IllegalArgumentException("Product line already exists in this agreement");
-        ProductLineBL productLine = new ProductLineBL(internalCatalogId, supplierCatalogId, price);
+        for (ProductLineBL pl : productLines) {
+            if (pl.getSupplierCatalogId() == supplierCatalogId) throw new IllegalArgumentException("Product line already exists in this agreement");
+        }
+        ProductLineBL productLine = new ProductLineBL(supplierCatalogId, name, price);
         productLines.add(productLine);
         return productLine;
     }
 
-    public void removeProductLine(int internalCatalogId) {
-        boolean removed = productLines.removeIf(pl -> pl.getInternalCatalogId() == internalCatalogId);
+    public void removeProductLine(int supplierCatalogId) {
+        boolean removed = productLines.removeIf(pl -> pl.getSupplierCatalogId() == supplierCatalogId);
         if (!removed) throw new NoSuchElementException("Product line not found in this agreement");
         try {
-            discountPolicy.getProductDiscounts().get(internalCatalogId).clear();
+            discountPolicy.getProductDiscounts().get(supplierCatalogId).clear();
         } catch (Exception ignored) {}
     }
 
-    public ProductLineBL updateProductLine(int internalCatalogId, double newPrice) {
+    public ProductLineBL updateProductLine(int supplierCatalogId, double newPrice) {
         if (newPrice < 0) throw new IllegalArgumentException("Price cannot be negative");
         for (ProductLineBL pl : productLines) {
-            if (pl.getInternalCatalogId() == internalCatalogId) {
+            if (pl.getSupplierCatalogId() == supplierCatalogId) {
                 pl.setAgreedPrice(newPrice);
                 return pl;
             }
@@ -51,25 +52,25 @@ public class AgreementBL {
         throw new NoSuchElementException("Product line not found in this agreement");
     }
 
-    public void addDiscount(int internalCatalogId, int minQuantity, double discountPercentage) {
-        checkProductExists(internalCatalogId);
-        discountPolicy.addBracket(internalCatalogId, minQuantity, discountPercentage);
+    public void addDiscount(int supplierCatalogId, int minQuantity, double discountPercentage) {
+        checkProductExists(supplierCatalogId);
+        discountPolicy.addBracket(supplierCatalogId, minQuantity, discountPercentage);
     }
 
-    public void removeDiscount(int internalCatalogId, int minQuantity) {
-        discountPolicy.removeBracket(internalCatalogId, minQuantity);
+    public void removeDiscount(int supplierCatalogId, int minQuantity) {
+        discountPolicy.removeBracket(supplierCatalogId, minQuantity);
     }
 
-    public void updateDiscount(int internalCatalogId, int minQuantity, double newDiscountPercentage) {
-        discountPolicy.updateBracket(internalCatalogId, minQuantity, newDiscountPercentage);
+    public void updateDiscount(int supplierCatalogId, int minQuantity, double newDiscountPercentage) {
+        discountPolicy.updateBracket(supplierCatalogId, minQuantity, newDiscountPercentage);
     }
 
     public void updateDeliveryTerms(List<DayOfWeek> fixedDeliveryDays, boolean supplierTransports) {
         deliveryTerms.updateTerms(fixedDeliveryDays, supplierTransports);
     }
 
-    private void checkProductExists(int internalCatalogId) {
-        boolean exists = productLines.stream().anyMatch(pl -> pl.getInternalCatalogId() == internalCatalogId);
+    private void checkProductExists(int supplierCatalogId) {
+        boolean exists = productLines.stream().anyMatch(pl -> pl.getSupplierCatalogId() == supplierCatalogId);
         if (!exists) throw new IllegalArgumentException("Cannot add discount for a product not in the agreement");
     }
 
