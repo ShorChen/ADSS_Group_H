@@ -1,4 +1,8 @@
-package domain;
+package domain.facades;
+
+import domain.util.PasswordGenerator;
+import domain.entities.Employee;
+import domain.entities.Role;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -10,6 +14,12 @@ public class AuthFacade {
     public AuthFacade() {
         employees = new HashMap<>();
         idToEmployee = new HashMap<>();
+
+        Employee e = new Employee("1234");
+        Employee e2 = new Employee("4321");
+        e.setQualifiedRoles(Role.MANAGER);
+        System.out.println("1234" + ", password: " + addWorker(e));
+        System.out.println("4321" + ", password: " + addWorker(e2));
     }
 
     public String addWorker(Employee employee) {
@@ -52,5 +62,11 @@ public class AuthFacade {
             pass = PasswordGenerator.generatePassword();
         }
         return pass;
+    }
+
+    public boolean isManager(String id){
+        if (!idToEmployee.containsKey(id))
+            throw new IllegalArgumentException("Only the HR Manager can perform this action");
+        return idToEmployee.get(id).getQualifiedRoles().contains(Role.MANAGER);
     }
 }

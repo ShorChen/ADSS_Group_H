@@ -1,7 +1,7 @@
-package contex;
+package context;
 
-import domain.Employee;
-import domain.Role;
+import domain.entities.Employee;
+import domain.entities.Role;
 
 import java.util.List;
 

@@ -1,4 +1,4 @@
-package domain;
+package domain.entities;
 
 public class Role {
     public static final Role MANAGER = new Role("Manager");
