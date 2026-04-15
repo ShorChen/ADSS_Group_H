@@ -28,5 +28,14 @@ public class ShiftFacade {
         return constraintDeadLine;
     }
 
-    
+    public boolean submitConstraint(Employee employee, Constraint constraint) {
+        if (new Date().after(constraintDeadLine) || constraintDeadLine == null) {
+            System.out.println("Cannot submit constraint after the deadline.");
+            return false;
+        }
+        employee.getConstraints().add(constraint);
+        return true;
+    }
+
+
 }

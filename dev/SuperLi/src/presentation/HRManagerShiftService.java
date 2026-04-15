@@ -17,7 +17,11 @@ public class HRManagerShiftService {
     public void placeToShifts(Employee employee, List<Shift> shifts){}
     public void requestEmployee(Employee employee, List<Shift> shifts){}
     public void setJobsToShift(Shift shift, Map<Role, Integer> jobs) {}
-    public void setDeadline(Date date){}
+    public void setDeadline(Date date){
+        facade.setConstraintDeadLine(date);
+        System.out.println("Constraint submission deadline set to: " + date.toString());
+    }
+    
     // set working time of the store
     // set default shift (NTH)
 }
