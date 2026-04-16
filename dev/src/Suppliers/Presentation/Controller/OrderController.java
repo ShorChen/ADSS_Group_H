@@ -31,7 +31,7 @@ public class OrderController {
         Response<List<PurchasableItemSL>> response = orderService.viewPurchasableItems(businessNumber);
         if (response.isSuccess()) {
             return response.getData().stream()
-                    .map(sl -> new PurchasableItemPL(sl.getProductName(), sl.getSupplierCatalogId(), sl.getPrice()))
+                    .map(sl -> new PurchasableItemPL(sl.getProductName(), sl.getSupplierCatalogId(), sl.getBasePrice(), sl.getQuantity(), sl.getFinalPrice()))
                     .collect(Collectors.toList());
         }
         throw new Exception(response.getErrorMessage());

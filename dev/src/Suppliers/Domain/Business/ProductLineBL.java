@@ -3,16 +3,20 @@ package Suppliers.Domain.Business;
 public class ProductLineBL {
     private final int supplierCatalogId;
     private final String name;
-    private double agreedPrice;
+    private double basePrice;
+    private int quantity;
 
-    ProductLineBL(int supplierCatalogId, String name, double agreedPrice) {
+    ProductLineBL(int supplierCatalogId, String name, double basePrice, int quantity) {
         this.supplierCatalogId = supplierCatalogId;
         this.name = name;
-        this.agreedPrice = agreedPrice;
+        this.basePrice = basePrice;
+        this.quantity = quantity;
     }
 
     public int getSupplierCatalogId() { return supplierCatalogId; }
     public String getName() { return name; }
-    public double getAgreedPrice() { return agreedPrice; }
-    public void setAgreedPrice(double agreedPrice) { this.agreedPrice = agreedPrice; }
+    public double getBasePrice() { return basePrice; }
+    public void setBasePrice(double basePrice) { this.basePrice = basePrice; }
+    public int getQuantity() { return quantity; }
+    public void setQuantity(int quantity) { this.quantity = quantity; }
 }

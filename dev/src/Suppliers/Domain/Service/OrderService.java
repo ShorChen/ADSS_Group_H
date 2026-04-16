@@ -34,7 +34,8 @@ public class OrderService {
             for (AgreementBL agreement : supplier.getAgreements()) {
                 if (agreement.getDeliveryTerms().isOnDemand()) {
                     for (ProductLineBL pl : agreement.getProductLines()) {
-                        items.add(new PurchasableItemSL(pl.getName(), pl.getSupplierCatalogId(), pl.getAgreedPrice()));
+                        double finalPrice = agreement.calculateTotal(pl.getSupplierCatalogId());
+                        items.add(new PurchasableItemSL(pl.getName(), pl.getSupplierCatalogId(), pl.getBasePrice(), pl.getQuantity(), finalPrice));
                     }
                 }
             }

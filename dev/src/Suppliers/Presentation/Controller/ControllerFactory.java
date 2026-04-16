@@ -7,7 +7,9 @@ import Suppliers.Domain.Service.OrderService;
 import Suppliers.Domain.Service.SupplierService;
 
 public class ControllerFactory {
+
     private static ControllerFactory instance;
+
     private final SupplierController supplierController;
     private final OrderController orderController;
     private final AuthController authController;

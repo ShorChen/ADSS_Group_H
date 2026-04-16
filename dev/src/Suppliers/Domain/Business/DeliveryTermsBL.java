@@ -14,8 +14,11 @@ public class DeliveryTermsBL {
         this.supplierTransports = supplierTransports;
     }
 
-    public void updateTerms(List<DayOfWeek> fixedDeliveryDays, boolean supplierTransports) {
+    public void updateFixedDeliveryDays(List<DayOfWeek> fixedDeliveryDays) {
         this.fixedDeliveryDays = fixedDeliveryDays != null ? new ArrayList<>(fixedDeliveryDays) : new ArrayList<>();
+    }
+
+    public void updateSupplierTransports(boolean supplierTransports) {
         this.supplierTransports = supplierTransports;
     }
 

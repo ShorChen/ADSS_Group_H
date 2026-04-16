@@ -34,9 +34,7 @@ public class SupplierController {
                     .map(this::convertAgreementSLToPL)
                     .collect(Collectors.toList());
             List<String> manufacturers = new ArrayList<>(supplierSL.getManufacturers());
-            return new SupplierPL(supplierSL.getName(), supplierSL.getBusinessNumber(), supplierSL.getAddress(),
-                    contacts, agreements, manufacturers
-            );
+            return new SupplierPL(supplierSL.getName(), supplierSL.getBusinessNumber(), supplierSL.getAddress(), contacts, agreements, manufacturers);
         }
         throw new Exception(response.getErrorMessage());
     }
@@ -73,12 +71,12 @@ public class SupplierController {
         return extractBooleanOrThrow(supplierService.removeAgreement(businessNumber, agreementId));
     }
 
-    public ProductLinePL addProductLine(String businessNumber, int agreementId, int supplierCatalogId, String name, double price) throws Exception {
+    public ProductLinePL addProductLine(String businessNumber, int agreementId, int supplierCatalogId, String name, double basePrice, int quantity) throws Exception {
         ensureSupplierManager();
-        Response<ProductLineSL> response = supplierService.addProductLine(businessNumber, agreementId, supplierCatalogId, name, price);
+        Response<ProductLineSL> response = supplierService.addProductLine(businessNumber, agreementId, supplierCatalogId, name, basePrice, quantity);
         if (response.isSuccess()) {
             ProductLineSL data = response.getData();
-            return new ProductLinePL(data.getSupplierCatalogId(), data.getName(), data.getAgreedPrice());
+            return new ProductLinePL(data.getSupplierCatalogId(), data.getName(), data.getBasePrice(), data.getQuantity());
         }
         throw new Exception(response.getErrorMessage());
     }
@@ -88,12 +86,22 @@ public class SupplierController {
         return extractBooleanOrThrow(supplierService.removeProductLine(businessNumber, agreementId, supplierCatalogId));
     }
 
-    public ProductLinePL updateProductLine(String businessNumber, int agreementId, int supplierCatalogId, double newPrice) throws Exception {
+    public ProductLinePL updateProductLineBasePrice(String businessNumber, int agreementId, int supplierCatalogId, double newBasePrice) throws Exception {
         ensureSupplierManager();
-        Response<ProductLineSL> response = supplierService.updateProductLine(businessNumber, agreementId, supplierCatalogId, newPrice);
+        Response<ProductLineSL> response = supplierService.updateProductLineBasePrice(businessNumber, agreementId, supplierCatalogId, newBasePrice);
         if (response.isSuccess()) {
             ProductLineSL data = response.getData();
-            return new ProductLinePL(data.getSupplierCatalogId(), data.getName(), data.getAgreedPrice());
+            return new ProductLinePL(data.getSupplierCatalogId(), data.getName(), data.getBasePrice(), data.getQuantity());
+        }
+        throw new Exception(response.getErrorMessage());
+    }
+
+    public ProductLinePL updateProductLineQuantity(String businessNumber, int agreementId, int supplierCatalogId, int newQuantity) throws Exception {
+        ensureSupplierManager();
+        Response<ProductLineSL> response = supplierService.updateProductLineQuantity(businessNumber, agreementId, supplierCatalogId, newQuantity);
+        if (response.isSuccess()) {
+            ProductLineSL data = response.getData();
+            return new ProductLinePL(data.getSupplierCatalogId(), data.getName(), data.getBasePrice(), data.getQuantity());
         }
         throw new Exception(response.getErrorMessage());
     }
@@ -113,9 +121,14 @@ public class SupplierController {
         return extractBooleanOrThrow(supplierService.updateDiscount(businessNumber, agreementId, supplierCatalogId, minQuantity, newDiscountPercentage));
     }
 
-    public boolean updateDeliveryTerms(String businessNumber, int agreementId, List<DayOfWeek> fixedDeliveryDays, boolean supplierTransports) throws Exception {
+    public boolean updateFixedDeliveryDays(String businessNumber, int agreementId, List<DayOfWeek> fixedDeliveryDays) throws Exception {
         ensureSupplierManager();
-        return extractBooleanOrThrow(supplierService.updateDeliveryTerms(businessNumber, agreementId, fixedDeliveryDays, supplierTransports));
+        return extractBooleanOrThrow(supplierService.updateFixedDeliveryDays(businessNumber, agreementId, fixedDeliveryDays));
+    }
+
+    public boolean updateSupplierTransports(String businessNumber, int agreementId, boolean supplierTransports) throws Exception {
+        ensureSupplierManager();
+        return extractBooleanOrThrow(supplierService.updateSupplierTransports(businessNumber, agreementId, supplierTransports));
     }
 
     public boolean updateBankAccount(String businessNumber, String newIban) throws Exception {
@@ -161,7 +174,7 @@ public class SupplierController {
     private AgreementPL convertAgreementSLToPL(AgreementSL data) {
         DeliveryTermsPL deliveryTermsPL = new DeliveryTermsPL(data.getDeliveryTerms().getFixedDeliveryDays(), data.getDeliveryTerms().isSupplierTransports());
         List<ProductLinePL> productLinesPL = data.getProductLines().stream()
-                .map(pl -> new ProductLinePL(pl.getSupplierCatalogId(), pl.getName(), pl.getAgreedPrice()))
+                .map(pl -> new ProductLinePL(pl.getSupplierCatalogId(), pl.getName(), pl.getBasePrice(), pl.getQuantity()))
                 .collect(Collectors.toList());
         Map<Integer, List<DiscountBracketPL>> discountPolicyPL = data.getDiscountPolicy().entrySet().stream()
                 .collect(Collectors.toMap(

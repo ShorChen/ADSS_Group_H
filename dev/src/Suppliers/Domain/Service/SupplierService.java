@@ -41,8 +41,8 @@ public class SupplierService {
         catch (Exception ex) { return new Response<>(ex.getMessage()); }
     }
 
-    public Response<ProductLineSL> addProductLine(String businessNumber, int agreementId, int supplierCatalogId, String name, double price) {
-        try { return new Response<>(new ProductLineSL(supplierFacade.addProductLine(businessNumber, agreementId, supplierCatalogId, name, price))); }
+    public Response<ProductLineSL> addProductLine(String businessNumber, int agreementId, int supplierCatalogId, String name, double basePrice, int quantity) {
+        try { return new Response<>(new ProductLineSL(supplierFacade.addProductLine(businessNumber, agreementId, supplierCatalogId, name, basePrice, quantity))); }
         catch (Exception ex) { return new Response<>(ex.getMessage()); }
     }
 
@@ -51,8 +51,13 @@ public class SupplierService {
         catch (Exception ex) { return new Response<>(ex.getMessage()); }
     }
 
-    public Response<ProductLineSL> updateProductLine(String businessNumber, int agreementId, int supplierCatalogId, double newPrice) {
-        try { return new Response<>(new ProductLineSL(supplierFacade.updateProductLine(businessNumber, agreementId, supplierCatalogId, newPrice))); }
+    public Response<ProductLineSL> updateProductLineBasePrice(String businessNumber, int agreementId, int supplierCatalogId, double newBasePrice) {
+        try { return new Response<>(new ProductLineSL(supplierFacade.updateProductLineBasePrice(businessNumber, agreementId, supplierCatalogId, newBasePrice))); }
+        catch (Exception ex) { return new Response<>(ex.getMessage()); }
+    }
+
+    public Response<ProductLineSL> updateProductLineQuantity(String businessNumber, int agreementId, int supplierCatalogId, int newQuantity) {
+        try { return new Response<>(new ProductLineSL(supplierFacade.updateProductLineQuantity(businessNumber, agreementId, supplierCatalogId, newQuantity))); }
         catch (Exception ex) { return new Response<>(ex.getMessage()); }
     }
 
@@ -71,8 +76,13 @@ public class SupplierService {
         catch (Exception ex) { return new Response<>(ex.getMessage()); }
     }
 
-    public Response<Boolean> updateDeliveryTerms(String businessNumber, int agreementId, List<DayOfWeek> fixedDeliveryDays, boolean supplierTransports) {
-        try { return new Response<>(supplierFacade.updateDeliveryTerms(businessNumber, agreementId, fixedDeliveryDays, supplierTransports)); }
+    public Response<Boolean> updateFixedDeliveryDays(String businessNumber, int agreementId, List<DayOfWeek> fixedDeliveryDays) {
+        try { return new Response<>(supplierFacade.updateFixedDeliveryDays(businessNumber, agreementId, fixedDeliveryDays)); }
+        catch (Exception ex) { return new Response<>(ex.getMessage()); }
+    }
+
+    public Response<Boolean> updateSupplierTransports(String businessNumber, int agreementId, boolean supplierTransports) {
+        try { return new Response<>(supplierFacade.updateSupplierTransports(businessNumber, agreementId, supplierTransports)); }
         catch (Exception ex) { return new Response<>(ex.getMessage()); }
     }
 

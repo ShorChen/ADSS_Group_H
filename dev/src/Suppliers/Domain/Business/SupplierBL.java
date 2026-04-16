@@ -4,8 +4,8 @@ import java.time.DayOfWeek;
 import java.util.*;
 
 public class SupplierBL {
-    private final String name;
     private final String businessNumber;
+    private final String name;
     private String address;
     private final PaymentDetails paymentDetails;
     private final List<ContactPersonBL> contactPersonnel;

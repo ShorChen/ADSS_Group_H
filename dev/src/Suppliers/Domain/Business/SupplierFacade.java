@@ -14,8 +14,8 @@ public class SupplierFacade {
     }
 
     public SupplierBL addSupplier(String name, String businessNumber, String address, String iban, String paymentTerms) {
-        businessNumberValidation(businessNumber);
         stringValidation(name, "Name");
+        businessNumberValidation(businessNumber);
         stringValidation(address, "Address");
         stringValidation(iban, "IBAN");
         stringValidation(paymentTerms, "paymentTerms");
@@ -52,9 +52,9 @@ public class SupplierFacade {
         return true;
     }
 
-    public ProductLineBL addProductLine(String businessNumber, int agreementId, int supplierCatalogId, String name, double price) {
+    public ProductLineBL addProductLine(String businessNumber, int agreementId, int supplierCatalogId, String name, double basePrice, int quantity) {
         stringValidation(name, "Product Name");
-        return getSupplierOrThrow(businessNumber).getAgreementOrThrow(agreementId).addProductLine(supplierCatalogId, name, price);
+        return getSupplierOrThrow(businessNumber).getAgreementOrThrow(agreementId).addProductLine(supplierCatalogId, name, basePrice, quantity);
     }
 
     public boolean removeProductLine(String businessNumber, int agreementId, int supplierCatalogId) {
@@ -62,8 +62,12 @@ public class SupplierFacade {
         return true;
     }
 
-    public ProductLineBL updateProductLine(String businessNumber, int agreementId, int supplierCatalogId, double newPrice) {
-        return getSupplierOrThrow(businessNumber).getAgreementOrThrow(agreementId).updateProductLine(supplierCatalogId, newPrice);
+    public ProductLineBL updateProductLineBasePrice(String businessNumber, int agreementId, int supplierCatalogId, double newBasePrice) {
+        return getSupplierOrThrow(businessNumber).getAgreementOrThrow(agreementId).updateProductLineBasePrice(supplierCatalogId, newBasePrice);
+    }
+
+    public ProductLineBL updateProductLineQuantity(String businessNumber, int agreementId, int supplierCatalogId, int newQuantity) {
+        return getSupplierOrThrow(businessNumber).getAgreementOrThrow(agreementId).updateProductLineQuantity(supplierCatalogId, newQuantity);
     }
 
     public boolean addDiscount(String businessNumber, int agreementId, int supplierCatalogId, int minQuantity, double discountPercentage) {
@@ -81,8 +85,13 @@ public class SupplierFacade {
         return true;
     }
 
-    public boolean updateDeliveryTerms(String businessNumber, int agreementId, List<DayOfWeek> fixedDeliveryDays, boolean supplierTransports) {
-        getSupplierOrThrow(businessNumber).getAgreementOrThrow(agreementId).updateDeliveryTerms(fixedDeliveryDays, supplierTransports);
+    public boolean updateFixedDeliveryDays(String businessNumber, int agreementId, List<DayOfWeek> fixedDeliveryDays) {
+        getSupplierOrThrow(businessNumber).getAgreementOrThrow(agreementId).updateFixedDeliveryDays(fixedDeliveryDays);
+        return true;
+    }
+
+    public boolean updateSupplierTransports(String businessNumber, int agreementId, boolean supplierTransports) {
+        getSupplierOrThrow(businessNumber).getAgreementOrThrow(agreementId).updateSupplierTransports(supplierTransports);
         return true;
     }
 
