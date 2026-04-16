@@ -1,12 +1,14 @@
 package presentation;
 
 import domain.facades.ShiftFacade;
-import service.services.HRManagerShiftService;
+import domain.services.HRManagerShiftService;
+import presentation.controllers.ShiftController;
 
 public class ManageShiftsUI extends View {
-    private final HRManagerShiftService service;
+    private final ShiftController shiftController;
     private boolean open = false;
     private final Runnable onBack;
+    
 
     private static final StringBuilder shiftsMenu = new StringBuilder(
             """
@@ -21,13 +23,12 @@ public class ManageShiftsUI extends View {
                     """
     );
 
-    public ManageShiftsUI(Runnable onBack) {
+    public ManageShiftsUI(Runnable onBack, ShiftController shiftController) {
         this.onBack = () -> {
             close();
             onBack.run();
         };
-
-        this.service = new HRManagerShiftService(new ShiftFacade());
+        this.shiftController = shiftController;
     }
 
     @Override
@@ -51,21 +52,20 @@ public class ManageShiftsUI extends View {
 
     private void createTemplateFlow() {
         String name = getNextLine("Enter new template name:");
-        // TODO: this is a test implementation
-        service.createShiftTemplate(name, null);
-        System.out.println("Template '" + name + "' created successfully.");
+        String result = shiftController.createShiftTemplate(name);
+        System.out.println(result);
     }
 
     private void setDefaultTemplateFlow() {
         String name = getNextLine("Enter the name of the template to set as default:");
-        service.setShiftTemplateAsDefault(name);
-        System.out.println("Default template updated.");
+        String result = shiftController.setShiftTemplateAsDefault(name);
+        System.out.println(result);
     }
 
     private void placeEmployeesFlow() {
         System.out.println("Initiating employee placement algorithm...");
-        service.placeToShifts(null, null);
-        System.out.println("Employees placed in shifts.");
+        String result = shiftController.placeToShifts();
+        System.out.println(result);
     }
 
     private void setDeadlineFlow() {
@@ -77,7 +77,7 @@ public class ManageShiftsUI extends View {
     }
 
     private void issueReportFlow() {
-        System.out.println(service.issueReport());
+        System.out.println(shiftController.issueReport());
     }
 
     @Override

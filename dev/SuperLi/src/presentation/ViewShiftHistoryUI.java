@@ -1,6 +1,6 @@
 package presentation;
 
-import service.services.HistoryService;
+import domain.services.HistoryService;
 
 public class ViewShiftHistoryUI extends View {
     private ShiftsView shiftsView;

@@ -1,51 +1,47 @@
 package presentation;
+import presentation.controllers.ShiftController;
 
 public class EmployeeHomeUI extends View {
-    public static final StringBuilder employeeMenu = new StringBuilder(
-            """
-                    Actions for Employee:
-                    0. Logout
-                    1. View Schedule & Submit Availability
-                    2. Set Preferred Rest Day
-                    3. Request Shift Replacement
-                    """
-    );
     private boolean open = false;
     private final Runnable onLogout;
+    private final ShiftController shiftController;
 
-    public EmployeeHomeUI(Runnable onLogout) {
-        this.onLogout = onLogout;
+    private static final StringBuilder menu = new StringBuilder(
+            """
+                    --- Employee Main Menu ---
+                    0. Logout
+                    1. Manage My Shifts
+                    """
+    );
+
+    public EmployeeHomeUI(Runnable onLogout, ShiftController shiftController) {
+        this.onLogout = () -> {
+            close();
+            onLogout.run();
+        };
+        this.shiftController = shiftController;
     }
 
     @Override
     public void display() {
         open = true;
         while (open) {
-            System.out.println(employeeMenu.toString());
-            int selection = getNextInteger("Select option (number)");
+            System.out.print(menu.toString());
+            int selection = getNextInteger("Select an option (number):");
+
             handleSelection(selection,
                     onLogout,
-                    this::chooseShifts,
-                    this::setRestDay,
-                    this::requestReplacement
+                    this::openChooseShifts
             );
         }
     }
 
-
-    private void chooseShifts() {
-        EmployeeChooseShiftsUI shiftsUI = new EmployeeChooseShiftsUI(this::display);
-        close();
-        shiftsUI.display();
-    }
-
-    private void setRestDay() {
-        System.out.println("not implemented");
-
-    }
-
-    private void requestReplacement() {
-        System.out.println("not implemented");
+    private void openChooseShifts() {
+        EmployeeChooseShiftsUI ui = new EmployeeChooseShiftsUI(
+                () -> System.out.println("Returning to Main Menu..."), 
+                shiftController
+        );
+        ui.display();
     }
 
     @Override

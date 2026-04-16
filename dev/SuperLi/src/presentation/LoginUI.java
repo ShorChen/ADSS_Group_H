@@ -1,16 +1,17 @@
 package presentation;
 
-import domain.facades.AuthFacade;
-import service.services.AuthService;
+import domain.services.AuthService;
+import presentation.controllers.AuthController;
 
 public class LoginUI extends View {
 
     private boolean open = false;
-    AuthService service = new AuthService(new AuthFacade());
+    private final AuthController authController;
     private final CloseLoginUI onLoginAction;
 
-    public LoginUI(CloseLoginUI onLoginAction) {
+    public LoginUI(CloseLoginUI onLoginAction, AuthController authController) {
         this.onLoginAction = onLoginAction;
+        this.authController = authController;
     }
 
     public interface CloseLoginUI {
@@ -24,9 +25,9 @@ public class LoginUI extends View {
         while (open) {
             String id = getNextLine("Enter employee id:");
             String pass = getNextLine("Enter employee password:");
-            boolean logged = service.login(id, pass);
+            boolean logged = authController.login(id, pass);
             System.out.println(logged ? "Successfully Logged in" : "No user found in the system");
-            if (logged) onLoginAction.onLogin(id, pass, service.isManager(id));
+            if (logged) onLoginAction.onLogin(id, pass, authController.isManager(id));
         }
 
     }

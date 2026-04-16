@@ -10,6 +10,7 @@ import java.util.List;
 public class Employee {
     private String id;
     private String name;
+    private boolean isActive;
     private String bankAccount;
     private double salary;
     private SalaryType salaryType;
@@ -32,6 +33,15 @@ public class Employee {
         return qualifiedRoles;
     }
 
+    public boolean isActive() {
+        return isActive;
+    }
+
+    public boolean setActive(boolean active) {
+        this.isActive = active;
+        return isActive;
+    }
+
     public void setQualifiedRoles(Role... qualifiedRoles) {
         if (this.qualifiedRoles == null){
             this.qualifiedRoles = new ArrayList<>();
@@ -41,5 +51,11 @@ public class Employee {
                 this.qualifiedRoles.add(qualifiedRole);
         }
 
+    }
+
+    public void addRole(Role role) {
+        if (!qualifiedRoles.contains(role)) {
+            qualifiedRoles.add(role);
+        }
     }
 }

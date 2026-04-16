@@ -1,11 +1,11 @@
 package presentation;
 
 import domain.entities.Employee;
-import domain.facades.EmployeeFacade;
-import service.services.EmployeeService;
+import domain.services.EmployeeService;
+import presentation.controllers.EmployeeController;
 
 public class ManageEmployeesUI extends View {
-    private final EmployeeService service;
+    private final EmployeeController controller;
     private boolean open = false;
     private final Runnable onBack;
 
@@ -19,21 +19,21 @@ public class ManageEmployeesUI extends View {
                     """
     );
 
-    public ManageEmployeesUI(Runnable onBack) {
+    public ManageEmployeesUI(Runnable onBack, EmployeeController controller) {
         this.onBack = () -> {
             close();
             onBack.run();
         };
 
-        this.service = new EmployeeService(new EmployeeFacade()); // todo replace facade
+        this.controller = controller;
     }
 
     @Override
-    void display() {
+    public void display() {
         open = true;
         while (open) {
             System.out.println(employeesMenu.toString());
-            int selection = getNextInteger("Select option (number)");
+            int selection = getNextInteger("Select option (number):");
             handleSelection(selection,
                     onBack,
                     this::addEmployee,
@@ -45,27 +45,25 @@ public class ManageEmployeesUI extends View {
     }
 
     private void addEmployee() {
-        boolean added = service.addEmployee(new Employee("dummy employee"));
-        System.out.println(added ? "Added a new employee" : "Could not add the new employee");
+        String id = getNextLine("Enter new Employee ID:");
+        String result = controller.addEmployee(id);
+        System.out.println(result);
     }
 
     private void deactivateEmployee() {
-        String employeeId = getNextLine("Enter Employee ID:");
-        boolean deactivated = service.deactivateEmployee(employeeId);
-        System.out.println(deactivated ? "Deactivated " + employeeId :
-                "Employee was not found or already deactivated");
+        String id = getNextLine("Enter Employee ID to deactivate:");
+        String result = controller.deactivateEmployee(id);
+        System.out.println(result);
     }
 
     private void getEmployeeDetails() {
-        Employee employee = service.getEmployeeDetails(getNextLine("Enter Employee ID:"));
-        System.out.println(employee == null ? "Could not find employee" : "found " + employee.getId());
+        String id = getNextLine("Enter Employee ID:");
+        String result = controller.getEmployeeDetails(id);
+        System.out.println(result);
     }
 
     private void updateEmployeeDetails() {
-        Employee employee = new Employee("updated employee");
-        String id = getNextLine("Enter employee id");
-        boolean updated = service.updateEmployee(id, employee);
-        System.out.println(updated? "updated employee" : "could not update employee");
+         System.out.println("Method not yet implemented");
     }
 
     @Override

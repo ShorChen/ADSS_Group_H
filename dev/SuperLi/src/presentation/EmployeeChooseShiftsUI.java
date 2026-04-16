@@ -1,9 +1,11 @@
 package presentation;
 import domain.enums.ShiftType;
+import presentation.controllers.ShiftController;
 
 public class EmployeeChooseShiftsUI extends View {
     private ShiftsView shiftsView = new ShiftsView(); // todo generally we should get the actual shift schedule of the next week
     private boolean open = false;
+    private final ShiftController shiftController;
     private Runnable onBack;
     private String menu = """
             0 - Back to Menu
@@ -11,8 +13,12 @@ public class EmployeeChooseShiftsUI extends View {
             2 - Submit Availability
             """;
 
-    public EmployeeChooseShiftsUI(Runnable onBack) {
-        this.onBack = onBack;
+    public EmployeeChooseShiftsUI(Runnable onBack, ShiftController shiftController) {
+        this.onBack = () -> {
+            close();
+            onBack.run();
+        };
+        this.shiftController = shiftController;
     }
 
     @Override

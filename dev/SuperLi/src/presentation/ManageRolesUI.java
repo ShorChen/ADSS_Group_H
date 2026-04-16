@@ -1,10 +1,12 @@
 package presentation;
 
-import service.services.RoleService;
+import domain.services.RoleService;
+import presentation.controllers.RoleController;
 
 public class ManageRolesUI extends View {
     RoleService service;
     private boolean open = false;
+    private final RoleController roleController;
     private static final StringBuilder rolesMenu = new StringBuilder(
             """
                     0. Back
@@ -14,9 +16,12 @@ public class ManageRolesUI extends View {
 
     Runnable onBack;
 
-    public ManageRolesUI(Runnable onBack) {
-        this.onBack = onBack;
-        service = new RoleService();
+    public ManageRolesUI(Runnable onBack, RoleController roleController) {
+        this.onBack = () -> {
+            close();
+            onBack.run();
+        };
+        this.roleController = roleController;
     }
 
     @Override

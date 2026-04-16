@@ -1,61 +1,66 @@
-package presentation;
+package presentation; // שייכי לתיקייה הנכונה אצלך (presentation או presentation.cli)
+
+import presentation.controllers.EmployeeController;
+import presentation.controllers.RoleController;
+import presentation.controllers.ShiftController;
 
 public class ManagerHomeUI extends View {
-    public static final StringBuilder managerMenu = new StringBuilder(
+    private boolean open = false;
+    private final Runnable onLogout;
+    
+    private final EmployeeController employeeController;
+    private final ShiftController shiftController;
+    private final RoleController roleController;
+
+    private static final StringBuilder menu = new StringBuilder(
             """
-                    Actions for manager:
+                    --- Manager Main Menu ---
                     0. Logout
-                    1. View Shift History
-                    2. Manage shifts
-                    3. Manage Employees
-                    4. Manage Roles
+                    1. Manage Employees
+                    2. Manage Shifts (Schedule)
+                    3. Manage Roles
                     """
     );
-    private boolean open = false;
-    private Runnable onLogout;
 
-    public ManagerHomeUI(Runnable onLogout) {
-        this.onLogout = onLogout;
+    public ManagerHomeUI(Runnable onLogout, EmployeeController empCtrl, ShiftController shiftCtrl, RoleController roleCtrl) {
+        this.onLogout = () -> {
+            close();
+            onLogout.run();
+        };
+        this.employeeController = empCtrl;
+        this.shiftController = shiftCtrl;
+        this.roleController = roleCtrl;
     }
 
     @Override
     public void display() {
         open = true;
         while (open) {
-            System.out.println(managerMenu.toString());
-            int selection = getNextInteger("Select option (number)");
+            System.out.print(menu.toString());
+            int selection = getNextInteger("Select an option (number):");
+
             handleSelection(selection,
                     onLogout,
-                    this::viewShiftHistory,
-                    this::manageShifts,
-                    this::manageEmployees,
-                    this::manageRoles
+                    this::openManageEmployees,
+                    this::openManageShifts,
+                    this::openManageRoles
             );
         }
     }
 
-    private void manageRoles() {
-        ManageRolesUI manageRolesUI = new ManageRolesUI(this::display);
-        close();
-        manageRolesUI.display();
+    private void openManageEmployees() {
+        ManageEmployeesUI ui = new ManageEmployeesUI(() -> System.out.println("Returning to Main Menu..."), employeeController);
+        ui.display();
     }
 
-    private void manageEmployees() {
-        ManageEmployeesUI manageEmployeesUI = new ManageEmployeesUI(this::display);
-        close();
-        manageEmployeesUI.display();
+    private void openManageShifts() {
+        ManageShiftsUI ui = new ManageShiftsUI(() -> System.out.println("Returning to Main Menu..."), shiftController);
+        ui.display();
     }
 
-    private void manageShifts() {
-        ManageShiftsUI manageShiftsUI = new ManageShiftsUI(this::display);
-        close();
-        manageShiftsUI.display();
-    }
-
-    private void viewShiftHistory() {
-        ViewShiftHistoryUI historyUI = new ViewShiftHistoryUI(this::display);
-        close();
-        historyUI.display();
+    private void openManageRoles() {
+        ManageRolesUI ui = new ManageRolesUI(() -> System.out.println("Returning to Main Menu..."), roleController);
+        ui.display();
     }
 
     @Override
