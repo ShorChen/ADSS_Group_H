@@ -1,4 +1,4 @@
-package presentation;
+package presentation.ui;
 
 public class ManagerHomeUI extends View {
     public static final StringBuilder managerMenu = new StringBuilder(

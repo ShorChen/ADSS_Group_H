@@ -1,10 +1,10 @@
-package presentation;
+package presentation.ui;
 
-import domain.facades.ShiftFacade;
-import service.services.HRManagerShiftService;
+import domain.services.ShiftService;
+import presentation.control.HRManagerShiftController;
 
 public class ManageShiftsUI extends View {
-    private final HRManagerShiftService service;
+    private final HRManagerShiftController controller;
     private boolean open = false;
     private final Runnable onBack;
 
@@ -27,7 +27,7 @@ public class ManageShiftsUI extends View {
             onBack.run();
         };
 
-        this.service = new HRManagerShiftService(new ShiftFacade());
+        this.controller = new HRManagerShiftController(new ShiftService());
     }
 
     @Override
@@ -52,19 +52,19 @@ public class ManageShiftsUI extends View {
     private void createTemplateFlow() {
         String name = getNextLine("Enter new template name:");
         // TODO: this is a test implementation
-        service.createShiftTemplate(name, null);
+        controller.createShiftTemplate(name, null);
         System.out.println("Template '" + name + "' created successfully.");
     }
 
     private void setDefaultTemplateFlow() {
         String name = getNextLine("Enter the name of the template to set as default:");
-        service.setShiftTemplateAsDefault(name);
+        controller.setShiftTemplateAsDefault(name);
         System.out.println("Default template updated.");
     }
 
     private void placeEmployeesFlow() {
         System.out.println("Initiating employee placement algorithm...");
-        service.placeToShifts(null, null);
+        controller.placeToShifts(null, null);
         System.out.println("Employees placed in shifts.");
     }
 
@@ -77,7 +77,7 @@ public class ManageShiftsUI extends View {
     }
 
     private void issueReportFlow() {
-        System.out.println(service.issueReport());
+        System.out.println(controller.issueReport());
     }
 
     @Override

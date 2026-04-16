@@ -1,9 +1,9 @@
-package presentation;
+package presentation.ui;
 
-import service.services.RoleService;
+import presentation.control.RoleController;
 
 public class ManageRolesUI extends View {
-    RoleService service;
+    RoleController controller;
     private boolean open = false;
     private static final StringBuilder rolesMenu = new StringBuilder(
             """
@@ -16,7 +16,7 @@ public class ManageRolesUI extends View {
 
     public ManageRolesUI(Runnable onBack) {
         this.onBack = onBack;
-        service = new RoleService();
+        controller = new RoleController();
     }
 
     @Override
@@ -34,7 +34,7 @@ public class ManageRolesUI extends View {
 
     private void createRole() {
         String newRole = getNextLine("Enter Role Name");
-        boolean added = service.createRole(newRole);
+        boolean added = controller.createRole(newRole);
         System.out.println(added ? "new role added" : "Role is already present in the system");
     }
 

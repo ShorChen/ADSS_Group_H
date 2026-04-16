@@ -1,7 +1,8 @@
-package presentation;
+package presentation.ui;
 
 
 import domain.enums.ShiftType;
+import domain.enums.WeekDay;
 
 public class ShiftsView extends View{
     static final int INDEX_SUN_DAY = 116;

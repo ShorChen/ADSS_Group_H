@@ -1,11 +1,11 @@
-package presentation;
+package presentation.ui;
 
 import domain.entities.Employee;
-import domain.facades.EmployeeFacade;
-import service.services.EmployeeService;
+import domain.services.EmployeeService;
+import presentation.control.EmployeeController;
 
 public class ManageEmployeesUI extends View {
-    private final EmployeeService service;
+    private final EmployeeController controller;
     private boolean open = false;
     private final Runnable onBack;
 
@@ -25,7 +25,7 @@ public class ManageEmployeesUI extends View {
             onBack.run();
         };
 
-        this.service = new EmployeeService(new EmployeeFacade()); // todo replace facade
+        this.controller = new EmployeeController(new EmployeeService()); // todo replace facade
     }
 
     @Override
@@ -45,26 +45,26 @@ public class ManageEmployeesUI extends View {
     }
 
     private void addEmployee() {
-        boolean added = service.addEmployee(new Employee("dummy employee"));
+        boolean added = controller.addEmployee(new Employee("dummy employee"));
         System.out.println(added ? "Added a new employee" : "Could not add the new employee");
     }
 
     private void deactivateEmployee() {
         String employeeId = getNextLine("Enter Employee ID:");
-        boolean deactivated = service.deactivateEmployee(employeeId);
+        boolean deactivated = controller.deactivateEmployee(employeeId);
         System.out.println(deactivated ? "Deactivated " + employeeId :
                 "Employee was not found or already deactivated");
     }
 
     private void getEmployeeDetails() {
-        Employee employee = service.getEmployeeDetails(getNextLine("Enter Employee ID:"));
+        Employee employee = controller.getEmployeeDetails(getNextLine("Enter Employee ID:"));
         System.out.println(employee == null ? "Could not find employee" : "found " + employee.getId());
     }
 
     private void updateEmployeeDetails() {
         Employee employee = new Employee("updated employee");
         String id = getNextLine("Enter employee id");
-        boolean updated = service.updateEmployee(id, employee);
+        boolean updated = controller.updateEmployee(id, employee);
         System.out.println(updated? "updated employee" : "could not update employee");
     }
 

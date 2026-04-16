@@ -1,4 +1,4 @@
-package presentation;
+package presentation.ui;
 
 public class EmployeeHomeUI extends View {
     public static final StringBuilder employeeMenu = new StringBuilder(

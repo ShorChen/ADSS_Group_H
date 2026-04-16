@@ -1,9 +1,8 @@
-package domain.facades;
+package domain.services;
 
 import domain.entities.Employee;
 
-/* requirement no. 1, 2 */
-public class EmployeeFacade {
+public class EmployeeService {
     public boolean addEmployee(String id) {
         //Todo: implement
         return false;

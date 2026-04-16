@@ -1,4 +1,4 @@
-package presentation;
+package presentation.ui;
 
 import java.util.Scanner;
 
@@ -17,6 +17,13 @@ public abstract class View {
     public int getNextInteger(String message) {
         System.out.println(message);
         int result = reader.nextInt();
+        reader.nextLine();
+        return result;
+    }
+
+    public double getNextDouble(String message) {
+        System.out.println(message);
+        double result = reader.nextDouble();
         reader.nextLine();
         return result;
     }

@@ -1,10 +1,10 @@
-package presentation;
+package presentation.ui;
 
-import service.services.HistoryService;
+import presentation.control.HistoryController;
 
 public class ViewShiftHistoryUI extends View {
     private ShiftsView shiftsView;
-    private HistoryService service;
+    private HistoryController controller;
     private boolean open = false;
     private Runnable onBack;
     private int weeksAgo = 1; // Tracks how far back in history we are looking
@@ -20,7 +20,7 @@ public class ViewShiftHistoryUI extends View {
     public ViewShiftHistoryUI(Runnable onBack) {
         this.onBack = onBack;
         this.shiftsView = new ShiftsView();
-        this.service = new HistoryService();
+        this.controller = new HistoryController();
     }
 
     @Override

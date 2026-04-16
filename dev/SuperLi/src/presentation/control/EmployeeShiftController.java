@@ -1,18 +1,18 @@
-package service.services;
+package presentation.control;
 
 import domain.entities.ExceptionalPlacementRequest;
 import domain.entities.ReplacementRequest;
 import domain.entities.Shift;
-import domain.facades.ShiftFacade;
+import domain.services.ShiftService;
 
 import java.util.List;
 import java.util.Map;
 
 /* requirement no. 4, 21 22 24 26 27 28*/
-public class EmployeeShiftService {
-    private ShiftFacade facade;
-    public EmployeeShiftService(ShiftFacade facade){
-        this.facade = facade;
+public class EmployeeShiftController {
+    private ShiftService service;
+    public EmployeeShiftController(ShiftService service){
+        this.service = service;
     }
     public void setAvailability(String employeeId, List<Shift> shifts, boolean canWorkDoubleShifts){
         //todo: implement

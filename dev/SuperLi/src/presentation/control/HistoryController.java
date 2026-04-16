@@ -1,9 +1,9 @@
-package service.services;
+package presentation.control;
 
 import domain.entities.Shift;
 
 /* requirement no.  */
-public class HistoryService {
+public class HistoryController {
     public void addHistory(Shift shift) {
     }
 

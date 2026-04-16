@@ -1,8 +1,7 @@
-package service.services;
+package presentation.control;
 
 import domain.entities.*;
-import domain.facades.ShiftFacade;
-import domain.entities.Report;
+import domain.services.ShiftService;
 import domain.util.TimeInterval;
 
 import java.util.Date;
@@ -10,14 +9,15 @@ import java.util.List;
 import java.util.Map;
 
 /* requirement no. 6 7 9 18 24 25 32*/
-public class HRManagerShiftService {
-    private ShiftFacade facade;
+public class HRManagerShiftController {
+    private ShiftService service;
 
-    public HRManagerShiftService(ShiftFacade facade) {
-        this.facade = facade;
+    public HRManagerShiftController(ShiftService service) {
+        this.service = service;
     }
 
     public void setJobsToShift(Shift shift, Map<Role, Integer> jobs) {
+
     }
 
     public void createShiftTemplate(String name, Map<Role, Integer> jobs) {

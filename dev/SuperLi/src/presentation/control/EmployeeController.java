@@ -1,15 +1,15 @@
-package service.services;
+package presentation.control;
 
 import domain.entities.Employee;
 import domain.entities.Role;
-import domain.facades.EmployeeFacade;
+import domain.services.EmployeeService;
 
 /* requirement no. 1 */
-public class EmployeeService {
-    private final EmployeeFacade facade;
+public class EmployeeController {
+    private final EmployeeService service;
 
-    public EmployeeService(EmployeeFacade facade) {
-        this.facade = facade;
+    public EmployeeController(EmployeeService service) {
+        this.service = service;
     }
 
     public boolean addEmployee(Employee employee) {

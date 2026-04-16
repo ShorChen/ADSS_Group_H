@@ -1,4 +1,4 @@
-package presentation;
+package domain.enums;
 
 public enum WeekDay {
     SUNDAY(0),

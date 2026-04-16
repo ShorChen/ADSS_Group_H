@@ -1,17 +1,17 @@
-package domain.facades;
+package domain.services;
 
-import domain.util.PasswordGenerator;
 import domain.entities.Employee;
 import domain.entities.Role;
+import domain.util.PasswordGenerator;
 
 import java.util.HashMap;
 import java.util.Map;
 
-public class AuthFacade {
+public class AuthService {
     private final Map<String, String> employees; // employee id to their password
     private final Map<String, Employee> idToEmployee;
 
-    public AuthFacade() {
+    public AuthService() {
         employees = new HashMap<>();
         idToEmployee = new HashMap<>();
 
@@ -41,8 +41,8 @@ public class AuthFacade {
         }
         throw new IllegalArgumentException(
                 "password is invalid, a password should contain at least 8 characters," +
-                        " a digit, a lowercase and uppercase characters and a special" +
-                        " character !@#$%^&*()-_=+[]{}|;:,.<>?\"");
+                " a digit, a lowercase and uppercase characters and a special" +
+                " character !@#$%^&*()-_=+[]{}|;:,.<>?\"");
     }
 
     public Employee login(String id, String password) {

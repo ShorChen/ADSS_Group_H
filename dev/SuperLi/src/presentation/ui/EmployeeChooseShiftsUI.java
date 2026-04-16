@@ -1,5 +1,6 @@
-package presentation;
+package presentation.ui;
 import domain.enums.ShiftType;
+import domain.enums.WeekDay;
 
 public class EmployeeChooseShiftsUI extends View {
     private ShiftsView shiftsView = new ShiftsView(); // todo generally we should get the actual shift schedule of the next week

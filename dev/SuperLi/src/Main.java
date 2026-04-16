@@ -1,6 +1,6 @@
-import presentation.EmployeeHomeUI;
-import presentation.LoginUI;
-import presentation.ManagerHomeUI;
+import presentation.ui.EmployeeHomeUI;
+import presentation.ui.LoginUI;
+import presentation.ui.ManagerHomeUI;
 
 public class Main {
     private static LoginUI loginUI;

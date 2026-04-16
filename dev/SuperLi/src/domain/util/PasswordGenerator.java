@@ -1,8 +1,6 @@
 package domain.util;
 
-import java.util.Collections;
-import java.util.List;
-import java.util.Random;
+import java.util.*;
 import java.util.stream.Collectors;
 
 public class PasswordGenerator {
@@ -40,21 +38,31 @@ public class PasswordGenerator {
         for (int i = 0; i < password.length(); i++) {
             CharSequence c = password.charAt(i) + "";
             if (DIGITS.contains(c)) digit = true;
-            if (UPPER.contains(c)) upper = true;
-            if (LOWER.contains(c)) lower = true;
-            if (SPECIAL.contains(c)) special = true;
+            else if (UPPER.contains(c)) upper = true;
+            else if (LOWER.contains(c)) lower = true;
+            else if (SPECIAL.contains(c)) special = true;
+            else throw new IllegalArgumentException("Password contains illegal characters");
         }
         return digit && upper && lower && special;
     }
 
     private static String shuffleString(String input) {
-        List<Character> characters = input.chars()
-                .mapToObj(c -> (char) c)
-                .collect(Collectors.toList());
-        Collections.shuffle(characters);
-        return characters.stream()
-                .map(String::valueOf)
-                .collect(Collectors.joining());
+        List<Integer> indices = new ArrayList<>();
+        for (int i = 0; i < input.length(); i++)
+            indices.add(i);
+        Collections.shuffle(indices);
+        StringBuilder stringBuilder = new StringBuilder();
+        for (Integer index : indices)
+            stringBuilder.append(input.charAt(index));
+        return stringBuilder.toString();
+
+    //        List<Character> characters = input.chars()
+    //                .mapToObj(c -> (char) c)
+    //                .collect(Collectors.toList());
+    //        Collections.shuffle(characters);
+    //        return characters.stream()
+    //                .map(String::valueOf)
+    //                .collect(Collectors.joining());
     }
 
 }
