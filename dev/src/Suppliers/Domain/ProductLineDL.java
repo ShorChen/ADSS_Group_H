@@ -1,12 +1,18 @@
-package Suppliers.Domain.Business;
+package Suppliers.Domain;
 
-public class ProductLineBL {
+import java.io.Serial;
+import java.io.Serializable;
+
+public class ProductLineDL implements Serializable {
+    @Serial
+    private static final long serialVersionUID = 1L;
+
     private final int supplierCatalogId;
     private final String name;
     private double basePrice;
     private int quantity;
 
-    ProductLineBL(int supplierCatalogId, String name, double basePrice, int quantity) {
+    ProductLineDL(int supplierCatalogId, String name, double basePrice, int quantity) {
         this.supplierCatalogId = supplierCatalogId;
         this.name = name;
         this.basePrice = basePrice;

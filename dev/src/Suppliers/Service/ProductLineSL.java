@@ -1,6 +1,6 @@
-package Suppliers.Domain.Service;
+package Suppliers.Service;
 
-import Suppliers.Domain.Business.ProductLineBL;
+import Suppliers.Domain.ProductLineDL;
 
 public class ProductLineSL {
     private final int supplierCatalogId;
@@ -8,11 +8,11 @@ public class ProductLineSL {
     private final double basePrice;
     private final int quantity;
 
-    ProductLineSL(ProductLineBL productLineBL) {
-        this.supplierCatalogId = productLineBL.getSupplierCatalogId();
-        this.name = productLineBL.getName();
-        this.basePrice = productLineBL.getBasePrice();
-        this.quantity = productLineBL.getQuantity();
+    ProductLineSL(ProductLineDL productLineDL) {
+        supplierCatalogId = productLineDL.getSupplierCatalogId();
+        name = productLineDL.getName();
+        basePrice = productLineDL.getBasePrice();
+        quantity = productLineDL.getQuantity();
     }
 
     public int getSupplierCatalogId() { return supplierCatalogId; }

@@ -1,11 +1,17 @@
-package Suppliers.Domain.Business;
+package Suppliers.Domain;
 
-public class ContactPersonBL {
+import java.io.Serial;
+import java.io.Serializable;
+
+public class ContactPersonDL implements Serializable {
+    @Serial
+    private static final long serialVersionUID = 1L;
+
     private String name;
     private String phone;
     private String email;
 
-    ContactPersonBL(String name, String phone, String email) {
+    ContactPersonDL(String name, String phone, String email) {
         this.name = name;
         this.phone = phone;
         this.email = email;

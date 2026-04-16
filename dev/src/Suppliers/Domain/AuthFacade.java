@@ -1,16 +1,16 @@
-package Suppliers.Domain.Business;
+package Suppliers.Domain;
 
-import java.util.HashMap;
+import Suppliers.DataAccess.AuthDAO;
 import java.util.Map;
 import java.util.NoSuchElementException;
 
 public class AuthFacade {
     private final Map<String, Role> validCodes;
+    private final AuthDAO authDAO;
 
-    public AuthFacade() {
-        this.validCodes = new HashMap<>();
-        this.validCodes.put("SUP123", Role.SUPPLIER_MANAGER);
-        this.validCodes.put("ORD123", Role.ORDER_MANAGER);
+    public AuthFacade(AuthDAO authDAO) {
+        this.authDAO = authDAO;
+        this.validCodes = authDAO.getAllCodes();
     }
 
     public void login(String code) {

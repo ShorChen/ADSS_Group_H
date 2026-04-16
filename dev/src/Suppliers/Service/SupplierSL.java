@@ -1,6 +1,6 @@
-package Suppliers.Domain.Service;
+package Suppliers.Service;
 
-import Suppliers.Domain.Business.SupplierBL;
+import Suppliers.Domain.SupplierDL;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -13,17 +13,17 @@ public class SupplierSL {
     private final List<AgreementSL> agreements;
     private final List<String> manufacturers;
 
-    SupplierSL(SupplierBL supplierBL) {
-        this.name = supplierBL.getName();
-        this.businessNumber = supplierBL.getBusinessNumber();
-        this.address = supplierBL.getAddress();
-        this.contactPersonnel = supplierBL.getContactPersonnel().stream()
+    SupplierSL(SupplierDL supplierDL) {
+        name = supplierDL.getName();
+        businessNumber = supplierDL.getBusinessNumber();
+        address = supplierDL.getAddress();
+        contactPersonnel = supplierDL.getContactPersonnel().stream()
                 .map(ContactPersonSL::new)
                 .collect(Collectors.toList());
-        this.agreements = supplierBL.getAgreements().stream()
+        agreements = supplierDL.getAgreements().stream()
                 .map(AgreementSL::new)
                 .collect(Collectors.toList());
-        this.manufacturers = supplierBL.getManufacturers();
+        manufacturers = supplierDL.getManufacturers();
     }
 
     public String getName() { return name; }

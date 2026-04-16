@@ -1,6 +1,12 @@
-package Suppliers.Domain.Business;
+package Suppliers.Domain;
 
-public class PaymentDetails {
+import java.io.Serial;
+import java.io.Serializable;
+
+public class PaymentDetails implements Serializable {
+    @Serial
+    private static final long serialVersionUID = 1L;
+
     private BankAccount bankAccount;
     private String paymentTerms;
 

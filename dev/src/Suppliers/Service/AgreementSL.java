@@ -1,6 +1,6 @@
-package Suppliers.Domain.Service;
+package Suppliers.Service;
 
-import Suppliers.Domain.Business.AgreementBL;
+import Suppliers.Domain.AgreementDL;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Map;
@@ -13,12 +13,12 @@ public class AgreementSL {
     private final List<ProductLineSL> productLines;
     private final Map<Integer, List<DiscountBracketSL>> discountPolicy;
 
-    AgreementSL(AgreementBL agreementBL) {
-        this.agreementId = agreementBL.getAgreementId();
-        this.startDate = agreementBL.getStartDate();
-        this.deliveryTerms = new DeliveryTermsSL(agreementBL.getDeliveryTerms());
-        this.productLines = agreementBL.getProductLines().stream().map(ProductLineSL::new).collect(Collectors.toList());
-        this.discountPolicy = agreementBL.getDiscountPolicy().getProductDiscounts().entrySet().stream()
+    AgreementSL(AgreementDL agreementDL) {
+        agreementId = agreementDL.getAgreementId();
+        startDate = agreementDL.getStartDate();
+        deliveryTerms = new DeliveryTermsSL(agreementDL.getDeliveryTerms());
+        productLines = agreementDL.getProductLines().stream().map(ProductLineSL::new).collect(Collectors.toList());
+        discountPolicy = agreementDL.getDiscountPolicy().getProductDiscounts().entrySet().stream()
                 .collect(Collectors.toMap(
                         Map.Entry::getKey,
                         e -> e.getValue().stream().map(DiscountBracketSL::new).collect(Collectors.toList())

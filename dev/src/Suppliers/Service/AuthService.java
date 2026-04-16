@@ -1,6 +1,6 @@
-package Suppliers.Domain.Service;
+package Suppliers.Service;
 
-import Suppliers.Domain.Business.AuthFacade;
+import Suppliers.Domain.AuthFacade;
 
 public class AuthService {
     private final AuthFacade authFacade;

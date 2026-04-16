@@ -1,10 +1,16 @@
-package Suppliers.Domain.Business;
+package Suppliers.Domain;
 
-public class DiscountBracketBL {
+import java.io.Serial;
+import java.io.Serializable;
+
+public class DiscountBracketDL implements Serializable {
+    @Serial
+    private static final long serialVersionUID = 1L;
+
     private final int minQuantity;
     private double discountPercentage;
 
-    DiscountBracketBL(int minQuantity, double discountPercentage) {
+    DiscountBracketDL(int minQuantity, double discountPercentage) {
         this.minQuantity = minQuantity;
         this.discountPercentage = discountPercentage;
     }

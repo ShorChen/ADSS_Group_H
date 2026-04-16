@@ -1,4 +1,4 @@
-package Suppliers.Domain.Business;
+package Suppliers.Domain;
 
 public enum Role {
     SUPPLIER_MANAGER,

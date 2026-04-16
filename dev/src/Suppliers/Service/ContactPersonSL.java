@@ -1,16 +1,16 @@
-package Suppliers.Domain.Service;
+package Suppliers.Service;
 
-import Suppliers.Domain.Business.ContactPersonBL;
+import Suppliers.Domain.ContactPersonDL;
 
 public class ContactPersonSL {
     private final String name;
     private final String phone;
     private final String email;
 
-    ContactPersonSL(ContactPersonBL cp) {
-        this.name = cp.getName();
-        this.phone = cp.getPhone();
-        this.email = cp.getEmail();
+    ContactPersonSL(ContactPersonDL cp) {
+        name = cp.getName();
+        phone = cp.getPhone();
+        email = cp.getEmail();
     }
 
     public String getName() { return name; }

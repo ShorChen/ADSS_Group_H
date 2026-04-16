@@ -1,15 +1,20 @@
-package Suppliers.Domain.Business;
+package Suppliers.Domain;
 
+import java.io.Serial;
+import java.io.Serializable;
 import java.time.DayOfWeek;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-public class DeliveryTermsBL {
+public class DeliveryTermsDL implements Serializable {
+    @Serial
+    private static final long serialVersionUID = 1L;
+
     private List<DayOfWeek> fixedDeliveryDays;
     private boolean supplierTransports;
 
-    DeliveryTermsBL(List<DayOfWeek> fixedDeliveryDays, boolean supplierTransports) {
+    DeliveryTermsDL(List<DayOfWeek> fixedDeliveryDays, boolean supplierTransports) {
         this.fixedDeliveryDays = fixedDeliveryDays != null ? new ArrayList<>(fixedDeliveryDays) : new ArrayList<>();
         this.supplierTransports = supplierTransports;
     }

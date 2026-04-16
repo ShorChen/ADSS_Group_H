@@ -1,5 +1,7 @@
-package Suppliers.Domain.Business;
+package Suppliers.Domain;
 
+import java.io.Serial;
+import java.io.Serializable;
 import java.time.DayOfWeek;
 import java.time.LocalDate;
 import java.util.ArrayList;
@@ -7,29 +9,37 @@ import java.util.Collections;
 import java.util.List;
 import java.util.NoSuchElementException;
 
-public class AgreementBL {
+public class AgreementDL implements Serializable {
+    @Serial
+    private static final long serialVersionUID = 1L;
+
     private static int idCounter = 0;
+
     private final int agreementId;
     private final LocalDate startDate;
-    private final DeliveryTermsBL deliveryTerms;
-    private final List<ProductLineBL> productLines;
-    private final DiscountPolicyBL discountPolicy;
+    private final DeliveryTermsDL deliveryTerms;
+    private final List<ProductLineDL> productLines;
+    private final DiscountPolicyDL discountPolicy;
 
-    AgreementBL(List<DayOfWeek> fixedDeliveryDays, boolean supplierTransports) {
+    AgreementDL(List<DayOfWeek> fixedDeliveryDays, boolean supplierTransports) {
         this.agreementId = ++idCounter;
         this.startDate = LocalDate.now();
-        this.deliveryTerms = new DeliveryTermsBL(fixedDeliveryDays, supplierTransports);
+        this.deliveryTerms = new DeliveryTermsDL(fixedDeliveryDays, supplierTransports);
         this.productLines = new ArrayList<>();
-        this.discountPolicy = new DiscountPolicyBL();
+        this.discountPolicy = new DiscountPolicyDL();
     }
 
-    public ProductLineBL addProductLine(int supplierCatalogId, String name, double basePrice, int quantity) {
+    public static void updateIdCounter(int maxId) {
+        if (maxId > idCounter)
+            idCounter = maxId;
+    }
+
+    public ProductLineDL addProductLine(int supplierCatalogId, String name, double basePrice, int quantity) {
         if (basePrice < 0) throw new IllegalArgumentException("Price cannot be negative");
         if (quantity < 0) throw new IllegalArgumentException("Quantity cannot be negative");
-        for (ProductLineBL pl : productLines) {
+        for (ProductLineDL pl : productLines)
             if (pl.getSupplierCatalogId() == supplierCatalogId) throw new IllegalArgumentException("Product line already exists in this agreement");
-        }
-        ProductLineBL productLine = new ProductLineBL(supplierCatalogId, name, basePrice, quantity);
+        ProductLineDL productLine = new ProductLineDL(supplierCatalogId, name, basePrice, quantity);
         productLines.add(productLine);
         return productLine;
     }
@@ -42,25 +52,23 @@ public class AgreementBL {
         } catch (Exception ignored) {}
     }
 
-    public ProductLineBL updateProductLineBasePrice(int supplierCatalogId, double newBasePrice) {
+    public ProductLineDL updateProductLineBasePrice(int supplierCatalogId, double newBasePrice) {
         if (newBasePrice < 0) throw new IllegalArgumentException("Price cannot be negative");
-        for (ProductLineBL pl : productLines) {
+        for (ProductLineDL pl : productLines)
             if (pl.getSupplierCatalogId() == supplierCatalogId) {
                 pl.setBasePrice(newBasePrice);
                 return pl;
             }
-        }
         throw new NoSuchElementException("Product line not found in this agreement");
     }
 
-    public ProductLineBL updateProductLineQuantity(int supplierCatalogId, int newQuantity) {
+    public ProductLineDL updateProductLineQuantity(int supplierCatalogId, int newQuantity) {
         if (newQuantity < 0) throw new IllegalArgumentException("Quantity cannot be negative");
-        for (ProductLineBL pl : productLines) {
+        for (ProductLineDL pl : productLines)
             if (pl.getSupplierCatalogId() == supplierCatalogId) {
                 pl.setQuantity(newQuantity);
                 return pl;
             }
-        }
         throw new NoSuchElementException("Product line not found in this agreement");
     }
 
@@ -86,12 +94,11 @@ public class AgreementBL {
     }
 
     public double calculateTotal(int supplierCatalogId) {
-        for (ProductLineBL pl : productLines) {
+        for (ProductLineDL pl : productLines)
             if (pl.getSupplierCatalogId() == supplierCatalogId) {
                 double discountPct = discountPolicy.calculateDiscount(supplierCatalogId, pl.getQuantity());
                 return (pl.getQuantity() * pl.getBasePrice()) * (1.0 - (discountPct / 100.0));
             }
-        }
         throw new NoSuchElementException("Product line not found");
     }
 
@@ -102,7 +109,7 @@ public class AgreementBL {
 
     public int getAgreementId() { return agreementId; }
     public LocalDate getStartDate() { return startDate; }
-    public DeliveryTermsBL getDeliveryTerms() { return deliveryTerms; }
-    public List<ProductLineBL> getProductLines() { return Collections.unmodifiableList(productLines); }
-    public DiscountPolicyBL getDiscountPolicy() { return discountPolicy; }
+    public DeliveryTermsDL getDeliveryTerms() { return deliveryTerms; }
+    public List<ProductLineDL> getProductLines() { return Collections.unmodifiableList(productLines); }
+    public DiscountPolicyDL getDiscountPolicy() { return discountPolicy; }
 }

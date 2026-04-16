@@ -1,6 +1,12 @@
-package Suppliers.Domain.Business;
+package Suppliers.Domain;
 
-public class BankAccount {
+import java.io.Serial;
+import java.io.Serializable;
+
+public class BankAccount implements Serializable {
+    @Serial
+    private static final long serialVersionUID = 1L;
+
     private final String countryCode;
     private final String checkDigits;
     private final String bankCode;

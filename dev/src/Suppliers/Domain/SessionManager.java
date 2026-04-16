@@ -1,4 +1,4 @@
-package Suppliers.Domain.Business;
+package Suppliers.Domain;
 
 public class SessionManager {
     private static SessionManager instance;
@@ -7,9 +7,8 @@ public class SessionManager {
     private SessionManager() {}
 
     public static synchronized SessionManager getInstance() {
-        if (instance == null) {
+        if (instance == null)
             instance = new SessionManager();
-        }
         return instance;
     }
 
@@ -29,8 +28,7 @@ public class SessionManager {
     }
 
     public void requireRole(Role requiredRole) {
-        if (getCurrentRole() != requiredRole) {
+        if (getCurrentRole() != requiredRole)
             throw new SecurityException("Access Denied: Requires " + requiredRole + " role.");
-        }
     }
 }

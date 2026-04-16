@@ -1,9 +1,9 @@
-package Suppliers.Domain.Service;
+package Suppliers.Service;
 
-import Suppliers.Domain.Business.AgreementBL;
-import Suppliers.Domain.Business.ProductLineBL;
-import Suppliers.Domain.Business.SupplierBL;
-import Suppliers.Domain.Business.SupplierFacade;
+import Suppliers.Domain.AgreementDL;
+import Suppliers.Domain.ProductLineDL;
+import Suppliers.Domain.SupplierDL;
+import Suppliers.Domain.SupplierFacade;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -19,7 +19,7 @@ public class OrderService {
     public Response<List<String>> getAllSupplierBusinessNumbers() {
         try {
             List<String> numbers = supplierFacade.getAllSuppliers().stream()
-                    .map(SupplierBL::getBusinessNumber)
+                    .map(SupplierDL::getBusinessNumber)
                     .collect(Collectors.toList());
             return new Response<>(numbers);
         } catch (Exception ex) {
@@ -29,16 +29,14 @@ public class OrderService {
 
     public Response<List<PurchasableItemSL>> viewPurchasableItems(String businessNumber) {
         try {
-            SupplierBL supplier = supplierFacade.getSupplier(businessNumber);
+            SupplierDL supplier = supplierFacade.getSupplier(businessNumber);
             List<PurchasableItemSL> items = new ArrayList<>();
-            for (AgreementBL agreement : supplier.getAgreements()) {
-                if (agreement.getDeliveryTerms().isOnDemand()) {
-                    for (ProductLineBL pl : agreement.getProductLines()) {
+            for (AgreementDL agreement : supplier.getAgreements())
+                if (agreement.getDeliveryTerms().isOnDemand())
+                    for (ProductLineDL pl : agreement.getProductLines()) {
                         double finalPrice = agreement.calculateTotal(pl.getSupplierCatalogId());
-                        items.add(new PurchasableItemSL(pl.getName(), pl.getSupplierCatalogId(), pl.getBasePrice(), pl.getQuantity(), finalPrice));
+                        items.add(new PurchasableItemSL(pl, finalPrice));
                     }
-                }
-            }
             return new Response<>(items);
         } catch (Exception ex) {
             return new Response<>(ex.getMessage());

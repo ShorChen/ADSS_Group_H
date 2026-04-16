@@ -1,3 +1,2 @@
 Manifest-Version: 1.0
-Suppliers.Presentation.Main-Class: Suppliers.Presentation.Main
-
+Main-Class: Suppliers.Presentation.Main

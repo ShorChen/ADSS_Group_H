@@ -1,7 +1,7 @@
 package Suppliers.Presentation.Controller;
 
-import Suppliers.Domain.Service.AuthService;
-import Suppliers.Domain.Service.Response;
+import Suppliers.Service.AuthService;
+import Suppliers.Service.Response;
 
 public class AuthController {
     private final AuthService authService;

@@ -1,4 +1,4 @@
-package Suppliers.Domain.Service;
+package Suppliers.Service;
 
 public class Response<T> {
     private final T data;

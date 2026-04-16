@@ -1,10 +1,14 @@
 package Suppliers.Presentation.Controller;
 
-import Suppliers.Domain.Business.AuthFacade;
-import Suppliers.Domain.Business.SupplierFacade;
-import Suppliers.Domain.Service.AuthService;
-import Suppliers.Domain.Service.OrderService;
-import Suppliers.Domain.Service.SupplierService;
+import Suppliers.DataAccess.AuthDAO;
+import Suppliers.DataAccess.FileAuthDAO;
+import Suppliers.DataAccess.FileSupplierDAO;
+import Suppliers.DataAccess.SupplierDAO;
+import Suppliers.Domain.AuthFacade;
+import Suppliers.Domain.SupplierFacade;
+import Suppliers.Service.AuthService;
+import Suppliers.Service.OrderService;
+import Suppliers.Service.SupplierService;
 
 public class ControllerFactory {
 
@@ -15,8 +19,10 @@ public class ControllerFactory {
     private final AuthController authController;
 
     private ControllerFactory() {
-        SupplierFacade supplierFacade = new SupplierFacade();
-        AuthFacade authFacade = new AuthFacade();
+        SupplierDAO supplierDAO = new FileSupplierDAO("dev/src/Suppliers/Table/suppliers.dat");
+        AuthDAO authDAO = new FileAuthDAO("dev/src/Suppliers/Table/auth.dat");
+        SupplierFacade supplierFacade = new SupplierFacade(supplierDAO);
+        AuthFacade authFacade = new AuthFacade(authDAO);
         SupplierService supplierService = new SupplierService(supplierFacade);
         OrderService orderService = new OrderService(supplierFacade);
         AuthService authService = new AuthService(authFacade);
@@ -31,15 +37,7 @@ public class ControllerFactory {
         return instance;
     }
 
-    public SupplierController getSupplierController() {
-        return supplierController;
-    }
-
-    public OrderController getOrderController() {
-        return orderController;
-    }
-
-    public AuthController getAuthController() {
-        return authController;
-    }
+    public SupplierController getSupplierController() { return supplierController; }
+    public OrderController getOrderController() { return orderController; }
+    public AuthController getAuthController() { return authController; }
 }

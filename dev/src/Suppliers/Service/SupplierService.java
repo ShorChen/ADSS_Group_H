@@ -1,6 +1,6 @@
-package Suppliers.Domain.Service;
+package Suppliers.Service;
 
-import Suppliers.Domain.Business.SupplierFacade;
+import Suppliers.Domain.SupplierFacade;
 import java.time.DayOfWeek;
 import java.util.List;
 
