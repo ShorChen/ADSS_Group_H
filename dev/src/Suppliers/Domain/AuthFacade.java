@@ -22,4 +22,8 @@ public class AuthFacade {
     public void logout() {
         SessionManager.getInstance().logout();
     }
+
+    public Role getCurrentRole() {
+        return SessionManager.getInstance().getCurrentRole();
+    }
 }

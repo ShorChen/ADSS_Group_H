@@ -1,2 +1,2 @@
 Manifest-Version: 1.0
-Main-Class: Suppliers.Presentation.Main
+Main-Class: Suppliers.Presentation.GUI.MainApp

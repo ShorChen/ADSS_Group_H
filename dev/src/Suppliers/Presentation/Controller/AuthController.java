@@ -1,5 +1,6 @@
 package Suppliers.Presentation.Controller;
 
+import Suppliers.Domain.Role;
 import Suppliers.Service.AuthService;
 import Suppliers.Service.Response;
 
@@ -10,10 +11,14 @@ public class AuthController {
         this.authService = authService;
     }
 
-    public boolean login(String code) throws Exception {
-        Response<Boolean> response = authService.login(code);
-        if (response.isSuccess()) return response.getData();
-        throw new Exception(response.getErrorMessage());
+    public String login(String code) throws Exception {
+        Response<Boolean> loginResponse = authService.login(code);
+        if (loginResponse.isSuccess()) {
+            Response<Role> roleResponse = authService.getCurrentRole();
+            if (roleResponse.isSuccess())
+                return roleResponse.getData().name();
+        }
+        throw new Exception(loginResponse.getErrorMessage());
     }
 
     public boolean logout() throws Exception {

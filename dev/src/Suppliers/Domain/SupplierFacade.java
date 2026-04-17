@@ -45,6 +45,8 @@ public class SupplierFacade {
     public ContactPersonDL addContactPerson(String businessNumber, String cpName, String phone, String email) {
         stringValidation(cpName, "Contact Name");
         stringValidation(phone, "Phone");
+        ValidationUtils.validatePhone(phone);
+        ValidationUtils.validateEmail(email);
         SupplierDL supplier = getSupplierOrThrow(businessNumber);
         ContactPersonDL cp = supplier.addContactPerson(cpName, phone, email);
         supplierDAO.updateSupplier(supplier);
@@ -185,6 +187,7 @@ public class SupplierFacade {
 
     public ContactPersonDL updateContactPhone(String businessNumber, String oldPhone, String newPhone) {
         stringValidation(newPhone, "New Phone");
+        ValidationUtils.validatePhone(newPhone);
         SupplierDL supplier = getSupplierOrThrow(businessNumber);
         ContactPersonDL cp = supplier.updateContactPhone(oldPhone, newPhone);
         supplierDAO.updateSupplier(supplier);
@@ -193,6 +196,7 @@ public class SupplierFacade {
 
     public ContactPersonDL updateContactEmail(String businessNumber, String phone, String newEmail) {
         stringValidation(newEmail, "New Email");
+        ValidationUtils.validateEmail(newEmail);
         SupplierDL supplier = getSupplierOrThrow(businessNumber);
         ContactPersonDL cp = supplier.updateContactEmail(phone, newEmail);
         supplierDAO.updateSupplier(supplier);

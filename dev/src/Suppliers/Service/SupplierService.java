@@ -125,4 +125,16 @@ public class SupplierService {
         try { return new Response<>(new ContactPersonSL(supplierFacade.updateContactEmail(businessNumber, phone, newEmail))); }
         catch (Exception ex) { return new Response<>(ex.getMessage()); }
     }
+
+    public Response<List<SupplierSL>> getAllSuppliers() {
+        try {
+            List<Suppliers.Domain.SupplierDL> suppliersDL = supplierFacade.getAllSuppliers();
+            List<SupplierSL> suppliersSL = suppliersDL.stream()
+                    .map(SupplierSL::new)
+                    .collect(java.util.stream.Collectors.toList());
+            return new Response<>(suppliersSL);
+        } catch (Exception e) {
+            return new Response<>(e.getMessage());
+        }
+    }
 }

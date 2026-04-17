@@ -171,6 +171,23 @@ public class SupplierController {
         return extractContactOrThrow(supplierService.updateContactEmail(businessNumber, phone, newEmail));
     }
 
+    public List<SupplierPL> getAllSuppliers() throws Exception {
+        ensureSupplierManager();
+        Response<List<SupplierSL>> response = supplierService.getAllSuppliers();
+        if (response.isSuccess())
+            return response.getData().stream().map(sl -> {
+                List<ContactPersonPL> contacts = sl.getContactPersonnel().stream()
+                        .map(cp -> new ContactPersonPL(cp.getName(), cp.getPhone(), cp.getEmail()))
+                        .collect(Collectors.toList());
+                List<AgreementPL> agreements = sl.getAgreements().stream()
+                        .map(this::convertAgreementSLToPL)
+                        .collect(Collectors.toList());
+                List<String> manufacturers = new ArrayList<>(sl.getManufacturers());
+                return new SupplierPL(sl.getName(), sl.getBusinessNumber(), sl.getAddress(), contacts, agreements, manufacturers);
+            }).collect(Collectors.toList());
+        throw new Exception(response.getErrorMessage());
+    }
+
     private AgreementPL convertAgreementSLToPL(AgreementSL data) {
         DeliveryTermsPL deliveryTermsPL = new DeliveryTermsPL(data.getDeliveryTerms().getFixedDeliveryDays(), data.getDeliveryTerms().isSupplierTransports());
         List<ProductLinePL> productLinesPL = data.getProductLines().stream()
