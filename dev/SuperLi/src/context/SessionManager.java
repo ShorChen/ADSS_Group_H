@@ -1,14 +1,14 @@
 package context;
 
-import domain.entities.Employee;
 import domain.entities.Role;
+import presentation.model.EmployeePL;
 
 import java.util.List;
 
 public class SessionManager {
-    private static Employee currentEmployee;
+    private static EmployeePL currentEmployee;
 
-    public static void login(Employee user) {
+    public static void login(EmployeePL user) {
         currentEmployee = user;
     }
 
@@ -16,7 +16,7 @@ public class SessionManager {
         currentEmployee = null;
     }
 
-    public static Employee getCurrentEmployee() {
+    public static EmployeePL getCurrentEmployee() {
         return currentEmployee;
     }
 

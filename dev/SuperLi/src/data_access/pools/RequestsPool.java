@@ -3,15 +3,23 @@ package data_access.pools;
 import domain.entities.ExceptionalPlacementRequest;
 import domain.entities.ReplacementRequest;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class RequestsPool {
     private final List<ReplacementRequest> replacementRequests;
     private final List<ExceptionalPlacementRequest> exceptionalPlacementRequests;
 
-    public RequestsPool(List<ReplacementRequest> replacementRequests, List<ExceptionalPlacementRequest> exceptionalPlacementRequests) {
-        this.replacementRequests = replacementRequests;
-        this.exceptionalPlacementRequests = exceptionalPlacementRequests;
+    private static RequestsPool instance;
+    public static RequestsPool Instance() {
+        if (instance == null)
+            instance = new RequestsPool();
+        return instance;
+    }
+
+    private RequestsPool() {
+        this.replacementRequests = new ArrayList<>();
+        this.exceptionalPlacementRequests =new ArrayList<>();
     }
 
     public ReplacementRequest getRequest(long requestId) {

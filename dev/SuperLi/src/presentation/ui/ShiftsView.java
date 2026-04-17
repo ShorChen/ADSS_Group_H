@@ -1,39 +1,53 @@
 package presentation.ui;
 
+import presentation.control.ShiftController;
 
-import domain.enums.ShiftType;
-import domain.enums.WeekDay;
+import java.util.Map;
 
-public class ShiftsView extends View{
-    static final int INDEX_SUN_DAY = 116;
-    static final int INDEX_SUN_NIGHT = 188;
-    static final int MARGIN = 4;
-    static StringBuilder shifts = new StringBuilder(
+public class ShiftsView extends View {
+    private static final int INDEX_SUN_DAY = 116;
+    private static final int INDEX_SUN_NIGHT = 188;
+    private static final int MARGIN = 4;
+    public static Character NO_SHIFT = 'X';
+    public static Character PARTIAL_SHIFT = 'P';
+    private final ShiftController controller;
+    private final StringBuilder shifts = new StringBuilder(
             """
-            +-----+---+---+---+---+---+---+---+
-            |Shift|Sun|Mon|Tue|Wed|Thu|Fri|Sat|
-            +-----+---+---+---+---+---+---+---+
-            | day |   |   |   |   |   |   |   |
-            +-----+---+---+---+---+---+---+---|
-            |night|   |   |   |   |   |   |   |
-            +-----+---+---+---+---+---+---+---+
-            """
+                    +-----+---+---+---+---+---+---+---+
+                    |Shift|Sun|Mon|Tue|Wed|Thu|Fri|Sat|
+                    +-----+---+---+---+---+---+---+---+
+                    | day |   |   |   |   |   |   |   |
+                    +-----+---+---+---+---+---+---+---|
+                    |night|   |   |   |   |   |   |   |
+                    +-----+---+---+---+---+---+---+---+
+                    """
     );
 
-    private static int getIndexOf(WeekDay day, ShiftType type) {
-        int i = type == ShiftType.DAY ? 0 : 1;
-        return day.day * MARGIN + INDEX_SUN_DAY +
-                (INDEX_SUN_NIGHT - INDEX_SUN_DAY) * i;
+    public ShiftsView(int weeksAgo) {
+        controller = new ShiftController();
+        Map<Integer, Map<Integer, Character>> shifts = controller.getNWeeksAgo(weeksAgo);
+        shifts.forEach((day, chars) -> {
+            setMarked(day, 0, chars.get(0));
+            setMarked(day, 1, chars.get(1));
+        });
     }
 
-    public static void setMarked(WeekDay day, ShiftType type, char c) {
-        shifts.setCharAt(getIndexOf(day, type), c);
-        System.out.println(shifts.toString());
+    private int getIndexOf(int day, int type) {
+        return controller.getIndexOf(day, type);
     }
+
+    public void setMarked(int day, int type, char c) {
+        shifts.setCharAt(getIndexOf(day, type), c);
+    }
+
+    public char getMark(int day, int type) {
+        return shifts.charAt(getIndexOf(day, type));
+    }
+
 
     @Override
     public void display() {
-        System.out.println(shifts.toString());
+        System.out.print(shifts);
     }
 
     @Override

@@ -1,44 +1,22 @@
 package domain.services;
 
+import data_access.entities.EmployeeEntity;
+import data_access.pools.EmployeePool;
 import domain.entities.Employee;
 import domain.entities.Role;
 import domain.util.PasswordGenerator;
 
-import java.util.HashMap;
-import java.util.Map;
-
 public class AuthService {
-    private final Map<String, String> employees; // employee id to their password
-    private final Map<String, Employee> idToEmployee;
+    private final EmployeePool employees;
 
     public AuthService() {
-        employees = new HashMap<>();
-        idToEmployee = new HashMap<>();
+        employees = EmployeePool.Instance();
 
-        Employee e = new Employee("1234");
-        Employee e2 = new Employee("4321");
-        e.setQualifiedRoles(Role.MANAGER);
-        System.out.println("1234" + ", password: " + addWorker(e));
-        System.out.println("4321" + ", password: " + addWorker(e2));
-    }
-
-    public String addWorker(Employee employee) {
-        String pass = generateFirstPassword();
-        if (!employees.containsKey(employee.getId())) {
-            employees.put(employee.getId(), pass);
-            idToEmployee.put(employee.getId(), employee);
-            return pass;
-        }
-        throw new IllegalArgumentException("An employee with the given id is already present in the system");
     }
 
     public boolean changePassword(String id, String oldPass, String newPass) {
-        if (!employees.getOrDefault(id, "").equals(oldPass))
-            return false;
-        if (validatePassword(newPass)) {
-            employees.put(id, newPass);
-            return true;
-        }
+        if (validatePassword(newPass))
+            return employees.updatePassword(id, oldPass, newPass);
         throw new IllegalArgumentException(
                 "password is invalid, a password should contain at least 8 characters," +
                 " a digit, a lowercase and uppercase characters and a special" +
@@ -46,9 +24,9 @@ public class AuthService {
     }
 
     public Employee login(String id, String password) {
-        if (employees.getOrDefault(id, "").equals(password)) {
-            return idToEmployee.get(id);
-        }
+        EmployeeEntity entity = employees.getEmployee(id);
+        if (entity != null && entity.checkPassword(password))
+            return new Employee(entity);
         return null;
     }
 
@@ -56,17 +34,10 @@ public class AuthService {
         return PasswordGenerator.validatePassword(password);
     }
 
-    private String generateFirstPassword() {
-        String pass = PasswordGenerator.generatePassword();
-        while (employees.containsValue(pass)) {
-            pass = PasswordGenerator.generatePassword();
-        }
-        return pass;
+    public boolean isManager(String id) {
+        if (employees.exists(id))
+            return employees.getEmployee(id).getQualifiedRoles().contains(Role.MANAGER.getTag());
+        throw new IllegalArgumentException("No employee found");
     }
 
-    public boolean isManager(String id){
-        if (!idToEmployee.containsKey(id))
-            throw new IllegalArgumentException("Only the HR Manager can perform this action");
-        return idToEmployee.get(id).getQualifiedRoles().contains(Role.MANAGER);
-    }
 }

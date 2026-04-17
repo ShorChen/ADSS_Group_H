@@ -23,7 +23,8 @@ public class ManageRolesUI extends View {
     void display() {
         open = true;
         while (open) {
-            System.out.println(rolesMenu.toString());
+            System.out.println("Roles: " + controller.getAllRoles());
+            System.out.print(rolesMenu);
             int selection = getNextInteger("Select option (number)");
             handleSelection(selection,
                     onBack,

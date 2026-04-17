@@ -11,8 +11,8 @@ import java.util.Map;
 /* requirement no. 4, 21 22 24 26 27 28*/
 public class EmployeeShiftController {
     private ShiftService service;
-    public EmployeeShiftController(ShiftService service){
-        this.service = service;
+    public EmployeeShiftController(){
+        this.service = new ShiftService();
     }
     public void setAvailability(String employeeId, List<Shift> shifts, boolean canWorkDoubleShifts){
         //todo: implement

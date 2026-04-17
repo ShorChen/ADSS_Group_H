@@ -1,5 +1,6 @@
 package presentation.ui;
 
+import java.util.InputMismatchException;
 import java.util.Scanner;
 
 public abstract class View {
@@ -26,6 +27,13 @@ public abstract class View {
         double result = reader.nextDouble();
         reader.nextLine();
         return result;
+    }
+
+    public boolean getNextBoolean(String message) {
+        System.out.println(message);
+        if (message.equalsIgnoreCase("y")) return true;
+        if (message.equalsIgnoreCase("n")) return false;
+        throw new IllegalArgumentException("Answer must be y or n");
     }
 
     protected void handleSelection(int selection, Runnable... selections) {

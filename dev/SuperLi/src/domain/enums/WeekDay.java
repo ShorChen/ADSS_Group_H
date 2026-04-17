@@ -14,4 +14,5 @@ public enum WeekDay {
     WeekDay(int day) {
         this.day = day;
     }
+
 }

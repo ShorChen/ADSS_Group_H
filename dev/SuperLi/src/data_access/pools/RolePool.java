@@ -2,19 +2,43 @@ package data_access.pools;
 
 import domain.entities.Role;
 
+import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 public class RolePool {
-    private final List<Role> roles;
+    private final Set<String> roles;
 
-    public RolePool(List<Role> roles) {
-        this.roles = roles;
+    private static RolePool instance;
+
+    public static RolePool Instance() {
+        if (instance == null)
+            instance = new RolePool();
+        return instance;
     }
 
-    public Role getEmployee(String tag) {
-        for (Role r : roles)
-            if (r.getTag().equals(tag))
+    private RolePool() {
+        this.roles = new HashSet<>();
+
+        roles.add(Role.MANAGER.getTag());
+        roles.add(Role.Storekeeper.getTag());
+        roles.add(Role.ShiftManager.getTag());
+        roles.add(Role.Cashier.getTag());
+    }
+
+    public String getRole(String tag) {
+        for (String r : roles)
+            if (r.equals(tag))
                 return r;
         return null;
+    }
+
+    public boolean addRole(String role) {
+        return roles.add(role);
+    }
+
+    public List<String> getAllRoles() {
+        return new ArrayList<>(roles);
     }
 }

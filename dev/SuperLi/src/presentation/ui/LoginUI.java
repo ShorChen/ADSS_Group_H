@@ -1,12 +1,11 @@
 package presentation.ui;
 
-import domain.services.AuthService;
 import presentation.control.AuthController;
 
 public class LoginUI extends View {
 
     private boolean open = false;
-    AuthController controller = new AuthController(new AuthService());
+    AuthController controller = new AuthController();
     private final CloseLoginUI onLoginAction;
 
     public LoginUI(CloseLoginUI onLoginAction) {
@@ -24,9 +23,13 @@ public class LoginUI extends View {
         while (open) {
             String id = getNextLine("Enter employee id:");
             String pass = getNextLine("Enter employee password:");
+
             boolean logged = controller.login(id, pass);
-            System.out.println(logged ? "Successfully Logged in" : "No user found in the system");
-            if (logged) onLoginAction.onLogin(id, pass, controller.isManager(id));
+            if (logged) {
+                System.out.println("Successfully Logged in");
+                onLoginAction.onLogin(id, pass, controller.isManager(id));
+            } else System.out.println("Id or password are Invalid");
+
         }
 
     }

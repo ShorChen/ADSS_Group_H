@@ -1,6 +1,7 @@
-package domain.entities;
+package presentation.model;
 
-import data_access.entities.EmployeeEntity;
+import domain.entities.Employee;
+import domain.entities.Role;
 import domain.enums.JobScope;
 import domain.enums.SalaryType;
 import domain.enums.ShiftType;
@@ -8,10 +9,8 @@ import domain.enums.WeekDay;
 
 import java.time.LocalDateTime;
 import java.util.*;
-import java.util.function.BiConsumer;
-import java.util.function.Consumer;
 
-public class Employee {
+public class EmployeePL {
     private final String id;
     private String name;
     private String bankAccount;
@@ -22,10 +21,10 @@ public class Employee {
     private final List<Role> qualifiedRoles;
     private String constraints;
     private int yearlyRestDays;
-    private boolean workingDoubles = false;
+    private boolean workingDoubles;
     private Map<WeekDay, Set<ShiftType>> unavailableShifts;
 
-    public Employee(String id) {
+    public EmployeePL(String id) {
         this(id, "temp-name", "0000-0000-0000-0000", 100.0, SalaryType.HOURLY,
                 LocalDateTime.now(),
                 JobScope.FULL_TIME, new ArrayList<>(),
@@ -33,10 +32,10 @@ public class Employee {
         );
     }
 
-    public Employee(String id, String name, String bankAccount,
-                    double salary, SalaryType salaryType, LocalDateTime dateOfEmployment,
-                    JobScope jobScope, List<Role> qualifiedRoles, String constraints,
-                    int yearlyRestDays, boolean workingDoubles, Map<WeekDay, Set<ShiftType>> unavailableShifts) {
+    public EmployeePL(String id, String name, String bankAccount,
+                      double salary, SalaryType salaryType, LocalDateTime dateOfEmployment,
+                      JobScope jobScope, List<Role> qualifiedRoles, String constraints,
+                      int yearlyRestDays, boolean workingDoubles, Map<WeekDay, Set<ShiftType>> unavailableShifts) {
         this.id = id;
         this.name = name;
         this.bankAccount = bankAccount;
@@ -47,32 +46,19 @@ public class Employee {
         this.qualifiedRoles = qualifiedRoles;
         this.constraints = constraints;
         this.yearlyRestDays = yearlyRestDays;
+        this.workingDoubles = workingDoubles;
+        this.unavailableShifts = unavailableShifts;
     }
 
-    public Employee(EmployeeEntity entity) {
-        this.id = entity.getId();
-        this.name = entity.getName();
-        this.bankAccount = entity.getBankAccount();
-        this.salary = entity.getSalary();
-        this.salaryType = SalaryType.valueOf(entity.getSalaryType());
-        this.dateOfEmployment = entity.getDateOfEmployment();
-        this.jobScope = JobScope.valueOf(entity.getJobScope());
-        this.qualifiedRoles = new ArrayList<>();
-        this.qualifiedRoles.addAll(getQualifiedRoles());
-        this.constraints = entity.getConstraints();
-        this.yearlyRestDays = entity.getYearlyRestDays();
-        this.workingDoubles = entity.isWorkingDoubles();
-
-        Map<Integer, Set<Integer>> entityUnavailableShifts = entity.getUnavailableShifts();
-        this.unavailableShifts = new HashMap<>();
-
-        if (entityUnavailableShifts != null) {
-            entityUnavailableShifts.forEach((day, shifts) -> {
-                HashSet<ShiftType> shiftTypes = new HashSet<>();
-                shifts.forEach(i -> shiftTypes.add(ShiftType.values()[i]));
-                this.unavailableShifts.put(WeekDay.values()[day], shiftTypes);
-            });
-        }
+    public EmployeePL(Employee employee) {
+        this(
+            employee.getId(), employee.getName(), employee.getBankAccount(),
+            employee.getSalary(), employee.getSalaryType(),
+            employee.getDateOfEmployment(), employee.getJobScope(),
+            employee.getQualifiedRoles(), employee.getConstraints(),
+            employee.getYearlyRestDays(), employee.isWorkingDoubles(),
+            employee.getUnavailableShifts()
+        );
     }
 
     public static class Builder {
@@ -156,10 +142,10 @@ public class Employee {
             return this;
         }
 
-        public Employee build() {
-            return new Employee(id, name, bankAccount, salary, salaryType,
-                    dateOfEmployment, jobScope, qualifiedRoles, constraints, yearlyRestDays
-                    , workingDoubles, unavailableShifts);
+        public EmployeePL build() {
+            return new EmployeePL(id, name, bankAccount, salary, salaryType,
+                    dateOfEmployment, jobScope, qualifiedRoles, constraints, yearlyRestDays,
+                    workingDoubles, unavailableShifts);
         }
     }
 
@@ -179,21 +165,11 @@ public class Employee {
 
     }
 
-    public EmployeeEntity toEntity(String password) {
-        List<String> roles = new ArrayList<>();
-        qualifiedRoles.forEach(role -> roles.add(role.getTag()));
-        Map<Integer, Set<Integer>> unavailableShiftsEntity = new HashMap<>();
-
-        unavailableShifts.forEach((day, shiftTypes) -> {
-            Set<Integer> shifts = new HashSet<>();
-            shiftTypes.forEach(type -> shifts.add(type.ordinal()));
-            unavailableShiftsEntity.put(day.day, shifts);
-        });
-
-        return new EmployeeEntity(
-                id, name, bankAccount, salary, salaryType.name(), dateOfEmployment,
-                jobScope.name(), roles, constraints, yearlyRestDays, password, workingDoubles,
-                unavailableShiftsEntity
+    public Employee toEmployee() {
+        return new Employee(
+                id, name, bankAccount, salary, salaryType, dateOfEmployment,
+                jobScope, new ArrayList<>(qualifiedRoles), constraints, yearlyRestDays
+                , workingDoubles, unavailableShifts
         );
     }
 

@@ -4,7 +4,8 @@ import domain.entities.*;
 import domain.services.ShiftService;
 import domain.util.TimeInterval;
 
-import java.util.Date;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.Map;
 
@@ -12,8 +13,8 @@ import java.util.Map;
 public class HRManagerShiftController {
     private ShiftService service;
 
-    public HRManagerShiftController(ShiftService service) {
-        this.service = service;
+    public HRManagerShiftController() {
+        this.service = new ShiftService();
     }
 
     public void setJobsToShift(Shift shift, Map<Role, Integer> jobs) {
@@ -32,7 +33,14 @@ public class HRManagerShiftController {
     public void requestExceptionalShiftPlacement(ExceptionalPlacementRequest request) {
     }
 
-    public void setDeadline(Date date) {
+    public void setDeadline(String date) {
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm");
+        try {
+            LocalDateTime dateTime = LocalDateTime.parse(date, formatter);
+            service.setDeadline(dateTime);
+        } catch (Exception e) {
+            throw new IllegalArgumentException(e.getMessage());
+        }
     }
 
     public void handleReplacementRequest(ReplacementRequest request, boolean approve) {
