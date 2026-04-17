@@ -2,6 +2,7 @@ package Suppliers.Domain;
 
 import Suppliers.DataAccess.SupplierDAO;
 import java.time.DayOfWeek;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.NoSuchElementException;
@@ -209,6 +210,12 @@ public class SupplierFacade {
 
     public List<SupplierDL> getAllSuppliers() {
         return List.copyOf(suppliers.values());
+    }
+
+    public List<SupplierDL> getOnDemandSuppliers() {
+        List<SupplierDL> onDemand = new ArrayList<>();
+        for (SupplierDL supplier : suppliers.values()) if (!supplier.getOnDemandAgreements().isEmpty()) onDemand.add(supplier);
+        return onDemand;
     }
 
     private SupplierDL getSupplierOrThrow(String businessNumber) {

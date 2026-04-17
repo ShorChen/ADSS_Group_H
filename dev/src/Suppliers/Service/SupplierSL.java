@@ -26,6 +26,17 @@ public class SupplierSL {
         manufacturers = supplierDL.getManufacturers();
     }
 
+    SupplierSL(SupplierDL supplierDL, List<AgreementSL> onDemandAgreements) {
+        name = supplierDL.getName();
+        businessNumber = supplierDL.getBusinessNumber();
+        address = supplierDL.getAddress();
+        contactPersonnel = supplierDL.getContactPersonnel().stream()
+                .map(ContactPersonSL::new)
+                .collect(Collectors.toList());
+        agreements = onDemandAgreements;
+        manufacturers = supplierDL.getManufacturers();
+    }
+
     public String getName() { return name; }
     public String getBusinessNumber() { return businessNumber; }
     public String getAddress() { return address; }

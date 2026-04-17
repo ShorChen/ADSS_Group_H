@@ -1,13 +1,10 @@
 package Suppliers.Service;
 
 import Suppliers.Domain.AgreementDL;
-import Suppliers.Domain.ProductLineDL;
 import Suppliers.Domain.SupplierDL;
 import Suppliers.Domain.SupplierFacade;
-
 import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Collectors;
 
 public class OrderService {
     private final SupplierFacade supplierFacade;
@@ -16,28 +13,15 @@ public class OrderService {
         this.supplierFacade = supplierFacade;
     }
 
-    public Response<List<String>> getAllSupplierBusinessNumbers() {
+    public Response<List<SupplierSL>> getOnDemandSuppliers() {
         try {
-            List<String> numbers = supplierFacade.getAllSuppliers().stream()
-                    .map(SupplierDL::getBusinessNumber)
-                    .collect(Collectors.toList());
-            return new Response<>(numbers);
-        } catch (Exception ex) {
-            return new Response<>(ex.getMessage());
-        }
-    }
-
-    public Response<List<PurchasableItemSL>> viewPurchasableItems(String businessNumber) {
-        try {
-            SupplierDL supplier = supplierFacade.getSupplier(businessNumber);
-            List<PurchasableItemSL> items = new ArrayList<>();
-            for (AgreementDL agreement : supplier.getAgreements())
-                if (agreement.getDeliveryTerms().isOnDemand())
-                    for (ProductLineDL pl : agreement.getProductLines()) {
-                        double finalPrice = agreement.calculateTotal(pl.getSupplierCatalogId());
-                        items.add(new PurchasableItemSL(pl, finalPrice));
-                    }
-            return new Response<>(items);
+            List<SupplierSL> onDemandSuppliers = new ArrayList<>();
+            for (SupplierDL dl : supplierFacade.getOnDemandSuppliers()) {
+                List<AgreementSL> onDemandAgreements = new ArrayList<>();
+                for (AgreementDL agr : dl.getOnDemandAgreements()) onDemandAgreements.add(new AgreementSL(agr));
+                onDemandSuppliers.add(new SupplierSL(dl, onDemandAgreements));
+            }
+            return new Response<>(onDemandSuppliers);
         } catch (Exception ex) {
             return new Response<>(ex.getMessage());
         }

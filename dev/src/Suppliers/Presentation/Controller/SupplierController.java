@@ -172,7 +172,6 @@ public class SupplierController {
     }
 
     public List<SupplierPL> getAllSuppliers() throws Exception {
-        ensureSupplierManager();
         Response<List<SupplierSL>> response = supplierService.getAllSuppliers();
         if (response.isSuccess())
             return response.getData().stream().map(sl -> {
