@@ -21,21 +21,14 @@ public class EmployeePL {
     private final List<Role> qualifiedRoles;
     private String constraints;
     private int yearlyRestDays;
+    private WeekDay weeklyRestDay;
     private boolean workingDoubles;
     private Map<WeekDay, Set<ShiftType>> unavailableShifts;
-
-    public EmployeePL(String id) {
-        this(id, "temp-name", "0000-0000-0000-0000", 100.0, SalaryType.HOURLY,
-                LocalDateTime.now(),
-                JobScope.FULL_TIME, new ArrayList<>(),
-                "not free on weekends", 24, false, new HashMap<>()
-        );
-    }
 
     public EmployeePL(String id, String name, String bankAccount,
                       double salary, SalaryType salaryType, LocalDateTime dateOfEmployment,
                       JobScope jobScope, List<Role> qualifiedRoles, String constraints,
-                      int yearlyRestDays, boolean workingDoubles, Map<WeekDay, Set<ShiftType>> unavailableShifts) {
+                      int yearlyRestDays, WeekDay weeklyRestDay, boolean workingDoubles, Map<WeekDay, Set<ShiftType>> unavailableShifts) {
         this.id = id;
         this.name = name;
         this.bankAccount = bankAccount;
@@ -46,38 +39,42 @@ public class EmployeePL {
         this.qualifiedRoles = qualifiedRoles;
         this.constraints = constraints;
         this.yearlyRestDays = yearlyRestDays;
+        this.weeklyRestDay = weeklyRestDay;
         this.workingDoubles = workingDoubles;
         this.unavailableShifts = unavailableShifts;
     }
 
     public EmployeePL(Employee employee) {
         this(
-            employee.getId(), employee.getName(), employee.getBankAccount(),
-            employee.getSalary(), employee.getSalaryType(),
-            employee.getDateOfEmployment(), employee.getJobScope(),
-            employee.getQualifiedRoles(), employee.getConstraints(),
-            employee.getYearlyRestDays(), employee.isWorkingDoubles(),
-            employee.getUnavailableShifts()
+                employee.getId(), employee.getName(), employee.getBankAccount(),
+                employee.getSalary(), employee.getSalaryType(),
+                employee.getDateOfEmployment(), employee.getJobScope(),
+                employee.getQualifiedRoles(), employee.getConstraints(),
+                employee.getYearlyRestDays(), employee.getWeeklyRestDay(), employee.isWorkingDoubles(),
+                employee.getUnavailableShifts()
         );
     }
 
     public static class Builder {
         private final String id;
 
-        private String name = "temp-name";
-        private String bankAccount = "0000-0000-0000-0000";
-        private double salary = 100.0;
-        private SalaryType salaryType = SalaryType.HOURLY;
-        private LocalDateTime dateOfEmployment = LocalDateTime.now();
-        private JobScope jobScope = JobScope.FULL_TIME;
-        private List<Role> qualifiedRoles = new ArrayList<>();
-        private String constraints = "not free on weekends";
-        private int yearlyRestDays = 24;
-        private boolean workingDoubles = false;
-        private Map<WeekDay, Set<ShiftType>> unavailableShifts = new HashMap<>();
+        private String name;
+        private String bankAccount;
+        private double salary;
+        private SalaryType salaryType;
+        private LocalDateTime dateOfEmployment;
+        private JobScope jobScope;
+        private List<Role> qualifiedRoles;
+        private String constraints;
+        private int yearlyRestDays;
+        private WeekDay weeklyRestDay;
+        private boolean workingDoubles;
+        private Map<WeekDay, Set<ShiftType>> unavailableShifts;
 
         public Builder(String id) {
             this.id = id;
+            this.qualifiedRoles = new ArrayList<>();
+            unavailableShifts = new HashMap<>();
         }
 
         public Builder name(String name) {
@@ -132,6 +129,11 @@ public class EmployeePL {
             return this;
         }
 
+        public Builder weeklyRestDay(WeekDay weeklyRestDay) {
+            this.weeklyRestDay = weeklyRestDay;
+            return this;
+        }
+
         public Builder workingDoubles(boolean workingDoubles) {
             this.workingDoubles = workingDoubles;
             return this;
@@ -145,7 +147,7 @@ public class EmployeePL {
         public EmployeePL build() {
             return new EmployeePL(id, name, bankAccount, salary, salaryType,
                     dateOfEmployment, jobScope, qualifiedRoles, constraints, yearlyRestDays,
-                    workingDoubles, unavailableShifts);
+                    weeklyRestDay, workingDoubles, unavailableShifts);
         }
     }
 
@@ -168,8 +170,8 @@ public class EmployeePL {
     public Employee toEmployee() {
         return new Employee(
                 id, name, bankAccount, salary, salaryType, dateOfEmployment,
-                jobScope, new ArrayList<>(qualifiedRoles), constraints, yearlyRestDays
-                , workingDoubles, unavailableShifts
+                jobScope, new ArrayList<>(qualifiedRoles), constraints, yearlyRestDays,
+                weeklyRestDay , workingDoubles, unavailableShifts
         );
     }
 
@@ -243,6 +245,10 @@ public class EmployeePL {
 
     public int getYearlyRestDays() {
         return yearlyRestDays;
+    }
+
+    public WeekDay getWeeklyRestDay() {
+        return weeklyRestDay;
     }
 
     public boolean isWorkingDoubles() {

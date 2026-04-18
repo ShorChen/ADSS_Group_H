@@ -56,13 +56,6 @@ public class PasswordGenerator {
             stringBuilder.append(input.charAt(index));
         return stringBuilder.toString();
 
-    //        List<Character> characters = input.chars()
-    //                .mapToObj(c -> (char) c)
-    //                .collect(Collectors.toList());
-    //        Collections.shuffle(characters);
-    //        return characters.stream()
-    //                .map(String::valueOf)
-    //                .collect(Collectors.joining());
     }
 
 }

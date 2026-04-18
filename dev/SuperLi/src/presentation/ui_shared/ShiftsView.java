@@ -1,4 +1,4 @@
-package presentation.ui;
+package presentation.ui_shared;
 
 import presentation.control.ShiftController;
 

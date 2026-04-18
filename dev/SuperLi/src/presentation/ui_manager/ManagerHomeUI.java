@@ -1,20 +1,11 @@
-package presentation.ui;
+package presentation.ui_manager;
 
 import context.SessionManager;
 import presentation.control.AuthController;
+import presentation.ui_shared.View;
+import presentation.util.Option;
 
 public class ManagerHomeUI extends View {
-    public static final StringBuilder managerMenu = new StringBuilder(
-            """
-                    Actions for manager:
-                    0. Logout
-                    1. View Shift History
-                    2. Manage shifts
-                    3. Manage Employees
-                    4. Manage Roles
-                    5. Change Password
-                    """
-    );
     private boolean open = false;
     private final Runnable onLogout;
     private final AuthController controller;
@@ -28,16 +19,15 @@ public class ManagerHomeUI extends View {
     public void display() {
         open = true;
         while (open) {
-            System.out.print(managerMenu);
-            int selection = getNextInteger("Select option (number)");
-            handleSelection(selection,
-                    onLogout,
-                    this::viewShiftHistory,
-                    this::manageShifts,
-                    this::manageEmployees,
-                    this::manageRoles,
-                    this::changePassword
+            displayMenu("Actions for manager:", "",
+                    new Option("Logout", onLogout),
+                    new Option("Change Password", this::changePassword),
+                    new Option("View Shift History", this::viewShiftHistory),
+                    new Option("Manage shifts", this::manageShifts),
+                    new Option("Manage Employees", this::manageEmployees),
+                    new Option("Manage Roles", this::manageRoles)
             );
+
         }
     }
 

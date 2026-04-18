@@ -1,7 +1,10 @@
-package presentation.ui;
+package presentation.ui_manager;
 
 
 import presentation.control.HistoryController;
+import presentation.ui_shared.ShiftsView;
+import presentation.ui_shared.View;
+import presentation.util.Option;
 
 public class ViewShiftHistoryUI extends View {
     private HistoryController controller;
@@ -10,17 +13,11 @@ public class ViewShiftHistoryUI extends View {
     private ShiftsView shiftsView;
     private int weeksAgo = 1; // Tracks how far back in history we are looking
 
-    private static final StringBuilder historyMenu = new StringBuilder(
-            """
-                    0. Back
-                    1. View Previous Week
-                    2. View Next Week
-                    3. View Shift
-                    """
-    );
-
     public ViewShiftHistoryUI(Runnable onBack) {
-        this.onBack = onBack;
+        this.onBack = () -> {
+            close();
+            onBack.run();
+        };
         this.controller = new HistoryController();
     }
 
@@ -28,24 +25,16 @@ public class ViewShiftHistoryUI extends View {
     public void display() {
         open = true;
         while (open) {
-            System.out.println("\n--- Viewing Shift History: " + weeksAgo + " Week(s) Ago ---");
-
+            System.out.println("\n--- Viewing Shift History: \" + weeksAgo + \" Week(s) Ago ---)");
             shiftsView = new ShiftsView(weeksAgo);
             shiftsView.display();
             System.out.println("X - Store Was Closed");
             System.out.println("P - Partial, Closed Early or Started Late\n");
-
-            System.out.print(historyMenu.toString());
-            int selection = getNextInteger("Select option (number):");
-
-            handleSelection(selection,
-                    () -> {
-                        close();
-                        onBack.run();
-                    },
-                    this::loadPreviousWeek,
-                    this::loadNextWeek,
-                    this::viewShift
+            displayMenu("---Options---", "",
+                    new Option("Back", onBack),
+                    new Option("View Previous Week", this::loadPreviousWeek),
+                    new Option("View Next Week", this::loadNextWeek),
+                    new Option("View Shift", this::viewShift)
             );
         }
     }
@@ -69,14 +58,12 @@ public class ViewShiftHistoryUI extends View {
     private void loadPreviousWeek() {
         weeksAgo++;
         System.out.println("Loading history for " + weeksAgo + " week(s) ago...");
-        // TODO: Call HistoryService to get older shifts and update ShiftsView
     }
 
     private void loadNextWeek() {
         if (weeksAgo > 1) {
             weeksAgo--;
             System.out.println("Loading history for " + weeksAgo + " week(s) ago...");
-            // TODO: Call HistoryService to get newer shifts and update ShiftsView
         } else {
             System.out.println("You are already viewing the most recent history week.");
         }

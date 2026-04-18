@@ -1,12 +1,14 @@
-package presentation.ui;
+package presentation.ui_manager;
 
 import domain.entities.Role;
 import domain.enums.JobScope;
 import domain.enums.SalaryType;
-import presentation.control.AuthController;
+import domain.enums.WeekDay;
 import presentation.control.EmployeeController;
 import presentation.control.RoleController;
 import presentation.model.EmployeePL;
+import presentation.ui_shared.View;
+import presentation.util.Option;
 
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
@@ -45,22 +47,14 @@ public class AddEmployeeView extends View {
             EmployeePL employee = builder.build();
             printSummary(employee);
 
-            System.out.println("\n--- Options ---");
-            System.out.println("1. Save Changes");
-            System.out.println("2. Update a Field");
-            System.out.println("3. Cancel");
-
-            int choice = getNextInteger("Select an option:");
-
-            if (choice == 1) {
-                if (employeeId == null || e == null) RegisterEmployee(employee);
-                else UpdateEmployee(employee);
-            } else if (choice == 2) {
-                updateFieldMenu();
-            } else if (choice == 3) {
-                System.out.println("Employee creation cancelled.");
-                close();
-            } else System.out.println("Invalid selection. Try again.");
+            displayMenu("--- Options ---", "",
+                    new Option("Cancel", this::close),
+                    new Option("Update a Field", this::updateFieldMenu),
+                    new Option("Save Changes", () -> {
+                        if (employeeId == null || e == null) registerEmployee(employee);
+                        else updateEmployee(employee);
+                    })
+            );
 
         }
     }
@@ -75,7 +69,8 @@ public class AddEmployeeView extends View {
         jobScope();
         roles();
         constraints();
-        restDays();
+        yearlyRestDays();
+        weeklyRestDay();
     }
 
     private void printSummary(EmployeePL employee) {
@@ -87,39 +82,34 @@ public class AddEmployeeView extends View {
         System.out.println("Date of Employment: " + employee.getDateOfEmployment());
         System.out.println("Job Scope: " + employee.getJobScope());
         System.out.println("Yearly Rest Days: " + employee.getYearlyRestDays());
+        System.out.println("Weekly Rest Day: " + employee.getWeeklyRestDay());
         System.out.println("Constraints: " + (employee.getConstraints().isEmpty() ? "None" : employee.getConstraints()));
 
         System.out.print("Roles: ");
         if (employee.getQualifiedRoles().isEmpty()) {
             System.out.println("None");
         } else {
-            employee.getQualifiedRoles().forEach(role -> System.out.print(role.getTag() + " ")); // Assuming Role has a getTag() or getName()
+            employee.getQualifiedRoles().forEach(role -> System.out.print(role.getTag() + " "));
             System.out.println();
         }
     }
 
     private void updateFieldMenu() {
-        System.out.println("\n--- Update Field ---");
-        System.out.println("0. Back to Summary");
-        System.out.println("1. Name");
-        System.out.println("2. Bank Account");
-        System.out.println("3. Salary & Salary Type");
-        System.out.println("4. Date of Employment");
-        System.out.println("5. Job Scope");
-        System.out.println("6. Roles");
-        System.out.println("7. Constraints");
-        System.out.println("8. Rest Days");
-
-        int choice = getNextInteger("Select field to update:");
-        Runnable[] choices = new Runnable[]{() -> {}, this::name, this::bankAccount,
-                this::salary, this::dateOfEmployment, this::jobScope,
-                this::roles, this::constraints, this::restDays};
-        if (choice >= 0 && choice < choices.length)
-            choices[choice].run();
-        else System.out.println("Invalid selection");
+        displayMenu("---Update Field ---", "",
+                new Option("Back to Summary", () -> {
+                }),
+                new Option("Name", this::name),
+                new Option("Bank Account", this::bankAccount),
+                new Option("Salary & Salary Type", this::salary),
+                new Option("Date of Employment", this::dateOfEmployment),
+                new Option("Job Scope", this::jobScope),
+                new Option("Roles", this::roles),
+                new Option("Constraints", this::constraints),
+                new Option("Yearly Rest Days", this::yearlyRestDays)
+        );
     }
 
-    private void RegisterEmployee(EmployeePL employee) {
+    private void registerEmployee(EmployeePL employee) {
         try {
             System.out.println("Your password: " + employeeController.addEmployee(employee) +
                                " make sure to change it as soon as you get access to the system");
@@ -129,7 +119,7 @@ public class AddEmployeeView extends View {
         close();
     }
 
-    private void UpdateEmployee(EmployeePL employee) {
+    private void updateEmployee(EmployeePL employee) {
         try {
             String password = getNextLine("To save changes, please enter password");
             employeeController.updateEmployee(employee, password);
@@ -156,14 +146,13 @@ public class AddEmployeeView extends View {
     }
 
     private void salary() {
-        String salTypeString = selectUntilResult("Enter Salary Type (UPPER_CASE):",
-                SalaryType.HOURLY.name(),
-                SalaryType.GLOBALLY.name());
+        displayMenu("Enter Salary Type", "",
+                new Option("Hourly", () -> builder.salaryType(SalaryType.HOURLY)),
+                new Option("Globally", () -> builder.salaryType(SalaryType.GLOBALLY))
+        );
 
-        SalaryType salaryType = SalaryType.valueOf(salTypeString);
         double salary = getNextDouble("Enter Employee's Salary:");
-
-        builder.salary(salary).salaryType(salaryType);
+        builder.salary(salary);
     }
 
     private void dateOfEmployment() {
@@ -183,11 +172,10 @@ public class AddEmployeeView extends View {
     }
 
     private void jobScope() {
-        String jobScope = selectUntilResult("Enter Job Scope (UPPER_CASE)",
-                JobScope.FULL_TIME.name(),
-                JobScope.PARTIAL.name());
-
-        builder.jobScope(JobScope.valueOf(jobScope));
+        displayMenu("Enter Job Scope", "",
+                new Option("Full Time", () -> builder.jobScope(JobScope.FULL_TIME)),
+                new Option("Partial", () -> builder.jobScope(JobScope.PARTIAL))
+        );
     }
 
     private void roles() {
@@ -219,21 +207,25 @@ public class AddEmployeeView extends View {
         builder.constraints(constraints);
     }
 
-    private void restDays() {
+    private void yearlyRestDays() {
         int yearlyRestDays = getNextInteger("Enter Yearly Rest Days:");
         builder.yearlyRestDays(yearlyRestDays);
     }
 
-    private String selectUntilResult(String message, String... options) {
-        String selection = getNextLine(message);
-        for (String option : options) {
-            if (selection.equals(option)) {
-                return selection;
-            }
-        }
-        System.out.println("Invalid selection. Please try again.");
-        return selectUntilResult(message, options);
+    private void weeklyRestDay() {
+        WeekDay[] day = new WeekDay[1];
+        displayMenu("Enter Weekly Rest Day", "",
+                new Option("Sunday", () -> day[0] = WeekDay.SUNDAY),
+                new Option("Monday", () -> day[0] = WeekDay.MONDAY),
+                new Option("Tuesday", () -> day[0] = WeekDay.TUESDAY),
+                new Option("Wednesday", () -> day[0] = WeekDay.WEDNESDAY),
+                new Option("Thursday", () -> day[0] = WeekDay.THURSDAY),
+                new Option("Friday", () -> day[0] = WeekDay.FRIDAY),
+                new Option("Saturday", () -> day[0] = WeekDay.SATURDAY)
+        );
+        builder.weeklyRestDay(day[0]);
     }
+
 
     @Override
     public void close() {

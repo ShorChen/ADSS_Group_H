@@ -1,4 +1,4 @@
-import presentation.ui.FirstScreenUI;
+import presentation.ui_shared.FirstScreenUI;
 
 public class Main {
     public static void main(String[] args) {

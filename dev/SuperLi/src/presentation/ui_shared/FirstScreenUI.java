@@ -1,4 +1,7 @@
-package presentation.ui;
+package presentation.ui_shared;
+
+import presentation.ui_employee.EmployeeHomeUI;
+import presentation.ui_manager.ManagerHomeUI;
 
 public class FirstScreenUI extends View {
     private LoginUI loginUI;
@@ -17,7 +20,7 @@ public class FirstScreenUI extends View {
     }
 
     @Override
-    void close() {
+    public void close() {
 
     }
 

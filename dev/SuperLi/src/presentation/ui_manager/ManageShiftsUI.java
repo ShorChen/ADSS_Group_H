@@ -1,24 +1,14 @@
-package presentation.ui;
+package presentation.ui_manager;
 
 import presentation.control.HRManagerShiftController;
+import presentation.ui_shared.ShiftsView;
+import presentation.ui_shared.View;
+import presentation.util.Option;
 
 public class ManageShiftsUI extends View {
     private final HRManagerShiftController controller;
     private boolean open = false;
     private final Runnable onBack;
-
-    private static final StringBuilder shiftsMenu = new StringBuilder(
-            """
-                    --- Manage Shifts ---
-                    0. Back
-                    1. Create Shift Template (Not Implemented)
-                    2. Set Default Template (Not Implemented)
-                    3. Place Employees to Shifts
-                    4. Set Submission Deadline
-                    5. Handle Replacement Requests
-                    6. Issue HR Report (Not Implemented)
-                    """
-    );
 
     public ManageShiftsUI(Runnable onBack) {
         this.onBack = () -> {
@@ -33,24 +23,20 @@ public class ManageShiftsUI extends View {
     public void display() {
         open = true;
         while (open) {
-            System.out.print(shiftsMenu.toString());
-            int selection = getNextInteger("Select option (number):");
-
-            handleSelection(selection,
-                    onBack,
-                    this::createTemplate,
-                    this::setDefaultTemplate,
-                    this::placeEmployees,
-                    this::setDeadline,
-                    this::handleReplacements,
-                    this::issueReport
+            displayMenu("--- Manage Shifts ---", "",
+                    new Option("Back", onBack),
+                    new Option("Place Employees to Shifts", this::placeEmployees),
+                    new Option("Set Submission Deadline", this::setDeadline),
+                    new Option("Handle Replacement Requests", this::handleReplacements),
+                    new Option("Create Shift Template (Not Implemented)", this::createTemplate),
+                    new Option("Set Default Template (Not Implemented)", this::setDefaultTemplate),
+                    new Option("Issue HR Report (Not Implemented)", this::issueReport)
             );
         }
     }
 
     private void createTemplate() {
         String name = getNextLine("Enter new template name:");
-        // TODO: this is a test implementation
         controller.createShiftTemplate(name, null);
         System.out.println("Template '" + name + "' created successfully.");
     }

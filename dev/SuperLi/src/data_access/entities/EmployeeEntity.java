@@ -14,15 +14,20 @@ public class EmployeeEntity {
     private List<String> qualifiedRoles;
     private String constraints;
     private int yearlyRestDays;
+    private String weeklyRestDay;
     private String password;
     private boolean workingDoubles = false;
     private Map<Integer, Set<Integer>> unavailableShifts;
 
+    @Deprecated
+    /* todo : this constructor is not meant to stay, this is only for
+        initiating a manager and an employee for now
+     */
     public EmployeeEntity(String id, String password) {
         this(id, "temp-name", "0000-0000-0000-0000", 100.0, "HOURLY",
                 LocalDateTime.now(),
                 "FULL_TIME", new ArrayList<>(),
-                "not free on weekends", 24, password, false, new HashMap<>()
+                "not free on weekends", 24, "SATURDAY",password, false, new HashMap<>()
         );
 
     }
@@ -31,7 +36,7 @@ public class EmployeeEntity {
                           String salaryType, LocalDateTime dateOfEmployment,
                           String jobScope, List<String> qualifiedRoles,
                           String constraints, int yearlyRestDays,
-                          String password, boolean workingDoubles,
+                          String weeklyRestDay, String password, boolean workingDoubles,
                           Map<Integer, Set<Integer>> unavailableShifts) {
         this.id = id;
         this.name = name;
@@ -43,6 +48,7 @@ public class EmployeeEntity {
         this.qualifiedRoles = qualifiedRoles;
         this.constraints = constraints;
         this.yearlyRestDays = yearlyRestDays;
+        this.weeklyRestDay = weeklyRestDay;
         this.password = password;
         this.workingDoubles = workingDoubles;
         this.unavailableShifts = unavailableShifts;
@@ -88,6 +94,10 @@ public class EmployeeEntity {
         return yearlyRestDays;
     }
 
+    public String getWeeklyRestDay() {
+        return weeklyRestDay;
+    }
+
     public boolean setPassword(String oldPass, String password) {
         if (this.password.equals(oldPass)) {
             this.password = password;
@@ -131,6 +141,7 @@ public class EmployeeEntity {
         qualifiedRoles = entity.getQualifiedRoles();
         constraints = entity.getConstraints();
         yearlyRestDays = entity.getYearlyRestDays();
+        weeklyRestDay = entity.getWeeklyRestDay();
         workingDoubles = entity.isWorkingDoubles();
         unavailableShifts = entity.getUnavailableShifts();
     }

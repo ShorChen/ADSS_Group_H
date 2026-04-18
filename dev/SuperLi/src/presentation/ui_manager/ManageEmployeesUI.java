@@ -1,22 +1,14 @@
-package presentation.ui;
+package presentation.ui_manager;
 
 import presentation.control.EmployeeController;
 import presentation.model.EmployeePL;
+import presentation.ui_shared.View;
+import presentation.util.Option;
 
 public class ManageEmployeesUI extends View {
     private final EmployeeController controller;
     private boolean open = false;
     private final Runnable onBack;
-
-    private static final StringBuilder employeesMenu = new StringBuilder(
-            """
-                    0. Back
-                    1. Add Employee
-                    2. Deactivate Employee
-                    3. View Employee Details
-                    4. Update Employee
-                    """
-    );
 
     public ManageEmployeesUI(Runnable onBack) {
         this.onBack = () -> {
@@ -28,17 +20,15 @@ public class ManageEmployeesUI extends View {
     }
 
     @Override
-    void display() {
+    public void display() {
         open = true;
         while (open) {
-            System.out.print(employeesMenu.toString());
-            int selection = getNextInteger("Select option (number)");
-            handleSelection(selection,
-                    onBack,
-                    this::addEmployee,
-                    this::deactivateEmployee,
-                    this::getEmployeeDetails,
-                    this::updateEmployeeDetails
+            displayMenu("---Managing Employees---", "",
+                    new Option("Back", onBack),
+                    new Option("Add Employee", this::addEmployee),
+                    new Option("Deactivate Employee", this::deactivateEmployee),
+                    new Option("View Employee Details", this::getEmployeeDetails),
+                    new Option("Update Employee", this::updateEmployeeDetails)
             );
         }
     }
@@ -68,6 +58,7 @@ public class ManageEmployeesUI extends View {
             System.out.println("Date of Employment: " + employee.getDateOfEmployment());
             System.out.println("Job Scope: " + employee.getJobScope());
             System.out.println("Yearly Rest Days: " + employee.getYearlyRestDays());
+            System.out.println("Weekly Rest Day: " + employee.getWeeklyRestDay());
             System.out.println("Constraints: " + (employee.getConstraints().isEmpty() ? "None" : employee.getConstraints()));
 
             System.out.print("Roles: ");
@@ -88,7 +79,7 @@ public class ManageEmployeesUI extends View {
     }
 
     @Override
-    void close() {
+    public void close() {
         open = false;
     }
 }

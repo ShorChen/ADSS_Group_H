@@ -1,31 +1,17 @@
-package presentation.ui;
+package presentation.ui_employee;
 
 import context.SessionManager;
-import domain.util.PasswordGenerator;
 import presentation.control.AuthController;
-import presentation.control.EmployeeController;
-
-import java.util.InputMismatchException;
+import presentation.ui_shared.View;
+import presentation.util.Option;
 
 public class EmployeeHomeUI extends View {
-    public static final StringBuilder employeeMenu = new StringBuilder(
-            """
-                    Actions for Employee:
-                    0. Logout
-                    1. View Schedule & Submit Availability
-                    2. Set Preferred Rest Day
-                    3. Change Password
-                    4. Request Shift Replacement
-                    """
-    );
     private boolean open = false;
     private final Runnable onLogout;
-    private EmployeeController controller;
-    private AuthController authController;
+    private final AuthController authController;
 
     public EmployeeHomeUI(Runnable onLogout) {
         this.onLogout = onLogout;
-        controller = new EmployeeController();
         authController = new AuthController();
     }
 
@@ -34,14 +20,11 @@ public class EmployeeHomeUI extends View {
     public void display() {
         open = true;
         while (open) {
-            System.out.print(employeeMenu.toString());
-            int selection = getNextInteger("Select option (number)");
-            handleSelection(selection,
-                    onLogout,
-                    this::chooseShifts,
-                    this::setRestDay,
-                    this::changePassword,
-                    this::requestReplacement
+            displayMenu("Actions for Employee", "",
+                    new Option("Logout", onLogout),
+                    new Option("Change Password", this::changePassword),
+                    new Option("View Schedule & Submit Availability", this::chooseShifts),
+                    new Option("Request Shift Replacement", this::requestReplacement)
             );
         }
     }
@@ -68,11 +51,6 @@ public class EmployeeHomeUI extends View {
         shiftsUI.display();
     }
 
-    private void setRestDay() {
-        int day = getNextInteger("Enter day (0=SUN, 1=MON, 2=TUE, 3=WED, 4=THU, 5=FRI, 6=SAT):");
-
-
-    }
 
     private void requestReplacement() {
         System.out.println("not implemented");

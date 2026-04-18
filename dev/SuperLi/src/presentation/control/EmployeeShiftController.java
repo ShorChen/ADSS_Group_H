@@ -7,6 +7,7 @@ import domain.services.ShiftService;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 /* requirement no. 4, 21 22 24 26 27 28*/
 public class EmployeeShiftController {
@@ -14,7 +15,8 @@ public class EmployeeShiftController {
     public EmployeeShiftController(){
         this.service = new ShiftService();
     }
-    public void setAvailability(String employeeId, List<Shift> shifts, boolean canWorkDoubleShifts){
+    public void setAvailability(String employeeId, Map<Integer, Set<Integer>> shifts,
+                                boolean canWorkDoubleShifts){
         //todo: implement
     }
     public void setPreferredRestDay(String day){
