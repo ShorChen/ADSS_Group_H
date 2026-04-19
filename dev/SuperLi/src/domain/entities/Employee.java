@@ -23,6 +23,7 @@ public class Employee {
     private WeekDay weeklyRestDay;
     private boolean workingDoubles = false;
     private Map<WeekDay, Set<ShiftType>> unavailableShifts;
+    private boolean active = true;
 
     public Employee(String id, String name, String bankAccount,
                     double salary, SalaryType salaryType, LocalDateTime dateOfEmployment,
@@ -59,6 +60,7 @@ public class Employee {
         this.weeklyRestDay = WeekDay.valueOf(entity.getWeeklyRestDay());
         this.yearlyRestDays = entity.getYearlyRestDays();
         this.workingDoubles = entity.isWorkingDoubles();
+        this.active = entity.isActive();
 
         Map<Integer, Set<Integer>> entityUnavailableShifts = entity.getUnavailableShifts();
         this.unavailableShifts = new HashMap<>();
@@ -100,12 +102,15 @@ public class Employee {
             unavailableShiftsEntity.put(day.day, shifts);
         });
 
-        return new EmployeeEntity(
-                id, name, bankAccount, salary, salaryType.name(), dateOfEmployment,
-                jobScope.name(), roles, constraints, yearlyRestDays, weeklyRestDay.name(),
-                password, workingDoubles,
-                unavailableShiftsEntity
+        EmployeeEntity entity = new EmployeeEntity(
+            id, name, bankAccount, salary, salaryType.name(), dateOfEmployment,
+            jobScope.name(), roles, constraints, yearlyRestDays, weeklyRestDay.name(),
+            password, workingDoubles,
+            unavailableShiftsEntity
         );
+    
+        entity.setActive(this.active); 
+        return entity;
     }
 
     public void setName(String name) {
@@ -190,5 +195,13 @@ public class Employee {
 
     public Map<WeekDay, Set<ShiftType>> getUnavailableShifts() {
         return unavailableShifts;
+    }
+
+    public boolean isActive() {
+        return active;
+    }
+
+    public void setActive(boolean active) {
+        this.active = active;
     }
 }

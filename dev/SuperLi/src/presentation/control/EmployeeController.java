@@ -23,18 +23,17 @@ public class EmployeeController {
     }
 
     public boolean deactivateEmployee(String id) {
-        System.out.println("Method not yet implemented");
-        //Todo: implement
-        return false;
+        if (id == null || id.trim().isEmpty()) return false;
+        return service.deactivateEmployee(id);
     }
 
     public EmployeePL getEmployeeDetails(String id) {
-        if (id == null)
-            return null;
-        //Todo: implement
-        System.out.println("Method not yet implemented");
-
-
+        if (id == null || id.trim().isEmpty()) return null;
+    
+        Employee employee = service.getEmployeeDetails(id);
+        if (employee != null) {
+            return new EmployeePL(employee); 
+        }
         return null;
     }
 

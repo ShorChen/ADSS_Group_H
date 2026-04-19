@@ -3,6 +3,7 @@ package domain.entities;
 import domain.enums.ShiftType;
 
 import java.util.Date;
+import java.util.HashMap;
 import java.util.Map;
 
 public class Shift {
@@ -12,6 +13,7 @@ public class Shift {
     private Employee shiftManager;
     private final Map<Employee, Role> employees;
     private final Map<Employee, Float> additionalHours;
+    private Map<Role, Integer> requiredJobs = new HashMap<>();
 
     public Shift(Date startDate, ShiftType shiftType, Map<Employee, Role> employees,
                  Map<Employee, Float> additionalHours, Employee shiftManager,
@@ -50,5 +52,13 @@ public class Shift {
 
     public void setShiftManager(Employee shiftManager) {
         this.shiftManager = shiftManager;
+    }
+
+    public Map<Role, Integer> getRequiredJobs() {
+    return requiredJobs;
+    }
+
+    public void setRequiredJobs(Map<Role, Integer> requiredJobs) {
+        this.requiredJobs = requiredJobs;
     }
 }

@@ -18,6 +18,7 @@ public class EmployeeEntity {
     private String password;
     private boolean workingDoubles = false;
     private Map<Integer, Set<Integer>> unavailableShifts;
+    private boolean active = true;
 
     @Deprecated
     /* todo : this constructor is not meant to stay, this is only for
@@ -126,6 +127,14 @@ public class EmployeeEntity {
 
     }
 
+    public void setWorkingDoubles(boolean workingDoubles) {
+        this.workingDoubles = workingDoubles;
+    }
+
+    public void setUnavailableShifts(Map<Integer, Set<Integer>> unavailableShifts) {
+        this.unavailableShifts = unavailableShifts;
+    }
+
     public void update(EmployeeEntity entity) {
         if (!id.equals(entity.id))
             throw new IllegalArgumentException("Can not update an employee from another employee's account");
@@ -144,5 +153,14 @@ public class EmployeeEntity {
         weeklyRestDay = entity.getWeeklyRestDay();
         workingDoubles = entity.isWorkingDoubles();
         unavailableShifts = entity.getUnavailableShifts();
+        active = entity.isActive();
+    }
+
+    public boolean isActive() {
+    return active;
+    }
+
+    public void setActive(boolean active) {
+        this.active = active;
     }
 }

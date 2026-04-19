@@ -60,6 +60,7 @@ public class ManageEmployeesUI extends View {
             System.out.println("Yearly Rest Days: " + employee.getYearlyRestDays());
             System.out.println("Weekly Rest Day: " + employee.getWeeklyRestDay());
             System.out.println("Constraints: " + (employee.getConstraints().isEmpty() ? "None" : employee.getConstraints()));
+            System.out.println("Status: " + (employee.isActive() ? "Active" : "Inactive"));
 
             System.out.print("Roles: ");
             if (employee.getQualifiedRoles().isEmpty()) {
