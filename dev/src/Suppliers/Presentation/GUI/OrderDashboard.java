@@ -13,11 +13,11 @@ import javafx.geometry.Pos;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.layout.*;
-
 import java.util.*;
 import java.util.stream.Collectors;
 
 public class OrderDashboard {
+    private static int globalOrderCounter = 1;
     private final Scene scene;
     private final OrderController orderController;
     private final BorderPane mainLayout;
@@ -216,33 +216,108 @@ public class OrderDashboard {
         this.centerPane.getChildren().clear();
         Label title = new Label("Order Summary");
         title.setStyle("-fx-font-size: 24px; -fx-font-weight: bold;");
-        TableView<OrderItem> table = new TableView<>();
-        table.setMaxWidth(800);
-        table.setPrefHeight(250);
-        TableColumn<OrderItem, String> prodCol = new TableColumn<>("Product");
-        prodCol.setCellValueFactory(data -> new SimpleStringProperty(data.getValue().getProductName()));
-        TableColumn<OrderItem, String> supCol = new TableColumn<>("Supplier");
-        supCol.setCellValueFactory(data -> new SimpleStringProperty(data.getValue().getSupplierName()));
-        TableColumn<OrderItem, Integer> catCol = new TableColumn<>("Catalog ID");
-        catCol.setCellValueFactory(data -> new SimpleObjectProperty<>(data.getValue().getCatalogId()));
-        TableColumn<OrderItem, Integer> agrCol = new TableColumn<>("Agreement ID");
-        agrCol.setCellValueFactory(data -> new SimpleObjectProperty<>(data.getValue().getAgreementId()));
-        TableColumn<OrderItem, Integer> qtyCol = new TableColumn<>("Quantity");
-        qtyCol.setCellValueFactory(data -> new SimpleObjectProperty<>(data.getValue().getQuantity()));
-        TableColumn<OrderItem, String> beforeCol = new TableColumn<>("Before Disc.");
-        beforeCol.setCellValueFactory(data -> new SimpleStringProperty(String.format("NIS %.2f", data.getValue().getPriceBeforeDiscount())));
-        TableColumn<OrderItem, String> priceCol = new TableColumn<>("Final Price");
-        priceCol.setCellValueFactory(data -> new SimpleStringProperty(String.format("NIS %.2f", data.getValue().getTotalPrice())));
-        table.getColumns().addAll(prodCol, supCol, catCol, agrCol, qtyCol, beforeCol, priceCol);
-        table.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY);
-        table.getItems().setAll(currentOrder);
+        if (currentOrder.isEmpty()) {
+            Label emptyMsg = new Label("No items in the current order.");
+            emptyMsg.setStyle("-fx-font-size: 18px; -fx-text-fill: gray;");
+            HBox actionBox = new HBox(20);
+            actionBox.setAlignment(Pos.CENTER);
+            Button returnBtn = new Button("Return / Add More");
+            returnBtn.setStyle("-fx-font-size: 16px;");
+            returnBtn.setOnAction(e -> showSearchPhase());
+            actionBox.getChildren().add(returnBtn);
+            this.centerPane.getChildren().addAll(title, emptyMsg, actionBox);
+            return;
+        }
+        VBox tablesContainer = new VBox(30);
+        tablesContainer.setAlignment(Pos.CENTER);
+        tablesContainer.setPadding(new Insets(10));
+        List<TableView<OrderItem>> allTables = new ArrayList<>();
+        Map<String, List<OrderItem>> groupedOrder = currentOrder.stream().collect(Collectors.groupingBy(OrderItem::getSupplierName));
+        for (Map.Entry<String, List<OrderItem>> entry : groupedOrder.entrySet()) {
+            String supplierName = entry.getKey();
+            List<OrderItem> items = entry.getValue();
+            SupplierPL supData = onDemandSuppliers.stream().filter(s -> s.getName().equals(supplierName)).findFirst().orElse(null);
+            VBox orderBlock = new VBox();
+            orderBlock.setMaxWidth(850);
+            GridPane grid = new GridPane();
+            grid.setHgap(1);
+            grid.setVgap(1);
+            grid.setStyle("-fx-background-color: black; -fx-border-color: black; -fx-border-width: 1;");
+            ColumnConstraints cc = new ColumnConstraints();
+            cc.setPercentWidth(16.66);
+            grid.getColumnConstraints().addAll(cc, cc, cc, cc, cc, cc);
+            Label titleLbl = new Label("Order Details");
+            titleLbl.setMaxWidth(Double.MAX_VALUE);
+            titleLbl.setAlignment(Pos.CENTER);
+            titleLbl.setStyle("-fx-background-color: #c0c0c0; -fx-padding: 5; -fx-font-weight: bold;");
+            grid.add(titleLbl, 0, 0, 6, 1);
+            String hStyle = "-fx-background-color: #c0c0c0; -fx-padding: 5; -fx-font-weight: bold;";
+            String vStyle = "-fx-background-color: white; -fx-padding: 5;";
+            Label snH = new Label("Supplier Name:"); snH.setMaxWidth(Double.MAX_VALUE); snH.setStyle(hStyle);
+            Label snV = new Label(supplierName); snV.setMaxWidth(Double.MAX_VALUE); snV.setStyle(vStyle);
+            Label adH = new Label("Address:"); adH.setMaxWidth(Double.MAX_VALUE); adH.setStyle(hStyle);
+            Label adV = new Label(supData != null ? supData.getAddress() : "N/A"); adV.setMaxWidth(Double.MAX_VALUE); adV.setStyle(vStyle);
+            Label onH = new Label("Order No:"); onH.setMaxWidth(Double.MAX_VALUE); onH.setStyle(hStyle);
+            Label onV = new Label(String.valueOf(globalOrderCounter)); onV.setMaxWidth(Double.MAX_VALUE); onV.setStyle(vStyle);
+            grid.add(snH, 0, 1); grid.add(snV, 1, 1);
+            grid.add(adH, 2, 1); grid.add(adV, 3, 1);
+            grid.add(onH, 4, 1); grid.add(onV, 5, 1);
+            Label snoH = new Label("Supplier No:"); snoH.setMaxWidth(Double.MAX_VALUE); snoH.setStyle(hStyle);
+            Label snoV = new Label(supData != null ? supData.getBusinessNumber() : "N/A"); snoV.setMaxWidth(Double.MAX_VALUE); snoV.setStyle(vStyle);
+            Label odH = new Label("Order Date:"); odH.setMaxWidth(Double.MAX_VALUE); odH.setStyle(hStyle);
+            Label odV = new Label(java.time.LocalDate.now().toString()); odV.setMaxWidth(Double.MAX_VALUE); odV.setStyle(vStyle);
+            Label cpH = new Label("Contact Phone:"); cpH.setMaxWidth(Double.MAX_VALUE); cpH.setStyle(hStyle);
+            String phone = (supData != null && !supData.getContactPersonnel().isEmpty()) ? supData.getContactPersonnel().get(0).getPhone() : "N/A";
+            Label cpV = new Label(phone); cpV.setMaxWidth(Double.MAX_VALUE); cpV.setStyle(vStyle);
+            grid.add(snoH, 0, 2); grid.add(snoV, 1, 2);
+            grid.add(odH, 2, 2); grid.add(odV, 3, 2);
+            grid.add(cpH, 4, 2); grid.add(cpV, 5, 2);
+            TableView<OrderItem> table = new TableView<>();
+            table.setPrefHeight(items.size() * 25 + 30);
+            TableColumn<OrderItem, Integer> catCol = new TableColumn<>("Catalog ID");
+            catCol.setCellValueFactory(data -> new SimpleObjectProperty<>(data.getValue().getCatalogId()));
+            TableColumn<OrderItem, String> prodCol = new TableColumn<>("Product Name");
+            prodCol.setCellValueFactory(data -> new SimpleStringProperty(data.getValue().getProductName()));
+            TableColumn<OrderItem, Integer> qtyCol = new TableColumn<>("Quantity");
+            qtyCol.setCellValueFactory(data -> new SimpleObjectProperty<>(data.getValue().getQuantity()));
+            TableColumn<OrderItem, String> listCol = new TableColumn<>("List Price");
+            listCol.setCellValueFactory(data -> new SimpleStringProperty(String.format("NIS %.2f", data.getValue().getPriceBeforeDiscount())));
+            TableColumn<OrderItem, String> discCol = new TableColumn<>("Discount");
+            discCol.setCellValueFactory(data -> new SimpleStringProperty(String.format("NIS %.2f", data.getValue().getPriceBeforeDiscount() - data.getValue().getTotalPrice())));
+            TableColumn<OrderItem, String> finalCol = new TableColumn<>("Final Price");
+            finalCol.setCellValueFactory(data -> new SimpleStringProperty(String.format("NIS %.2f", data.getValue().getTotalPrice())));
+            table.getColumns().addAll(catCol, prodCol, qtyCol, listCol, discCol, finalCol);
+            table.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY);
+            table.getItems().setAll(items);
+            allTables.add(table);
+            table.getSelectionModel().selectedItemProperty().addListener((obs, oldVal, newVal) -> {
+                if (newVal != null) {
+                    for (TableView<OrderItem> t : allTables) {
+                        if (t != table) t.getSelectionModel().clearSelection();
+                    }
+                }
+            });
+            orderBlock.getChildren().addAll(grid, table);
+            tablesContainer.getChildren().add(orderBlock);
+        }
+        ScrollPane scrollPane = new ScrollPane(tablesContainer);
+        scrollPane.setFitToWidth(true);
+        scrollPane.setStyle("-fx-background-color: transparent;");
+        scrollPane.setPrefViewportHeight(300);
         HBox editBox = new HBox(15);
         editBox.setAlignment(Pos.CENTER);
         Button modifyBtn = new Button("Modify Quantity");
         modifyBtn.setStyle("-fx-font-size: 14px; -fx-background-color: #2196F3; -fx-text-fill: white;");
         modifyBtn.setOnAction(e -> {
-            OrderItem selected = table.getSelectionModel().getSelectedItem();
+            OrderItem selected = null;
+            for (TableView<OrderItem> t : allTables) {
+                if (t.getSelectionModel().getSelectedItem() != null) {
+                    selected = t.getSelectionModel().getSelectedItem();
+                    break;
+                }
+            }
             if (selected != null) {
+                OrderItem finalSelected = selected;
                 TextInputDialog dialog = new TextInputDialog(String.valueOf(selected.getQuantity()));
                 dialog.setTitle("Modify Quantity");
                 dialog.setHeaderText("New quantity for " + selected.getProductName() + ":");
@@ -250,8 +325,8 @@ public class OrderDashboard {
                     try {
                         int newQty = Integer.parseInt(val);
                         if (newQty <= 0) throw new NumberFormatException();
-                        currentOrder.remove(selected);
-                        OrderItem newItem = findCheapestItem(selected.getProductName(), newQty);
+                        currentOrder.remove(finalSelected);
+                        OrderItem newItem = findCheapestItem(finalSelected.getProductName(), newQty);
                         if (newItem != null) currentOrder.add(newItem);
                         else showAlert("Error", "Could not recalculate. Item removed.");
                         showSummaryPhase();
@@ -266,7 +341,13 @@ public class OrderDashboard {
         Button deleteBtn = new Button("Delete Item");
         deleteBtn.setStyle("-fx-font-size: 14px; -fx-background-color: #f44336; -fx-text-fill: white;");
         deleteBtn.setOnAction(e -> {
-            OrderItem selected = table.getSelectionModel().getSelectedItem();
+            OrderItem selected = null;
+            for (TableView<OrderItem> t : allTables) {
+                if (t.getSelectionModel().getSelectedItem() != null) {
+                    selected = t.getSelectionModel().getSelectedItem();
+                    break;
+                }
+            }
             if (selected != null) {
                 currentOrder.remove(selected);
                 showSummaryPhase();
@@ -288,10 +369,11 @@ public class OrderDashboard {
         finalizeBtn.setDisable(currentOrder.isEmpty());
         finalizeBtn.setOnAction(e -> showConfirmationPhase());
         actionBox.getChildren().addAll(returnBtn, finalizeBtn);
-        this.centerPane.getChildren().addAll(title, table, editBox, totalLabel, actionBox);
+        this.centerPane.getChildren().addAll(title, scrollPane, editBox, totalLabel, actionBox);
     }
 
     private void showConfirmationPhase() {
+        globalOrderCounter++;
         this.abortBtn.setVisible(false);
         this.centerPane.getChildren().clear();
         Label confirm = new Label("Order sent successfully!");
@@ -360,40 +442,14 @@ public class OrderDashboard {
             this.supplierAddress = supplierAddress;
         }
 
-        public String getProductName() {
-            return productName;
-        }
-
-        public String getSupplierName() {
-            return supplierName;
-        }
-
-        public int getCatalogId() {
-            return catalogId;
-        }
-
-        public int getAgreementId() {
-            return agreementId;
-        }
-
-        public int getQuantity() {
-            return quantity;
-        }
-
-        public double getPriceBeforeDiscount() {
-            return priceBeforeDiscount;
-        }
-
-        public double getTotalPrice() {
-            return totalPrice;
-        }
-
-        public boolean isSupplierTransports() {
-            return supplierTransports;
-        }
-
-        public String getSupplierAddress() {
-            return supplierAddress;
-        }
+        public String getProductName() { return productName; }
+        public String getSupplierName() { return supplierName; }
+        public int getCatalogId() { return catalogId; }
+        public int getAgreementId() { return agreementId; }
+        public int getQuantity() { return quantity; }
+        public double getPriceBeforeDiscount() { return priceBeforeDiscount; }
+        public double getTotalPrice() { return totalPrice; }
+        public boolean isSupplierTransports() { return supplierTransports; }
+        public String getSupplierAddress() { return supplierAddress; }
     }
 }

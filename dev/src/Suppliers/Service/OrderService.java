@@ -1,6 +1,5 @@
 package Suppliers.Service;
 
-import Suppliers.Domain.AgreementDL;
 import Suppliers.Domain.SupplierDL;
 import Suppliers.Domain.SupplierFacade;
 import java.util.ArrayList;
@@ -13,7 +12,8 @@ public class OrderService {
         this.supplierFacade = supplierFacade;
     }
 
-    public Response<List<SupplierSL>> getOnDemandSuppliers() {
+    /*
+        public Response<List<SupplierSL>> getOnDemandSuppliers() {
         try {
             List<SupplierSL> onDemandSuppliers = new ArrayList<>();
             for (SupplierDL dl : supplierFacade.getOnDemandSuppliers()) {
@@ -23,6 +23,21 @@ public class OrderService {
             }
             return new Response<>(onDemandSuppliers);
         } catch (Exception ex) {
+            return new Response<>(ex.getMessage());
+        }
+    }
+     */
+
+    // The trivial solution is the one above, as written in the description of the module. But Max said that for
+    // suppliers with fixed days agreements, we should allow to make an order in other days too, if it is urgent
+    public Response<List<SupplierSL>> getOnDemandSuppliers() {
+        try {
+            List<SupplierSL> onDemandSuppliers = new ArrayList<>();
+            for (SupplierDL dl : supplierFacade.getAllSuppliers())
+                onDemandSuppliers.add(new SupplierSL(dl));
+            return new Response<>(onDemandSuppliers);
+        }
+        catch (Exception ex) {
             return new Response<>(ex.getMessage());
         }
     }
