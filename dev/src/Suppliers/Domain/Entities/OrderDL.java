@@ -20,8 +20,8 @@ public class OrderDL implements Serializable {
     private final List<OrderItemDL> items;
 
     public OrderDL(String supplierBusinessNumber, String supplierName, String address, String contactPhone, List<OrderItemDL> items) {
-        this.orderId = ++idCounter;
-        this.orderDate = LocalDate.now();
+        orderId = ++idCounter;
+        orderDate = LocalDate.now();
         this.supplierBusinessNumber = supplierBusinessNumber;
         this.supplierName = supplierName;
         this.address = address;

@@ -35,17 +35,14 @@ public class OrderController {
     public boolean placeOnDemandOrders(List<OrderItemPL> currentOrder) throws Exception {
         SessionManager.getInstance().requireRole(Role.ORDER_MANAGER);
         Map<String, List<OrderItemPL>> grouped = currentOrder.stream().collect(Collectors.groupingBy(OrderItemPL::getSupplierBusinessNumber));
-
         for (Map.Entry<String, List<OrderItemPL>> entry : grouped.entrySet()) {
             String businessNumber = entry.getKey();
-
             List<Integer> catalogIds = new ArrayList<>();
             List<String> productNames = new ArrayList<>();
             List<Integer> quantities = new ArrayList<>();
             List<Double> listPrices = new ArrayList<>();
             List<Double> discounts = new ArrayList<>();
             List<Double> finalPrices = new ArrayList<>();
-
             for (OrderItemPL item : entry.getValue()) {
                 catalogIds.add(item.getCatalogId());
                 productNames.add(item.getProductName());
@@ -54,11 +51,9 @@ public class OrderController {
                 discounts.add(item.getPriceBeforeDiscount() - item.getTotalPrice());
                 finalPrices.add(item.getTotalPrice());
             }
-
             Response<Boolean> response = orderService.placeOrder(
                     businessNumber, catalogIds, productNames, quantities, listPrices, discounts, finalPrices
             );
-
             if (!response.isSuccess()) throw new Exception(response.getErrorMessage());
         }
         return true;

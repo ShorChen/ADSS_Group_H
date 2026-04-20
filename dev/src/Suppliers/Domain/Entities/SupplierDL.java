@@ -24,9 +24,9 @@ public class SupplierDL implements Serializable {
         this.businessNumber = businessNumber;
         this.address = address;
         this.paymentDetails = paymentDetails;
-        this.contactPersonnel = new ArrayList<>();
-        this.agreements = new ArrayList<>();
-        this.manufacturers = new ArrayList<>();
+        contactPersonnel = new ArrayList<>();
+        agreements = new ArrayList<>();
+        manufacturers = new ArrayList<>();
     }
 
     public ContactPersonDL addContactPerson(String cpName, String phone, String email) {
@@ -60,11 +60,11 @@ public class SupplierDL implements Serializable {
     }
 
     public void setBankAccount(String iban) {
-        this.paymentDetails.setBankAccount(iban);
+        paymentDetails.setBankAccount(iban);
     }
 
     public void setPaymentTerms(String paymentTerms) {
-        this.paymentDetails.setPaymentTerms(paymentTerms);
+        paymentDetails.setPaymentTerms(paymentTerms);
     }
 
     public void setAddress(String address) {

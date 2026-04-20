@@ -25,11 +25,11 @@ public class AgreementDL implements Serializable {
     private final DiscountPolicyDL discountPolicy;
 
     AgreementDL(List<DayOfWeek> fixedDeliveryDays, boolean supplierTransports) {
-        this.agreementId = ++idCounter;
-        this.startDate = LocalDate.now();
-        this.deliveryTerms = new DeliveryTermsDL(fixedDeliveryDays, supplierTransports);
-        this.productLines = new ArrayList<>();
-        this.discountPolicy = new DiscountPolicyDL();
+        agreementId = ++idCounter;
+        startDate = LocalDate.now();
+        deliveryTerms = new DeliveryTermsDL(fixedDeliveryDays, supplierTransports);
+        productLines = new ArrayList<>();
+        discountPolicy = new DiscountPolicyDL();
     }
 
     public static void updateIdCounter(int maxId) {

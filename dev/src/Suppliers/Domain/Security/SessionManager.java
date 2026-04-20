@@ -14,13 +14,13 @@ public class SessionManager {
     }
 
     public void login(Role role) {
-        if (this.currentRole != null) throw new IllegalStateException("Someone is already logged in.");
-        this.currentRole = role;
+        if (currentRole != null) throw new IllegalStateException("Someone is already logged in.");
+        currentRole = role;
     }
 
     public void logout() {
-        if (this.currentRole == null) throw new IllegalStateException("No one is currently logged in.");
-        this.currentRole = null;
+        if (currentRole == null) throw new IllegalStateException("No one is currently logged in.");
+        currentRole = null;
     }
 
     public Role getCurrentRole() {

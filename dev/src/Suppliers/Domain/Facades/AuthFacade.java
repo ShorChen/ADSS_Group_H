@@ -13,7 +13,7 @@ public class AuthFacade {
 
     public AuthFacade(AuthDAO authDAO) {
         this.authDAO = authDAO;
-        this.validCodes = authDAO.getAllCodes();
+        validCodes = authDAO.getAllCodes();
     }
 
     public void login(String code) {

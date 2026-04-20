@@ -30,7 +30,7 @@ public class SupplierDashboard {
     private boolean isRebuilding = false;
 
     public SupplierDashboard() {
-        this.supplierController = ControllerFactory.getInstance().getSupplierController();
+        supplierController = ControllerFactory.getInstance().getSupplierController();
         Button logoutBtn = new Button("Logout");
         logoutBtn.setOnAction(e -> logout());
         Button addSupplierBtn = new Button("+ Add New Supplier");
@@ -70,7 +70,7 @@ public class SupplierDashboard {
         mainLayout.setTop(topBar);
         mainLayout.setLeft(supplierListView);
         mainLayout.setCenter(detailsPane);
-        this.scene = new Scene(mainLayout, 1000, 750);
+        scene = new Scene(mainLayout, 1000, 750);
         refreshSupplierList();
     }
 

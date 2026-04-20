@@ -11,7 +11,7 @@ public class PaymentDetails implements Serializable {
     private String paymentTerms;
 
     public PaymentDetails(String IBAN, String paymentTerms) {
-        this.bankAccount = new BankAccount(IBAN);
+        bankAccount = new BankAccount(IBAN);
         this.paymentTerms = paymentTerms;
     }
 

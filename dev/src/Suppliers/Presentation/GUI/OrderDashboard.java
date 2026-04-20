@@ -32,68 +32,63 @@ public class OrderDashboard {
     private String selectedProductName;
 
     public OrderDashboard() {
-        this.orderController = ControllerFactory.getInstance().getOrderController();
-        this.currentOrder = new ArrayList<>();
-        this.availableProducts = new HashSet<>();
-        this.onDemandSuppliers = new ArrayList<>();
+        orderController = ControllerFactory.getInstance().getOrderController();
+        currentOrder = new ArrayList<>();
+        availableProducts = new HashSet<>();
+        onDemandSuppliers = new ArrayList<>();
         Button logoutBtn = new Button("Logout");
         logoutBtn.setOnAction(e -> logout());
-        this.abortBtn = new Button("Abort Order");
-        this.abortBtn.setStyle("-fx-background-color: #f44336; -fx-text-fill: white; font-weight: bold;");
-        this.abortBtn.setVisible(false);
-        this.abortBtn.setOnAction(e -> resetToStart());
+        abortBtn = new Button("Abort Order");
+        abortBtn.setStyle("-fx-background-color: #f44336; -fx-text-fill: white; font-weight: bold;");
+        abortBtn.setVisible(false);
+        abortBtn.setOnAction(e -> resetToStart());
         Region spacer = new Region();
         HBox.setHgrow(spacer, Priority.ALWAYS);
-        this.topBar = new HBox(15, abortBtn, spacer, logoutBtn);
-        this.topBar.setPadding(new Insets(10));
-        this.topBar.setStyle("-fx-background-color: #333333;");
-        this.centerPane = new VBox(20);
-        this.centerPane.setAlignment(Pos.CENTER);
-        this.centerPane.setPadding(new Insets(40));
-        this.mainLayout = new BorderPane();
-        this.mainLayout.setTop(topBar);
-        this.mainLayout.setCenter(centerPane);
-        this.scene = new Scene(mainLayout, 900, 600);
+        topBar = new HBox(15, abortBtn, spacer, logoutBtn);
+        topBar.setPadding(new Insets(10));
+        topBar.setStyle("-fx-background-color: #333333;");
+        centerPane = new VBox(20);
+        centerPane.setAlignment(Pos.CENTER);
+        centerPane.setPadding(new Insets(40));
+        mainLayout = new BorderPane();
+        mainLayout.setTop(topBar);
+        mainLayout.setCenter(centerPane);
+        scene = new Scene(mainLayout, 900, 600);
         resetToStart();
     }
 
     private void loadOnDemandCatalog() {
-        this.availableProducts.clear();
+        availableProducts.clear();
         try {
-            this.onDemandSuppliers = orderController.getOnDemandSuppliers();
-            for (SupplierPL sup : this.onDemandSuppliers) {
-                for (AgreementPL agr : sup.getAgreements()) {
-                    for (ProductLinePL prod : agr.getProductLines()) {
+            onDemandSuppliers = orderController.getOnDemandSuppliers();
+            for (SupplierPL sup : onDemandSuppliers)
+                for (AgreementPL agr : sup.getAgreements())
+                    for (ProductLinePL prod : agr.getProductLines())
                         availableProducts.add(prod.getName());
-                    }
-                }
-            }
         } catch (Exception e) {
             showAlert("Error", "Could not load catalog: " + e.getMessage());
         }
     }
 
     private void resetToStart() {
-        this.currentOrder.clear();
-        this.selectedProductName = null;
-        this.abortBtn.setVisible(false);
-        this.centerPane.getChildren().clear();
+        currentOrder.clear();
+        selectedProductName = null;
+        abortBtn.setVisible(false);
+        centerPane.getChildren().clear();
         Label welcome = new Label("Order Management System");
         welcome.setStyle("-fx-font-size: 28px; -fx-font-weight: bold;");
-
         Button startBtn = new Button("Start Order");
         startBtn.setStyle("-fx-font-size: 18px; -fx-background-color: #4CAF50; -fx-text-fill: white; -fx-padding: 10 30;");
         startBtn.setOnAction(e -> {
             loadOnDemandCatalog();
             showSearchPhase();
         });
-
-        this.centerPane.getChildren().addAll(welcome, startBtn);
+        centerPane.getChildren().addAll(welcome, startBtn);
     }
 
     private void showSearchPhase() {
-        this.abortBtn.setVisible(true);
-        this.centerPane.getChildren().clear();
+        abortBtn.setVisible(true);
+        centerPane.getChildren().clear();
         Label prompt = new Label("What item do you seek to buy?");
         prompt.setStyle("-fx-font-size: 20px;");
         TextField searchBar = new TextField();
@@ -106,7 +101,6 @@ public class OrderDashboard {
         Label errorLabel = new Label("No matching products found in on-demand agreements.");
         errorLabel.setStyle("-fx-text-fill: red; -fx-font-size: 14px;");
         errorLabel.setVisible(false);
-
         searchBar.textProperty().addListener((obs, oldVal, newVal) -> {
             if (newVal == null || newVal.trim().isEmpty()) {
                 resultsList.getItems().clear();
@@ -117,35 +111,30 @@ public class OrderDashboard {
                 errorLabel.setVisible(matches.isEmpty());
             }
         });
-
         resultsList.setOnMouseClicked(e -> {
             String selected = resultsList.getSelectionModel().getSelectedItem();
             if (selected != null) {
-                this.selectedProductName = selected;
+                selectedProductName = selected;
                 showQuantityPhase();
             }
         });
-
-        this.centerPane.getChildren().addAll(prompt, searchBar, errorLabel, resultsList);
-
-        // FEATURE ADDED HERE: Let the manager return to summary if they changed their mind
+        centerPane.getChildren().addAll(prompt, searchBar, errorLabel, resultsList);
         if (!currentOrder.isEmpty()) {
             Button returnSummaryBtn = new Button("Return to Order Summary");
             returnSummaryBtn.setStyle("-fx-font-size: 16px; -fx-background-color: #FF9800; -fx-text-fill: white;");
             returnSummaryBtn.setOnAction(e -> showSummaryPhase());
-            this.centerPane.getChildren().add(returnSummaryBtn);
+            centerPane.getChildren().add(returnSummaryBtn);
         }
     }
 
     private void showQuantityPhase() {
-        this.centerPane.getChildren().clear();
+        centerPane.getChildren().clear();
         Label prompt = new Label("How many units of '" + selectedProductName + "' do you need?");
         prompt.setStyle("-fx-font-size: 20px;");
         TextField qtyField = new TextField();
         qtyField.setPromptText("Enter quantity...");
         qtyField.setMaxWidth(200);
         qtyField.setStyle("-fx-font-size: 16px;");
-
         Button calcBtn = new Button("Find Cheapest Supplier");
         calcBtn.setStyle("-fx-font-size: 16px; -fx-background-color: #2196F3; -fx-text-fill: white;");
         calcBtn.setOnAction(e -> {
@@ -157,24 +146,21 @@ public class OrderDashboard {
                 showAlert("Invalid Input", "Please enter a valid positive number.");
             }
         });
-
         Button backBtn = new Button("Go Back");
         backBtn.setStyle("-fx-font-size: 16px; -fx-background-color: #9e9e9e; -fx-text-fill: white;");
         backBtn.setOnAction(e -> showSearchPhase());
-
         HBox actionBox = new HBox(15, calcBtn, backBtn);
         actionBox.setAlignment(Pos.CENTER);
-
-        this.centerPane.getChildren().addAll(prompt, qtyField, actionBox);
+        centerPane.getChildren().addAll(prompt, qtyField, actionBox);
     }
 
     private OrderItem findCheapestItem(String productName, int quantity) throws IllegalArgumentException {
         OrderItem bestItem = null;
         double minPrice = Double.MAX_VALUE;
         int maxAvailable = 0;
-        for (SupplierPL sup : onDemandSuppliers) {
-            for (AgreementPL agr : sup.getAgreements()) {
-                for (ProductLinePL prod : agr.getProductLines()) {
+        for (SupplierPL sup : onDemandSuppliers)
+            for (AgreementPL agr : sup.getAgreements())
+                for (ProductLinePL prod : agr.getProductLines())
                     if (prod.getName().equals(productName)) {
                         if (prod.getQuantity() > maxAvailable) maxAvailable = prod.getQuantity();
                         if (quantity <= prod.getQuantity()) {
@@ -182,10 +168,9 @@ public class OrderDashboard {
                             double bestDiscountPct = 0.0;
                             List<DiscountBracketPL> discounts = agr.getDiscountPolicy().get(prod.getSupplierCatalogId());
                             if (discounts != null) {
-                                for (DiscountBracketPL d : discounts) {
+                                for (DiscountBracketPL d : discounts)
                                     if (quantity >= d.getMinQuantity() && d.getDiscountPercentage() > bestDiscountPct)
                                         bestDiscountPct = d.getDiscountPercentage();
-                                }
                             }
                             double currentPrice = priceBefore * (1.0 - (bestDiscountPct / 100.0));
                             if (currentPrice < minPrice) {
@@ -194,9 +179,6 @@ public class OrderDashboard {
                             }
                         }
                     }
-                }
-            }
-        }
         if (bestItem == null) {
             if (maxAvailable > 0 && quantity > maxAvailable)
                 throw new IllegalArgumentException("The maximum quantity any supplier can provide for this item is " + maxAvailable + ".");
@@ -208,8 +190,8 @@ public class OrderDashboard {
     private void calculateCheapestAndShowResult(int quantity) {
         try {
             OrderItem bestItem = findCheapestItem(selectedProductName, quantity);
-            this.currentOrder.add(bestItem);
-            this.centerPane.getChildren().clear();
+            currentOrder.add(bestItem);
+            centerPane.getChildren().clear();
             Label success = new Label("Item Added Successfully!");
             success.setStyle("-fx-font-size: 24px; -fx-font-weight: bold; -fx-text-fill: green;");
             VBox detailsBox = new VBox(10);
@@ -235,14 +217,14 @@ public class OrderDashboard {
             finishBtn.setStyle("-fx-font-size: 16px; -fx-background-color: #FF9800; -fx-text-fill: white;");
             finishBtn.setOnAction(e -> showSummaryPhase());
             actionBox.getChildren().addAll(addAnotherBtn, finishBtn);
-            this.centerPane.getChildren().addAll(success, detailsBox, actionBox);
+            centerPane.getChildren().addAll(success, detailsBox, actionBox);
         } catch (IllegalArgumentException ex) {
             showAlert("Error", ex.getMessage());
         }
     }
 
     private void showSummaryPhase() {
-        this.centerPane.getChildren().clear();
+        centerPane.getChildren().clear();
         Label title = new Label("Order Summary");
         title.setStyle("-fx-font-size: 24px; -fx-font-weight: bold;");
         if (currentOrder.isEmpty()) {
@@ -254,7 +236,7 @@ public class OrderDashboard {
             returnBtn.setStyle("-fx-font-size: 16px;");
             returnBtn.setOnAction(e -> showSearchPhase());
             actionBox.getChildren().add(returnBtn);
-            this.centerPane.getChildren().addAll(title, emptyMsg, actionBox);
+            centerPane.getChildren().addAll(title, emptyMsg, actionBox);
             return;
         }
         VBox tablesContainer = new VBox(30);
@@ -266,7 +248,6 @@ public class OrderDashboard {
             String supplierName = entry.getKey();
             List<OrderItem> items = entry.getValue();
             SupplierPL supData = onDemandSuppliers.stream().filter(s -> s.getName().equals(supplierName)).findFirst().orElse(null);
-
             VBox orderBlock = new VBox();
             orderBlock.setMaxWidth(850);
             GridPane grid = new GridPane();
@@ -283,7 +264,6 @@ public class OrderDashboard {
             grid.add(titleLbl, 0, 0, 6, 1);
             String hStyle = "-fx-background-color: #c0c0c0; -fx-padding: 5; -fx-font-weight: bold;";
             String vStyle = "-fx-background-color: white; -fx-padding: 5;";
-
             Label snH = new Label("Supplier Name:");
             snH.setMaxWidth(Double.MAX_VALUE);
             snH.setStyle(hStyle);
@@ -308,7 +288,6 @@ public class OrderDashboard {
             grid.add(adV, 3, 1);
             grid.add(onH, 4, 1);
             grid.add(onV, 5, 1);
-
             Label snoH = new Label("Supplier No:");
             snoH.setMaxWidth(Double.MAX_VALUE);
             snoH.setStyle(hStyle);
@@ -324,23 +303,19 @@ public class OrderDashboard {
             Label cpH = new Label("Contact Phone:");
             cpH.setMaxWidth(Double.MAX_VALUE);
             cpH.setStyle(hStyle);
-
             String phones = "N/A";
-            if (supData != null && !supData.getContactPersonnel().isEmpty()) {
+            if (supData != null && !supData.getContactPersonnel().isEmpty())
                 phones = supData.getContactPersonnel().stream().map(cp -> cp.getName() + " (" + cp.getPhone() + ")").collect(Collectors.joining(", "));
-            }
             Label cpV = new Label(phones);
             cpV.setMaxWidth(Double.MAX_VALUE);
             cpV.setStyle(vStyle);
             cpV.setWrapText(true);
-
             grid.add(snoH, 0, 2);
             grid.add(snoV, 1, 2);
             grid.add(odH, 2, 2);
             grid.add(odV, 3, 2);
             grid.add(cpH, 4, 2);
             grid.add(cpV, 5, 2);
-
             TableView<OrderItem> table = new TableView<>();
             table.setPrefHeight(items.size() * 25 + 30);
             TableColumn<OrderItem, Integer> catCol = new TableColumn<>("Catalog ID");
@@ -370,20 +345,17 @@ public class OrderDashboard {
         scrollPane.setFitToWidth(true);
         scrollPane.setStyle("-fx-background-color: transparent;");
         scrollPane.setPrefViewportHeight(300);
-
         HBox editBox = new HBox(15);
         editBox.setAlignment(Pos.CENTER);
-
         Button modifyBtn = new Button("Modify Quantity");
         modifyBtn.setStyle("-fx-font-size: 14px; -fx-background-color: #2196F3; -fx-text-fill: white;");
         modifyBtn.setOnAction(e -> {
             OrderItem selected = null;
-            for (TableView<OrderItem> t : allTables) {
+            for (TableView<OrderItem> t : allTables)
                 if (t.getSelectionModel().getSelectedItem() != null) {
                     selected = t.getSelectionModel().getSelectedItem();
                     break;
                 }
-            }
             if (selected != null) {
                 OrderItem finalSelected = selected;
                 TextInputDialog dialog = new TextInputDialog(String.valueOf(selected.getQuantity()));
@@ -393,9 +365,7 @@ public class OrderDashboard {
                     try {
                         int newQty = Integer.parseInt(val);
                         if (newQty <= 0) throw new NumberFormatException();
-
                         OrderItem newItem = findCheapestItem(finalSelected.getProductName(), newQty);
-
                         currentOrder.remove(finalSelected);
                         currentOrder.add(newItem);
                         showSummaryPhase();
@@ -407,24 +377,21 @@ public class OrderDashboard {
                 });
             } else showAlert("Warning", "Select an item to modify.");
         });
-
         Button deleteBtn = new Button("Delete Item");
         deleteBtn.setStyle("-fx-font-size: 14px; -fx-background-color: #f44336; -fx-text-fill: white;");
         deleteBtn.setOnAction(e -> {
             OrderItem selected = null;
-            for (TableView<OrderItem> t : allTables) {
+            for (TableView<OrderItem> t : allTables)
                 if (t.getSelectionModel().getSelectedItem() != null) {
                     selected = t.getSelectionModel().getSelectedItem();
                     break;
                 }
-            }
             if (selected != null) {
                 currentOrder.remove(selected);
                 showSummaryPhase();
             } else showAlert("Warning", "Select an item to delete.");
         });
         editBox.getChildren().addAll(modifyBtn, deleteBtn);
-
         double grandTotal = currentOrder.stream().mapToDouble(OrderItem::getTotalPrice).sum();
         Label totalLabel = new Label(String.format("Grand Total: NIS %.2f", grandTotal));
         totalLabel.setStyle("-fx-font-size: 20px; -fx-font-weight: bold;");
@@ -438,7 +405,7 @@ public class OrderDashboard {
         finalizeBtn.setDisable(currentOrder.isEmpty());
         finalizeBtn.setOnAction(e -> showConfirmationPhase());
         actionBox.getChildren().addAll(returnBtn, finalizeBtn);
-        this.centerPane.getChildren().addAll(title, scrollPane, editBox, totalLabel, actionBox);
+        centerPane.getChildren().addAll(title, scrollPane, editBox, totalLabel, actionBox);
     }
 
     private void showConfirmationPhase() {
@@ -447,17 +414,16 @@ public class OrderDashboard {
                     i.getProductName(), i.getSupplierBusinessNumber(), i.getSupplierName(),
                     i.getCatalogId(), i.getQuantity(), i.getPriceBeforeDiscount(), i.getTotalPrice()
             )).collect(Collectors.toList());
-
             orderController.placeOnDemandOrders(plItems);
             globalOrderCounter++;
-            this.abortBtn.setVisible(false);
-            this.centerPane.getChildren().clear();
+            abortBtn.setVisible(false);
+            centerPane.getChildren().clear();
             Label confirm = new Label("Order saved and placed successfully!");
             confirm.setStyle("-fx-font-size: 32px; -fx-font-weight: bold; -fx-text-fill: green;");
             VBox messagesBox = new VBox(10);
             messagesBox.setAlignment(Pos.CENTER);
             Set<String> processedSuppliers = new HashSet<>();
-            for (OrderItem item : currentOrder) {
+            for (OrderItem item : currentOrder)
                 if (!processedSuppliers.contains(item.getSupplierName())) {
                     processedSuppliers.add(item.getSupplierName());
                     SupplierPL supData = onDemandSuppliers.stream().filter(s -> s.getName().equals(item.getSupplierName())).findFirst().orElse(null);
@@ -469,11 +435,10 @@ public class OrderDashboard {
                     lbl.setStyle("-fx-font-size: 16px; -fx-font-weight: bold;");
                     messagesBox.getChildren().add(lbl);
                 }
-            }
             Button newOrderBtn = new Button("Start New Order");
             newOrderBtn.setStyle("-fx-font-size: 18px; -fx-padding: 10 30;");
             newOrderBtn.setOnAction(e -> resetToStart());
-            this.centerPane.getChildren().addAll(confirm, messagesBox, newOrderBtn);
+            centerPane.getChildren().addAll(confirm, messagesBox, newOrderBtn);
         } catch (Exception ex) {
             showAlert("Error", "Failed to save order: " + ex.getMessage());
         }
