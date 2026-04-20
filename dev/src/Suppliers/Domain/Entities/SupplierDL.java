@@ -95,11 +95,14 @@ public class SupplierDL implements Serializable {
         throw new NoSuchElementException("Agreement not found");
     }
 
-    public List<AgreementDL> getOnDemandAgreements() {
+    /*
+    Trivial solution before Max's change
+        public List<AgreementDL> getOnDemandAgreements() {
         List<AgreementDL> onDemand = new ArrayList<>();
         for (AgreementDL a : agreements) if (a.getDeliveryTerms().isOnDemand()) onDemand.add(a);
         return onDemand;
     }
+     */
 
     private ContactPersonDL getContactOrThrow(String phone) {
         for (ContactPersonDL cp : contactPersonnel)
@@ -119,6 +122,7 @@ public class SupplierDL implements Serializable {
         return address;
     }
 
+    @SuppressWarnings("unused")
     public PaymentDetails getPaymentDetails() {
         return paymentDetails;
     }

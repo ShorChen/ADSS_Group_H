@@ -7,6 +7,7 @@ import java.io.*;
 import java.util.HashMap;
 import java.util.Map;
 
+@SuppressWarnings("ClassCanBeRecord")
 public class FileOrderDAO implements OrderDAO {
     private final String filePath;
 
@@ -27,7 +28,9 @@ public class FileOrderDAO implements OrderDAO {
 
     private void writeAll(Map<Integer, OrderDL> data) {
         File file = new File(filePath);
-        if (file.getParentFile() != null) file.getParentFile().mkdirs();
+        File parent = file.getParentFile();
+        if (parent != null && !parent.exists() && !parent.mkdirs())
+            throw new RuntimeException("Failed to create parent directories for: " + filePath);
         try (ObjectOutputStream oos = new ObjectOutputStream(new FileOutputStream(file))) {
             oos.writeObject(data);
         } catch (IOException e) {

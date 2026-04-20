@@ -13,6 +13,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+@SuppressWarnings({"UnusedReturnValue", "ClassCanBeRecord"})
 public class SupplierController {
     private final SupplierService supplierService;
 
@@ -29,14 +30,14 @@ public class SupplierController {
         Response<SupplierSL> response = supplierService.addSupplier(name, businessNumber, address, iban, paymentTerms);
         if (response.isSuccess()) {
             SupplierSL supplierSL = response.getData();
-            List<ContactPersonPL> contacts = supplierSL.getContactPersonnel().stream()
-                    .map(cp -> new ContactPersonPL(cp.getName(), cp.getPhone(), cp.getEmail()))
+            List<ContactPersonPL> contacts = supplierSL.contactPersonnel().stream()
+                    .map(cp -> new ContactPersonPL(cp.name(), cp.phone(), cp.email()))
                     .collect(Collectors.toList());
-            List<AgreementPL> agreements = supplierSL.getAgreements().stream()
+            List<AgreementPL> agreements = supplierSL.agreements().stream()
                     .map(this::convertAgreementSLToPL)
                     .collect(Collectors.toList());
-            List<String> manufacturers = new ArrayList<>(supplierSL.getManufacturers());
-            return new SupplierPL(supplierSL.getName(), supplierSL.getBusinessNumber(), supplierSL.getAddress(), contacts, agreements, manufacturers);
+            List<String> manufacturers = new ArrayList<>(supplierSL.manufacturers());
+            return new SupplierPL(supplierSL.name(), supplierSL.businessNumber(), supplierSL.address(), contacts, agreements, manufacturers);
         }
         throw new Exception(response.getErrorMessage());
     }
@@ -51,7 +52,7 @@ public class SupplierController {
         Response<ContactPersonSL> response = supplierService.addContactPerson(businessNumber, cpName, phone, email);
         if (response.isSuccess()) {
             ContactPersonSL data = response.getData();
-            return new ContactPersonPL(data.getName(), data.getPhone(), data.getEmail());
+            return new ContactPersonPL(data.name(), data.phone(), data.email());
         }
         throw new Exception(response.getErrorMessage());
     }
@@ -78,7 +79,7 @@ public class SupplierController {
         Response<ProductLineSL> response = supplierService.addProductLine(businessNumber, agreementId, supplierCatalogId, name, basePrice, quantity);
         if (response.isSuccess()) {
             ProductLineSL data = response.getData();
-            return new ProductLinePL(data.getSupplierCatalogId(), data.getName(), data.getBasePrice(), data.getQuantity());
+            return new ProductLinePL(data.supplierCatalogId(), data.name(), data.basePrice(), data.quantity());
         }
         throw new Exception(response.getErrorMessage());
     }
@@ -93,7 +94,7 @@ public class SupplierController {
         Response<ProductLineSL> response = supplierService.updateProductLineBasePrice(businessNumber, agreementId, supplierCatalogId, newBasePrice);
         if (response.isSuccess()) {
             ProductLineSL data = response.getData();
-            return new ProductLinePL(data.getSupplierCatalogId(), data.getName(), data.getBasePrice(), data.getQuantity());
+            return new ProductLinePL(data.supplierCatalogId(), data.name(), data.basePrice(), data.quantity());
         }
         throw new Exception(response.getErrorMessage());
     }
@@ -103,7 +104,7 @@ public class SupplierController {
         Response<ProductLineSL> response = supplierService.updateProductLineQuantity(businessNumber, agreementId, supplierCatalogId, newQuantity);
         if (response.isSuccess()) {
             ProductLineSL data = response.getData();
-            return new ProductLinePL(data.getSupplierCatalogId(), data.getName(), data.getBasePrice(), data.getQuantity());
+            return new ProductLinePL(data.supplierCatalogId(), data.name(), data.basePrice(), data.quantity());
         }
         throw new Exception(response.getErrorMessage());
     }
@@ -177,37 +178,37 @@ public class SupplierController {
         Response<List<SupplierSL>> response = supplierService.getAllSuppliers();
         if (response.isSuccess())
             return response.getData().stream().map(sl -> {
-                List<ContactPersonPL> contacts = sl.getContactPersonnel().stream()
-                        .map(cp -> new ContactPersonPL(cp.getName(), cp.getPhone(), cp.getEmail()))
+                List<ContactPersonPL> contacts = sl.contactPersonnel().stream()
+                        .map(cp -> new ContactPersonPL(cp.name(), cp.phone(), cp.email()))
                         .collect(Collectors.toList());
-                List<AgreementPL> agreements = sl.getAgreements().stream()
+                List<AgreementPL> agreements = sl.agreements().stream()
                         .map(this::convertAgreementSLToPL)
                         .collect(Collectors.toList());
-                List<String> manufacturers = new ArrayList<>(sl.getManufacturers());
-                return new SupplierPL(sl.getName(), sl.getBusinessNumber(), sl.getAddress(), contacts, agreements, manufacturers);
+                List<String> manufacturers = new ArrayList<>(sl.manufacturers());
+                return new SupplierPL(sl.name(), sl.businessNumber(), sl.address(), contacts, agreements, manufacturers);
             }).collect(Collectors.toList());
         throw new Exception(response.getErrorMessage());
     }
 
     private AgreementPL convertAgreementSLToPL(AgreementSL data) {
-        DeliveryTermsPL deliveryTermsPL = new DeliveryTermsPL(data.getDeliveryTerms().getFixedDeliveryDays(), data.getDeliveryTerms().isSupplierTransports());
-        List<ProductLinePL> productLinesPL = data.getProductLines().stream()
-                .map(pl -> new ProductLinePL(pl.getSupplierCatalogId(), pl.getName(), pl.getBasePrice(), pl.getQuantity()))
+        DeliveryTermsPL deliveryTermsPL = new DeliveryTermsPL(data.deliveryTerms().fixedDeliveryDays(), data.deliveryTerms().supplierTransports());
+        List<ProductLinePL> productLinesPL = data.productLines().stream()
+                .map(pl -> new ProductLinePL(pl.supplierCatalogId(), pl.name(), pl.basePrice(), pl.quantity()))
                 .collect(Collectors.toList());
-        Map<Integer, List<DiscountBracketPL>> discountPolicyPL = data.getDiscountPolicy().entrySet().stream()
+        Map<Integer, List<DiscountBracketPL>> discountPolicyPL = data.discountPolicy().entrySet().stream()
                 .collect(Collectors.toMap(
                         Map.Entry::getKey,
                         e -> e.getValue().stream()
-                                .map(db -> new DiscountBracketPL(db.getMinQuantity(), db.getDiscountPercentage()))
+                                .map(db -> new DiscountBracketPL(db.minQuantity(), db.discountPercentage()))
                                 .collect(Collectors.toList())
                 ));
-        return new AgreementPL(data.getAgreementId(), data.getStartDate(), deliveryTermsPL, productLinesPL, discountPolicyPL);
+        return new AgreementPL(data.agreementId(), data.startDate(), deliveryTermsPL, productLinesPL, discountPolicyPL);
     }
 
     private ContactPersonPL extractContactOrThrow(Response<ContactPersonSL> response) throws Exception {
         if (response.isSuccess()) {
             ContactPersonSL data = response.getData();
-            return new ContactPersonPL(data.getName(), data.getPhone(), data.getEmail());
+            return new ContactPersonPL(data.name(), data.phone(), data.email());
         }
         throw new Exception(response.getErrorMessage());
     }

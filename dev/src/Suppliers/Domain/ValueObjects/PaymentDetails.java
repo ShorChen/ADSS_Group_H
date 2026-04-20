@@ -3,6 +3,7 @@ package Suppliers.Domain.ValueObjects;
 import java.io.Serial;
 import java.io.Serializable;
 
+@SuppressWarnings("unused")
 public class PaymentDetails implements Serializable {
     @Serial
     private static final long serialVersionUID = 1L;
@@ -20,7 +21,7 @@ public class PaymentDetails implements Serializable {
     }
 
     public void setBankAccount(String IBAN) {
-        this.bankAccount = new BankAccount(IBAN);
+        bankAccount = new BankAccount(IBAN);
     }
 
     public String getPaymentTerms() {

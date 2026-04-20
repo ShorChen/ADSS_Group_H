@@ -7,12 +7,14 @@ import Suppliers.Domain.Security.SessionManager;
 import java.util.Map;
 import java.util.NoSuchElementException;
 
+@SuppressWarnings("ClassCanBeRecord")
 public class AuthFacade {
     private final Map<String, Role> validCodes;
-    private final AuthDAO authDAO;
+    // private final AuthDAO authDAO;
+    // if we will implement a window for an admin
 
     public AuthFacade(AuthDAO authDAO) {
-        this.authDAO = authDAO;
+        // this.authDAO = authDAO;
         validCodes = authDAO.getAllCodes();
     }
 

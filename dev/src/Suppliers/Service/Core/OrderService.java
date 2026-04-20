@@ -1,6 +1,7 @@
 package Suppliers.Service.Core;
 
 import Suppliers.Domain.Entities.AgreementDL;
+import Suppliers.Domain.Entities.OrderDL;
 import Suppliers.Domain.ValueObjects.OrderItemDL;
 import Suppliers.Domain.Entities.ProductLineDL;
 import Suppliers.Domain.Entities.SupplierDL;
@@ -15,6 +16,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
+@SuppressWarnings("ClassCanBeRecord")
 public class OrderService {
     private final SupplierFacade supplierFacade;
     private final OrderFacade orderFacade;
@@ -25,6 +27,8 @@ public class OrderService {
     }
 
     /*
+    This is the trivial solution, as written in the description of the module. But Max said that for
+    suppliers with fixed days agreements, we should allow to make an order in other days too, if it is urgent
         public Response<List<SupplierSL>> getOnDemandSuppliers() {
         try {
             List<SupplierSL> onDemandSuppliers = new ArrayList<>();
@@ -40,8 +44,6 @@ public class OrderService {
     }
      */
 
-    // The trivial solution is the one above, as written in the description of the module. But Max said that for
-    // suppliers with fixed days agreements, we should allow to make an order in other days too, if it is urgent
     public Response<List<SupplierSL>> getOnDemandSuppliers() {
         try {
             List<SupplierSL> onDemandSuppliers = new ArrayList<>();
@@ -53,20 +55,18 @@ public class OrderService {
         }
     }
 
-    public Response<Boolean> placeOrder(String businessNumber, List<Integer> catalogIds, List<String> productNames,
+    public Response<Integer> placeOrder(String businessNumber, List<Integer> catalogIds, List<String> productNames,
                                         List<Integer> quantities, List<Double> listPrices, List<Double> discounts, List<Double> finalPrices) {
         try {
             SupplierDL supplier = supplierFacade.getSupplier(businessNumber);
             String address = supplier.getAddress();
             String phones = supplier.getContactPersonnel().isEmpty() ? "N/A" :
                     supplier.getContactPersonnel().stream().map(cp -> cp.getName() + " (" + cp.getPhone() + ")").collect(Collectors.joining(", "));
-
             List<OrderItemDL> itemsDL = new ArrayList<>();
-            for (int i = 0; i < catalogIds.size(); i++) {
+            for (int i = 0; i < catalogIds.size(); i++)
                 itemsDL.add(new OrderItemDL(catalogIds.get(i), productNames.get(i), quantities.get(i), listPrices.get(i), discounts.get(i), finalPrices.get(i)));
-            }
-            orderFacade.createOrder(businessNumber, supplier.getName(), address, phones, itemsDL);
-            return new Response<>(true);
+            OrderDL order = orderFacade.createOrder(businessNumber, supplier.getName(), address, phones, itemsDL);
+            return new Response<>(order.getOrderId());
         } catch (Exception ex) {
             return new Response<>(ex.getMessage());
         }

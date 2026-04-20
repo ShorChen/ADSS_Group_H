@@ -1,6 +1,7 @@
 package Suppliers.Domain.Entities;
 
 import Suppliers.Domain.ValueObjects.DeliveryTermsDL;
+import Suppliers.Domain.ValueObjects.DiscountBracketDL;
 import Suppliers.Domain.ValueObjects.DiscountPolicyDL;
 
 import java.io.Serial;
@@ -51,10 +52,8 @@ public class AgreementDL implements Serializable {
     public void removeProductLine(int supplierCatalogId) {
         boolean removed = productLines.removeIf(pl -> pl.getSupplierCatalogId() == supplierCatalogId);
         if (!removed) throw new NoSuchElementException("Product line not found in this agreement");
-        try {
-            discountPolicy.getProductDiscounts().get(supplierCatalogId).clear();
-        } catch (Exception ignored) {
-        }
+        List<DiscountBracketDL> brackets = discountPolicy.getProductDiscounts().get(supplierCatalogId);
+        if (brackets != null) brackets.clear();
     }
 
     public ProductLineDL updateProductLineBasePrice(int supplierCatalogId, double newBasePrice) {
@@ -96,15 +95,6 @@ public class AgreementDL implements Serializable {
 
     public void updateSupplierTransports(boolean supplierTransports) {
         deliveryTerms.updateSupplierTransports(supplierTransports);
-    }
-
-    public double calculateTotal(int supplierCatalogId) {
-        for (ProductLineDL pl : productLines)
-            if (pl.getSupplierCatalogId() == supplierCatalogId) {
-                double discountPct = discountPolicy.calculateDiscount(supplierCatalogId, pl.getQuantity());
-                return (pl.getQuantity() * pl.getBasePrice()) * (1.0 - (discountPct / 100.0));
-            }
-        throw new NoSuchElementException("Product line not found");
     }
 
     private void checkProductExists(int supplierCatalogId) {

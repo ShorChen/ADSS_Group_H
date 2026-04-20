@@ -8,6 +8,7 @@ import Suppliers.Service.Response;
 import java.time.DayOfWeek;
 import java.util.List;
 
+@SuppressWarnings("ClassCanBeRecord")
 public class SupplierService {
     private final SupplierFacade supplierFacade;
 

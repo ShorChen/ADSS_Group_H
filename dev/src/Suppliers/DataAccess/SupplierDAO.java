@@ -11,6 +11,7 @@ public interface SupplierDAO {
 
     void deleteSupplier(String businessNumber);
 
+    @SuppressWarnings("unused")
     SupplierDL getSupplier(String businessNumber);
 
     Map<String, SupplierDL> getAllSuppliers();

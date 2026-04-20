@@ -7,6 +7,7 @@ import java.io.Serializable;
 import java.time.LocalDate;
 import java.util.List;
 
+@SuppressWarnings("unused")
 public class OrderDL implements Serializable {
     @Serial
     private static final long serialVersionUID = 1L;

@@ -4,6 +4,7 @@ import Suppliers.Domain.Security.Role;
 import Suppliers.Service.Core.AuthService;
 import Suppliers.Service.Response;
 
+@SuppressWarnings("ClassCanBeRecord")
 public class AuthController {
     private final AuthService authService;
 
@@ -21,9 +22,9 @@ public class AuthController {
         throw new Exception(loginResponse.getErrorMessage());
     }
 
-    public boolean logout() throws Exception {
+    public void logout() throws Exception {
         Response<Boolean> response = authService.logout();
-        if (response.isSuccess()) return response.getData();
+        if (response.isSuccess()) return;
         throw new Exception(response.getErrorMessage());
     }
 }

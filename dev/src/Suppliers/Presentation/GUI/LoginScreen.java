@@ -8,10 +8,10 @@ import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.layout.VBox;
 
-public class LoginScreen {
+class LoginScreen {
     private final Scene scene;
 
-    public LoginScreen() {
+    LoginScreen() {
         Label titleLabel = new Label("Super-Lee Login");
         titleLabel.setStyle("-fx-font-size: 24px; -fx-font-weight: bold;");
         PasswordField codeField = new PasswordField();

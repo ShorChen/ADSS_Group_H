@@ -8,28 +8,29 @@ import Suppliers.Presentation.DTO.AgreementPL;
 import Suppliers.Presentation.DTO.ProductLinePL;
 import Suppliers.Presentation.DTO.DiscountBracketPL;
 import Suppliers.Presentation.DTO.DeliveryTermsPL;
+import javafx.beans.property.SimpleObjectProperty;
+import javafx.beans.property.SimpleStringProperty;
 import javafx.geometry.Insets;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.layout.*;
-import javafx.scene.control.cell.PropertyValueFactory;
 
 import java.time.DayOfWeek;
 import java.util.ArrayList;
 import java.util.List;
 
-public class SupplierDashboard {
+class SupplierDashboard {
     private final Scene scene;
     private final SupplierController supplierController;
-    private ListView<SupplierPL> supplierListView;
-    private VBox detailsPane;
-    private TabPane mainTabPane;
+    private final ListView<SupplierPL> supplierListView;
+    private final VBox detailsPane;
+    private final TabPane mainTabPane;
     private String currentSupplierId = null;
     private Integer activeAgreementId = null;
     private Integer activeProductId = null;
     private boolean isRebuilding = false;
 
-    public SupplierDashboard() {
+    SupplierDashboard() {
         supplierController = ControllerFactory.getInstance().getSupplierController();
         Button logoutBtn = new Button("Logout");
         logoutBtn.setOnAction(e -> logout());
@@ -46,15 +47,15 @@ public class SupplierDashboard {
             protected void updateItem(SupplierPL item, boolean empty) {
                 super.updateItem(item, empty);
                 if (empty || item == null) setText(null);
-                else setText(item.getName() + " (" + item.getBusinessNumber() + ")");
+                else setText(item.name() + " (" + item.businessNumber() + ")");
             }
         });
         supplierListView.getSelectionModel().selectedItemProperty().addListener((obs, oldVal, newVal) -> {
             if (newVal != null) {
-                if (currentSupplierId == null || !currentSupplierId.equals(newVal.getBusinessNumber())) {
+                if (currentSupplierId == null || !currentSupplierId.equals(newVal.businessNumber())) {
                     activeAgreementId = null;
                     activeProductId = null;
-                    currentSupplierId = newVal.getBusinessNumber();
+                    currentSupplierId = newVal.businessNumber();
                 }
                 if (!isRebuilding) populateDetailsPane(newVal);
             }
@@ -90,7 +91,7 @@ public class SupplierDashboard {
             if (!mainTabPane.getTabs().isEmpty()) currentTabIndex = mainTabPane.getSelectionModel().getSelectedIndex();
             refreshSupplierList();
             for (SupplierPL s : supplierListView.getItems())
-                if (s.getBusinessNumber().equals(businessNumber)) {
+                if (s.businessNumber().equals(businessNumber)) {
                     supplierListView.getSelectionModel().select(s);
                     populateDetailsPane(s);
                     mainTabPane.getSelectionModel().select(currentTabIndex);
@@ -113,42 +114,14 @@ public class SupplierDashboard {
     private void populateDetailsPane(SupplierPL supplier) {
         detailsPane.getChildren().clear();
         mainTabPane.getTabs().clear();
-        String bn = supplier.getBusinessNumber();
-        Label nameTitle = new Label(supplier.getName() + " Dashboard");
+        String bn = supplier.businessNumber();
+        Label nameTitle = new Label(supplier.name() + " Dashboard");
         nameTitle.setStyle("-fx-font-size: 24px; -fx-font-weight: bold;");
-        Label bnLabel = new Label("Business Number: " + bn);
-        Button deleteSupplierBtn = new Button("Delete Entire Supplier");
-        deleteSupplierBtn.setStyle("-fx-background-color: #f44336; -fx-text-fill: white;");
-        deleteSupplierBtn.setOnAction(e -> {
-            if (showConfirmDialog("Delete Supplier", "Are you sure you want to delete this entire supplier?")) {
-                try {
-                    supplierController.deleteSupplier(bn);
-                    supplierListView.getItems().remove(supplier);
-                    detailsPane.getChildren().clear();
-                    mainTabPane.getTabs().clear();
-                } catch (Exception ex) {
-                    showAlert("Error", ex.getMessage());
-                }
-            }
-        });
-        HBox headerBox = new HBox(20, bnLabel, deleteSupplierBtn);
-        headerBox.setAlignment(javafx.geometry.Pos.CENTER_LEFT);
+        HBox headerBox = getHBox(supplier, bn);
         Tab overviewTab = new Tab("Overview & Settings");
         VBox overviewLayout = new VBox(15);
         overviewLayout.setPadding(new Insets(15));
-        Button editAddressBtn = new Button("Update Address");
-        editAddressBtn.setOnAction(e -> showSingleFieldEditDialog("Edit Address", "New address:", supplier.getAddress(), val -> {
-            try {
-                supplierController.updateAddress(bn, val);
-                SupplierPL updated = new SupplierPL(supplier.getName(), supplier.getBusinessNumber(), val, supplier.getContactPersonnel(), supplier.getAgreements(), supplier.getManufacturers());
-                int idx = supplierListView.getItems().indexOf(supplier);
-                supplierListView.getItems().set(idx, updated);
-                supplierListView.getSelectionModel().select(updated);
-                redrawCurrentSupplier(updated);
-            } catch (Exception ex) {
-                throw new RuntimeException(ex);
-            }
-        }));
+        Button editAddressBtn = getButton(supplier, bn);
         Button editBankBtn = new Button("Update Bank (IBAN)");
         editBankBtn.setOnAction(e -> showSingleFieldEditDialog("Edit Bank", "New IBAN:", "", val -> {
             try {
@@ -171,49 +144,35 @@ public class SupplierDashboard {
         addMfgBtn.setOnAction(e -> showSingleFieldEditDialog("Add Manufacturer", "Manufacturer name:", "", val -> {
             try {
                 supplierController.addManufacturer(bn, val);
-                supplier.getManufacturers().add(val);
+                supplier.manufacturers().add(val);
                 redrawCurrentSupplier(supplier);
             } catch (Exception ex) {
                 throw new RuntimeException(ex);
             }
         }));
-        Button rmvMfgBtn = new Button("- Remove Manufacturer");
-        rmvMfgBtn.setOnAction(e -> {
-            if (supplier.getManufacturers().isEmpty()) {
-                showAlert("Info", "No manufacturers to remove.");
-                return;
-            }
-            ChoiceDialog<String> dialog = new ChoiceDialog<>(supplier.getManufacturers().get(0), supplier.getManufacturers());
-            dialog.setTitle("Remove Manufacturer");
-            dialog.setHeaderText("Select a manufacturer to remove:");
-            dialog.showAndWait().ifPresent(selected -> {
-                try {
-                    supplierController.removeManufacturer(bn, selected);
-                    supplier.getManufacturers().remove(selected);
-                    redrawCurrentSupplier(supplier);
-                } catch (Exception ex) {
-                    showAlert("Error", ex.getMessage());
-                }
-            });
-        });
-        overviewLayout.getChildren().addAll(new Label("Address: " + supplier.getAddress()), new Label("Manufacturers: " + String.join(", ", supplier.getManufacturers())), new Separator(), new HBox(10, editAddressBtn, editBankBtn, editTermsBtn), new HBox(10, addMfgBtn, rmvMfgBtn));
+        Button rmvMfgBtn = getRmvMfgBtn(supplier, bn);
+        overviewLayout.getChildren().addAll(new Label("Address: " + supplier.address()), new Label("Manufacturers: " + String.join(", ", supplier.manufacturers())), new Separator(), new HBox(10, editAddressBtn, editBankBtn, editTermsBtn), new HBox(10, addMfgBtn, rmvMfgBtn));
         overviewTab.setContent(overviewLayout);
+
         Tab contactsTab = new Tab("Contact Personnel");
         VBox contactsLayout = new VBox(10);
         contactsLayout.setPadding(new Insets(15));
         TableView<ContactPersonPL> contactsTable = new TableView<>();
+
         TableColumn<ContactPersonPL, String> nameCol = new TableColumn<>("Name");
-        nameCol.setCellValueFactory(new PropertyValueFactory<>("name"));
+        nameCol.setCellValueFactory(cellData -> new SimpleStringProperty(cellData.getValue().name()));
         TableColumn<ContactPersonPL, String> phoneCol = new TableColumn<>("Phone");
-        phoneCol.setCellValueFactory(new PropertyValueFactory<>("phone"));
+        phoneCol.setCellValueFactory(cellData -> new SimpleStringProperty(cellData.getValue().phone()));
         TableColumn<ContactPersonPL, String> emailCol = new TableColumn<>("Email");
-        emailCol.setCellValueFactory(new PropertyValueFactory<>("email"));
-        contactsTable.getColumns().addAll(nameCol, phoneCol, emailCol);
-        contactsTable.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY);
-        contactsTable.getItems().setAll(supplier.getContactPersonnel());
+        emailCol.setCellValueFactory(cellData -> new SimpleStringProperty(cellData.getValue().email()));
+
+        contactsTable.getColumns().addAll(List.of(nameCol, phoneCol, emailCol));
+        contactsTable.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY_ALL_COLUMNS);
+        contactsTable.getItems().setAll(supplier.contactPersonnel());
+
         Button addContactBtn = new Button("+ Add Contact");
         addContactBtn.setOnAction(e -> showAddContactDialog(bn, newContact -> {
-            supplier.getContactPersonnel().add(newContact);
+            supplier.contactPersonnel().add(newContact);
             redrawCurrentSupplier(supplier);
         }));
         Button editContactBtn = new Button("Edit Selected Contact");
@@ -222,21 +181,10 @@ public class SupplierDashboard {
             if (selected != null) showEditContactDialog(bn, supplier, selected);
             else showAlert("Warning", "Select a contact first.");
         });
-        Button delContactBtn = new Button("Delete Selected");
-        delContactBtn.setOnAction(e -> {
-            ContactPersonPL selected = contactsTable.getSelectionModel().getSelectedItem();
-            if (selected != null && showConfirmDialog("Delete", "Remove this contact?")) {
-                try {
-                    supplierController.removeContactPerson(bn, selected.getPhone());
-                    supplier.getContactPersonnel().remove(selected);
-                    redrawCurrentSupplier(supplier);
-                } catch (Exception ex) {
-                    showAlert("Error", ex.getMessage());
-                }
-            }
-        });
+        Button delContactBtn = getButton(supplier, contactsTable, bn);
         contactsLayout.getChildren().addAll(contactsTable, new HBox(10, addContactBtn, editContactBtn, delContactBtn));
         contactsTab.setContent(contactsLayout);
+
         Tab agreementsTab = new Tab("Agreements & Products");
         VBox agreementsLayout = new VBox(10);
         agreementsLayout.setPadding(new Insets(15));
@@ -245,17 +193,19 @@ public class SupplierDashboard {
         Label agreeLabel = new Label("Agreements:");
         agreeLabel.setStyle("-fx-font-weight: bold;");
         TableView<AgreementPL> agreeTable = new TableView<>();
+
         TableColumn<AgreementPL, Integer> idCol = new TableColumn<>("Agreement ID");
-        idCol.setCellValueFactory(new PropertyValueFactory<>("agreementId"));
+        idCol.setCellValueFactory(cellData -> new SimpleObjectProperty<>(cellData.getValue().agreementId()));
         TableColumn<AgreementPL, String> dateCol = new TableColumn<>("Start Date");
-        dateCol.setCellValueFactory(new PropertyValueFactory<>("startDate"));
-        agreeTable.getColumns().addAll(idCol, dateCol);
-        agreeTable.getItems().setAll(supplier.getAgreements());
+        dateCol.setCellValueFactory(cellData -> new SimpleStringProperty(String.valueOf(cellData.getValue().startDate())));
+
+        agreeTable.getColumns().addAll(List.of(idCol, dateCol));
+        agreeTable.getItems().setAll(supplier.agreements());
         agreeTable.setPrefHeight(120);
         Button addAgreeBtn = new Button("+ Add Agreement");
         addAgreeBtn.setOnAction(e -> showAddAgreementDialog(bn, newAgree -> {
-            supplier.getAgreements().add(newAgree);
-            activeAgreementId = newAgree.getAgreementId();
+            supplier.agreements().add(newAgree);
+            activeAgreementId = newAgree.agreementId();
             redrawCurrentSupplier(supplier);
         }));
         Button editAgreeBtn = new Button("Edit Selected Agreement");
@@ -264,21 +214,7 @@ public class SupplierDashboard {
             if (selected != null) showEditAgreementDialog(bn, supplier, selected);
             else showAlert("Warning", "Select an Agreement first.");
         });
-        Button rmvAgreeBtn = new Button("- Remove Selected Agreement");
-        rmvAgreeBtn.setOnAction(e -> {
-            AgreementPL selected = agreeTable.getSelectionModel().getSelectedItem();
-            if (selected != null && showConfirmDialog("Delete", "Delete this agreement?")) {
-                try {
-                    supplierController.removeAgreement(bn, selected.getAgreementId());
-                    supplier.getAgreements().remove(selected);
-                    if (activeAgreementId != null && activeAgreementId == selected.getAgreementId())
-                        activeAgreementId = null;
-                    redrawCurrentSupplier(supplier);
-                } catch (Exception ex) {
-                    showAlert("Error", ex.getMessage());
-                }
-            }
-        });
+        Button rmvAgreeBtn = getRmvAgreeBtn(supplier, agreeTable, bn);
         agreeHeader.getChildren().addAll(agreeLabel, addAgreeBtn, editAgreeBtn, rmvAgreeBtn);
         HBox prodHeader = new HBox(15);
         prodHeader.setAlignment(javafx.geometry.Pos.CENTER_LEFT);
@@ -289,21 +225,23 @@ public class SupplierDashboard {
         Button rmvProdBtn = new Button("- Remove Product");
         prodHeader.getChildren().addAll(prodLabel, addProdBtn, editProdBtn, rmvProdBtn);
         TableView<ProductLinePL> prodTable = new TableView<>();
+
         TableColumn<ProductLinePL, Integer> catCol = new TableColumn<>("Catalog ID");
-        catCol.setCellValueFactory(new PropertyValueFactory<>("supplierCatalogId"));
+        catCol.setCellValueFactory(cellData -> new SimpleObjectProperty<>(cellData.getValue().supplierCatalogId()));
         TableColumn<ProductLinePL, String> pNameCol = new TableColumn<>("Name");
-        pNameCol.setCellValueFactory(new PropertyValueFactory<>("name"));
+        pNameCol.setCellValueFactory(cellData -> new SimpleStringProperty(cellData.getValue().name()));
         TableColumn<ProductLinePL, Double> priceCol = new TableColumn<>("Base Price");
-        priceCol.setCellValueFactory(new PropertyValueFactory<>("basePrice"));
+        priceCol.setCellValueFactory(cellData -> new SimpleObjectProperty<>(cellData.getValue().basePrice()));
         TableColumn<ProductLinePL, Integer> qtyCol = new TableColumn<>("Quantity");
-        qtyCol.setCellValueFactory(new PropertyValueFactory<>("quantity"));
-        prodTable.getColumns().addAll(catCol, pNameCol, priceCol, qtyCol);
+        qtyCol.setCellValueFactory(cellData -> new SimpleObjectProperty<>(cellData.getValue().quantity()));
+
+        prodTable.getColumns().addAll(List.of(catCol, pNameCol, priceCol, qtyCol));
         prodTable.setPrefHeight(120);
         addProdBtn.setOnAction(e -> {
             AgreementPL selAgree = agreeTable.getSelectionModel().getSelectedItem();
-            if (selAgree != null) showAddProductDialog(bn, selAgree.getAgreementId(), newProd -> {
-                selAgree.getProductLines().add(newProd);
-                activeProductId = newProd.getSupplierCatalogId();
+            if (selAgree != null) showAddProductDialog(bn, selAgree.agreementId(), newProd -> {
+                selAgree.productLines().add(newProd);
+                activeProductId = newProd.supplierCatalogId();
                 redrawCurrentSupplier(supplier);
             });
             else showAlert("Warning", "Select an Agreement first.");
@@ -319,9 +257,9 @@ public class SupplierDashboard {
             ProductLinePL selProd = prodTable.getSelectionModel().getSelectedItem();
             if (selAgree != null && selProd != null && showConfirmDialog("Delete", "Remove product?")) {
                 try {
-                    supplierController.removeProductLine(bn, selAgree.getAgreementId(), selProd.getSupplierCatalogId());
-                    selAgree.getProductLines().remove(selProd);
-                    if (activeProductId != null && activeProductId == selProd.getSupplierCatalogId())
+                    supplierController.removeProductLine(bn, selAgree.agreementId(), selProd.supplierCatalogId());
+                    selAgree.productLines().remove(selProd);
+                    if (activeProductId != null && activeProductId == selProd.supplierCatalogId())
                         activeProductId = null;
                     redrawCurrentSupplier(supplier);
                 } catch (Exception ex) {
@@ -338,17 +276,19 @@ public class SupplierDashboard {
         Button rmvDiscBtn = new Button("- Remove Discount");
         discHeader.getChildren().addAll(discLabel, addDiscBtn, editDiscBtn, rmvDiscBtn);
         TableView<DiscountBracketPL> discTable = new TableView<>();
+
         TableColumn<DiscountBracketPL, Integer> minQtyCol = new TableColumn<>("Min Quantity");
-        minQtyCol.setCellValueFactory(new PropertyValueFactory<>("minQuantity"));
+        minQtyCol.setCellValueFactory(cellData -> new SimpleObjectProperty<>(cellData.getValue().minQuantity()));
         TableColumn<DiscountBracketPL, Double> pctCol = new TableColumn<>("Discount %");
-        pctCol.setCellValueFactory(new PropertyValueFactory<>("discountPercentage"));
-        discTable.getColumns().addAll(minQtyCol, pctCol);
+        pctCol.setCellValueFactory(cellData -> new SimpleObjectProperty<>(cellData.getValue().discountPercentage()));
+
+        discTable.getColumns().addAll(List.of(minQtyCol, pctCol));
         discTable.setPrefHeight(100);
         addDiscBtn.setOnAction(e -> {
             AgreementPL selAgree = agreeTable.getSelectionModel().getSelectedItem();
             ProductLinePL selProd = prodTable.getSelectionModel().getSelectedItem();
             if (selAgree != null && selProd != null)
-                showAddDiscountDialog(bn, supplier, selAgree, selProd.getSupplierCatalogId());
+                showAddDiscountDialog(bn, supplier, selAgree, selProd.supplierCatalogId());
             else showAlert("Warning", "Select a Product first.");
         });
         editDiscBtn.setOnAction(e -> {
@@ -356,11 +296,11 @@ public class SupplierDashboard {
             ProductLinePL selProd = prodTable.getSelectionModel().getSelectedItem();
             DiscountBracketPL selDisc = discTable.getSelectionModel().getSelectedItem();
             if (selAgree != null && selProd != null && selDisc != null) {
-                showSingleFieldEditDialog("Edit Discount", "New % for Min Qty " + selDisc.getMinQuantity() + ":", String.valueOf(selDisc.getDiscountPercentage()), val -> {
+                showSingleFieldEditDialog("Edit Discount", "New % for Min Qty " + selDisc.minQuantity() + ":", String.valueOf(selDisc.discountPercentage()), val -> {
                     try {
-                        supplierController.updateDiscount(bn, selAgree.getAgreementId(), selProd.getSupplierCatalogId(), selDisc.getMinQuantity(), Double.parseDouble(val));
-                        selAgree.getDiscountPolicy().get(selProd.getSupplierCatalogId()).remove(selDisc);
-                        selAgree.getDiscountPolicy().get(selProd.getSupplierCatalogId()).add(new DiscountBracketPL(selDisc.getMinQuantity(), Double.parseDouble(val)));
+                        supplierController.updateDiscount(bn, selAgree.agreementId(), selProd.supplierCatalogId(), selDisc.minQuantity(), Double.parseDouble(val));
+                        selAgree.discountPolicy().get(selProd.supplierCatalogId()).remove(selDisc);
+                        selAgree.discountPolicy().get(selProd.supplierCatalogId()).add(new DiscountBracketPL(selDisc.minQuantity(), Double.parseDouble(val)));
                         redrawCurrentSupplier(supplier);
                     } catch (Exception ex) {
                         throw new RuntimeException(ex);
@@ -374,8 +314,8 @@ public class SupplierDashboard {
             DiscountBracketPL selDisc = discTable.getSelectionModel().getSelectedItem();
             if (selAgree != null && selProd != null && selDisc != null && showConfirmDialog("Delete", "Remove this discount?")) {
                 try {
-                    supplierController.removeDiscount(bn, selAgree.getAgreementId(), selProd.getSupplierCatalogId(), selDisc.getMinQuantity());
-                    selAgree.getDiscountPolicy().get(selProd.getSupplierCatalogId()).remove(selDisc);
+                    supplierController.removeDiscount(bn, selAgree.agreementId(), selProd.supplierCatalogId(), selDisc.minQuantity());
+                    selAgree.discountPolicy().get(selProd.supplierCatalogId()).remove(selDisc);
                     redrawCurrentSupplier(supplier);
                 } catch (Exception ex) {
                     showAlert("Error", ex.getMessage());
@@ -385,11 +325,11 @@ public class SupplierDashboard {
         agreeTable.getSelectionModel().selectedItemProperty().addListener((obs, oldVal, newVal) -> {
             discTable.getItems().clear();
             if (newVal != null) {
-                activeAgreementId = newVal.getAgreementId();
-                prodTable.getItems().setAll(newVal.getProductLines());
+                activeAgreementId = newVal.agreementId();
+                prodTable.getItems().setAll(newVal.productLines());
                 if (activeProductId != null)
                     for (ProductLinePL p : prodTable.getItems())
-                        if (p.getSupplierCatalogId() == activeProductId) {
+                        if (p.supplierCatalogId() == activeProductId) {
                             prodTable.getSelectionModel().select(p);
                             break;
                         }
@@ -400,10 +340,10 @@ public class SupplierDashboard {
         });
         prodTable.getSelectionModel().selectedItemProperty().addListener((obs, oldVal, newVal) -> {
             if (newVal != null) {
-                activeProductId = newVal.getSupplierCatalogId();
+                activeProductId = newVal.supplierCatalogId();
                 AgreementPL selAgree = agreeTable.getSelectionModel().getSelectedItem();
-                if (selAgree != null && selAgree.getDiscountPolicy().containsKey(newVal.getSupplierCatalogId()))
-                    discTable.getItems().setAll(selAgree.getDiscountPolicy().get(newVal.getSupplierCatalogId()));
+                if (selAgree != null && selAgree.discountPolicy().containsKey(newVal.supplierCatalogId()))
+                    discTable.getItems().setAll(selAgree.discountPolicy().get(newVal.supplierCatalogId()));
                 else discTable.getItems().clear();
             } else {
                 if (!isRebuilding) activeProductId = null;
@@ -416,10 +356,107 @@ public class SupplierDashboard {
         detailsPane.getChildren().addAll(nameTitle, headerBox, new Separator(), mainTabPane);
         if (!agreeTable.getItems().isEmpty() && activeAgreementId != null)
             for (AgreementPL a : agreeTable.getItems())
-                if (a.getAgreementId() == activeAgreementId) {
+                if (a.agreementId() == activeAgreementId) {
                     agreeTable.getSelectionModel().select(a);
                     break;
                 }
+    }
+
+    private Button getRmvAgreeBtn(SupplierPL supplier, TableView<AgreementPL> agreeTable, String bn) {
+        Button rmvAgreeBtn = new Button("- Remove Selected Agreement");
+        rmvAgreeBtn.setOnAction(e -> {
+            AgreementPL selected = agreeTable.getSelectionModel().getSelectedItem();
+            if (selected != null && showConfirmDialog("Delete", "Delete this agreement?")) {
+                try {
+                    supplierController.removeAgreement(bn, selected.agreementId());
+                    supplier.agreements().remove(selected);
+                    if (activeAgreementId != null && activeAgreementId == selected.agreementId())
+                        activeAgreementId = null;
+                    redrawCurrentSupplier(supplier);
+                } catch (Exception ex) {
+                    showAlert("Error", ex.getMessage());
+                }
+            }
+        });
+        return rmvAgreeBtn;
+    }
+
+    private Button getButton(SupplierPL supplier, TableView<ContactPersonPL> contactsTable, String bn) {
+        Button delContactBtn = new Button("Delete Selected");
+        delContactBtn.setOnAction(e -> {
+            ContactPersonPL selected = contactsTable.getSelectionModel().getSelectedItem();
+            if (selected != null && showConfirmDialog("Delete", "Remove this contact?")) {
+                try {
+                    supplierController.removeContactPerson(bn, selected.phone());
+                    supplier.contactPersonnel().remove(selected);
+                    redrawCurrentSupplier(supplier);
+                } catch (Exception ex) {
+                    showAlert("Error", ex.getMessage());
+                }
+            }
+        });
+        return delContactBtn;
+    }
+
+    private Button getRmvMfgBtn(SupplierPL supplier, String bn) {
+        Button rmvMfgBtn = new Button("- Remove Manufacturer");
+        rmvMfgBtn.setOnAction(e -> {
+            if (supplier.manufacturers().isEmpty()) {
+                showAlert("Info", "No manufacturers to remove.");
+                return;
+            }
+            ChoiceDialog<String> dialog = new ChoiceDialog<>(supplier.manufacturers().getFirst(), supplier.manufacturers());
+            dialog.setTitle("Remove Manufacturer");
+            dialog.setHeaderText("Select a manufacturer to remove:");
+            dialog.showAndWait().ifPresent(selected -> {
+                try {
+                    supplierController.removeManufacturer(bn, selected);
+                    supplier.manufacturers().remove(selected);
+                    redrawCurrentSupplier(supplier);
+                } catch (Exception ex) {
+                    showAlert("Error", ex.getMessage());
+                }
+            });
+        });
+        return rmvMfgBtn;
+    }
+
+    private Button getButton(SupplierPL supplier, String bn) {
+        Button editAddressBtn = new Button("Update Address");
+        editAddressBtn.setOnAction(e -> showSingleFieldEditDialog("Edit Address", "New address:", supplier.address(), val -> {
+            try {
+                supplierController.updateAddress(bn, val);
+                SupplierPL updated = new SupplierPL(supplier.name(), supplier.businessNumber(), val, supplier.contactPersonnel(), supplier.agreements(), supplier.manufacturers());
+                int idx = supplierListView.getItems().indexOf(supplier);
+                supplierListView.getItems().set(idx, updated);
+                supplierListView.getSelectionModel().select(updated);
+                redrawCurrentSupplier(updated);
+            } catch (Exception ex) {
+                throw new RuntimeException(ex);
+            }
+        }));
+        return editAddressBtn;
+    }
+
+    private HBox getHBox(SupplierPL supplier, String bn) {
+        Label bnLabel = new Label("Business Number: " + bn);
+        Button deleteSupplierBtn = new Button("Delete Entire Supplier");
+        deleteSupplierBtn.setStyle("-fx-background-color: #f44336; -fx-text-fill: white;");
+        deleteSupplierBtn.setOnAction(e -> {
+            if (showConfirmDialog("Delete Supplier", "Are you sure you want to delete this entire supplier?")) {
+                try {
+                    supplierController.deleteSupplier(bn);
+                    supplierListView.getItems().remove(supplier);
+                    detailsPane.getChildren().clear();
+                    mainTabPane.getTabs().clear();
+                } catch (Exception ex) {
+                    showAlert("Error", ex.getMessage());
+                }
+            }
+        });
+        HBox headerBox = new HBox(20, bnLabel, deleteSupplierBtn);
+        headerBox.setAlignment(javafx.geometry.Pos.CENTER_LEFT);
+        return headerBox;
     }
 
     private void showAddContactDialog(String businessNumber, java.util.function.Consumer<ContactPersonPL> onSuccess) {
@@ -445,7 +482,7 @@ public class SupplierDashboard {
         dialog.setResultConverter(btn -> btn == saveBtn ? new ContactPersonPL(nameField.getText(), phoneField.getText(), emailField.getText()) : null);
         dialog.showAndWait().ifPresent(contact -> {
             try {
-                ContactPersonPL newContact = supplierController.addContactPerson(businessNumber, contact.getName(), contact.getPhone(), contact.getEmail());
+                ContactPersonPL newContact = supplierController.addContactPerson(businessNumber, contact.name(), contact.phone(), contact.email());
                 onSuccess.accept(newContact);
             } catch (Exception e) {
                 showAlert("Error", e.getMessage());
@@ -463,9 +500,9 @@ public class SupplierDashboard {
         grid.setHgap(10);
         grid.setVgap(10);
         grid.setPadding(new Insets(20));
-        TextField nameField = new TextField(oldContact.getName());
-        TextField phoneField = new TextField(oldContact.getPhone());
-        TextField emailField = new TextField(oldContact.getEmail());
+        TextField nameField = new TextField(oldContact.name());
+        TextField phoneField = new TextField(oldContact.phone());
+        TextField emailField = new TextField(oldContact.email());
         grid.add(new Label("Name:"), 0, 0);
         grid.add(nameField, 1, 0);
         grid.add(new Label("Phone:"), 0, 1);
@@ -477,14 +514,14 @@ public class SupplierDashboard {
         dialog.showAndWait().ifPresent(newContact -> {
             try {
                 ContactPersonPL latest = oldContact;
-                if (!newContact.getName().equals(latest.getName()))
-                    latest = supplierController.updateContactName(bn, latest.getPhone(), newContact.getName());
-                if (!newContact.getEmail().equals(latest.getEmail()))
-                    latest = supplierController.updateContactEmail(bn, latest.getPhone(), newContact.getEmail());
-                if (!newContact.getPhone().equals(latest.getPhone()))
-                    latest = supplierController.updateContactPhone(bn, latest.getPhone(), newContact.getPhone());
-                supplier.getContactPersonnel().remove(oldContact);
-                supplier.getContactPersonnel().add(latest);
+                if (!newContact.name().equals(latest.name()))
+                    latest = supplierController.updateContactName(bn, latest.phone(), newContact.name());
+                if (!newContact.email().equals(latest.email()))
+                    latest = supplierController.updateContactEmail(bn, latest.phone(), newContact.email());
+                if (!newContact.phone().equals(latest.phone()))
+                    latest = supplierController.updateContactPhone(bn, latest.phone(), newContact.phone());
+                supplier.contactPersonnel().remove(oldContact);
+                supplier.contactPersonnel().add(latest);
                 redrawCurrentSupplier(supplier);
             } catch (Exception e) {
                 showAlert("Error", e.getMessage());
@@ -535,14 +572,14 @@ public class SupplierDashboard {
         box.setPadding(new Insets(20));
         CheckBox[] days = new CheckBox[7];
         DayOfWeek[] dow = DayOfWeek.values();
-        List<DayOfWeek> currentDays = agree.getDeliveryTerms().getFixedDeliveryDays();
+        List<DayOfWeek> currentDays = agree.deliveryTerms().fixedDeliveryDays();
         for (int i = 0; i < 7; i++) {
             days[i] = new CheckBox(dow[i].toString());
             if (currentDays.contains(dow[i])) days[i].setSelected(true);
             box.getChildren().add(days[i]);
         }
         CheckBox transportBox = new CheckBox("Supplier Transports?");
-        transportBox.setSelected(agree.getDeliveryTerms().isSupplierTransports());
+        transportBox.setSelected(agree.deliveryTerms().supplierTransports());
         box.getChildren().add(new Separator());
         box.getChildren().add(transportBox);
         dialog.getDialogPane().setContent(box);
@@ -553,13 +590,13 @@ public class SupplierDashboard {
                 for (int i = 0; i < 7; i++) if (days[i].isSelected()) fixedDays.add(dow[i]);
                 try {
                     if (!fixedDays.equals(currentDays))
-                        supplierController.updateFixedDeliveryDays(bn, agree.getAgreementId(), fixedDays);
-                    if (transportBox.isSelected() != agree.getDeliveryTerms().isSupplierTransports())
-                        supplierController.updateSupplierTransports(bn, agree.getAgreementId(), transportBox.isSelected());
+                        supplierController.updateFixedDeliveryDays(bn, agree.agreementId(), fixedDays);
+                    if (transportBox.isSelected() != agree.deliveryTerms().supplierTransports())
+                        supplierController.updateSupplierTransports(bn, agree.agreementId(), transportBox.isSelected());
                     DeliveryTermsPL updatedTerms = new DeliveryTermsPL(fixedDays, transportBox.isSelected());
-                    AgreementPL updatedAgree = new AgreementPL(agree.getAgreementId(), agree.getStartDate(), updatedTerms, agree.getProductLines(), agree.getDiscountPolicy());
-                    int idx = supplier.getAgreements().indexOf(agree);
-                    if (idx >= 0) supplier.getAgreements().set(idx, updatedAgree);
+                    AgreementPL updatedAgree = new AgreementPL(agree.agreementId(), agree.startDate(), updatedTerms, agree.productLines(), agree.discountPolicy());
+                    int idx = supplier.agreements().indexOf(agree);
+                    if (idx >= 0) supplier.agreements().set(idx, updatedAgree);
                     redrawCurrentSupplier(supplier);
                 } catch (Exception e) {
                     showAlert("Error", e.getMessage());
@@ -604,7 +641,7 @@ public class SupplierDashboard {
         });
         dialog.showAndWait().ifPresent(p -> {
             try {
-                ProductLinePL newProd = supplierController.addProductLine(bn, agreeId, p.getSupplierCatalogId(), p.getName(), p.getBasePrice(), p.getQuantity());
+                ProductLinePL newProd = supplierController.addProductLine(bn, agreeId, p.supplierCatalogId(), p.name(), p.basePrice(), p.quantity());
                 onSuccess.accept(newProd);
             } catch (Exception e) {
                 showAlert("Error", e.getMessage());
@@ -622,23 +659,23 @@ public class SupplierDashboard {
         grid.setHgap(10);
         grid.setVgap(10);
         grid.setPadding(new Insets(20));
-        TextField priceField = new TextField(String.valueOf(prod.getBasePrice()));
-        TextField qtyField = new TextField(String.valueOf(prod.getQuantity()));
+        TextField priceField = new TextField(String.valueOf(prod.basePrice()));
+        TextField qtyField = new TextField(String.valueOf(prod.quantity()));
         grid.add(new Label("Base Price:"), 0, 0);
         grid.add(priceField, 1, 0);
         grid.add(new Label("Quantity:"), 0, 1);
         grid.add(qtyField, 1, 1);
         dialog.getDialogPane().setContent(grid);
-        dialog.setResultConverter(btn -> btn == saveBtn ? new ProductLinePL(prod.getSupplierCatalogId(), prod.getName(), Double.parseDouble(priceField.getText()), Integer.parseInt(qtyField.getText())) : null);
+        dialog.setResultConverter(btn -> btn == saveBtn ? new ProductLinePL(prod.supplierCatalogId(), prod.name(), Double.parseDouble(priceField.getText()), Integer.parseInt(qtyField.getText())) : null);
         dialog.showAndWait().ifPresent(p -> {
             try {
                 ProductLinePL latest = prod;
-                if (p.getBasePrice() != latest.getBasePrice())
-                    latest = supplierController.updateProductLineBasePrice(bn, agree.getAgreementId(), latest.getSupplierCatalogId(), p.getBasePrice());
-                if (p.getQuantity() != latest.getQuantity())
-                    latest = supplierController.updateProductLineQuantity(bn, agree.getAgreementId(), latest.getSupplierCatalogId(), p.getQuantity());
-                agree.getProductLines().remove(prod);
-                agree.getProductLines().add(latest);
+                if (p.basePrice() != latest.basePrice())
+                    latest = supplierController.updateProductLineBasePrice(bn, agree.agreementId(), latest.supplierCatalogId(), p.basePrice());
+                if (p.quantity() != latest.quantity())
+                    latest = supplierController.updateProductLineQuantity(bn, agree.agreementId(), latest.supplierCatalogId(), p.quantity());
+                agree.productLines().remove(prod);
+                agree.productLines().add(latest);
                 redrawCurrentSupplier(supplier);
             } catch (Exception e) {
                 showAlert("Error", e.getMessage());
@@ -666,8 +703,8 @@ public class SupplierDashboard {
         dialog.setResultConverter(btn -> btn == saveBtn ? new DiscountBracketPL(Integer.parseInt(qtyField.getText()), Double.parseDouble(pctField.getText())) : null);
         dialog.showAndWait().ifPresent(d -> {
             try {
-                supplierController.addDiscount(bn, selAgree.getAgreementId(), catalogId, d.getMinQuantity(), d.getDiscountPercentage());
-                selAgree.getDiscountPolicy().computeIfAbsent(catalogId, k -> new ArrayList<>()).add(new DiscountBracketPL(d.getMinQuantity(), d.getDiscountPercentage()));
+                supplierController.addDiscount(bn, selAgree.agreementId(), catalogId, d.minQuantity(), d.discountPercentage());
+                selAgree.discountPolicy().computeIfAbsent(catalogId, k -> new ArrayList<>()).add(new DiscountBracketPL(d.minQuantity(), d.discountPercentage()));
                 redrawCurrentSupplier(supplier);
             } catch (Exception e) {
                 showAlert("Error", e.getMessage());
@@ -722,10 +759,10 @@ public class SupplierDashboard {
         grid.add(new Label("Pay Terms:"), 0, 4);
         grid.add(termsField, 1, 4);
         dialog.getDialogPane().setContent(grid);
-        dialog.setResultConverter(btn -> btn == saveBtn ? new SupplierPL(nameField.getText(), bnField.getText(), addressField.getText(), null, null, null) : null);
+        dialog.setResultConverter(btn -> btn == saveBtn ? new SupplierPL(nameField.getText(), bnField.getText(), addressField.getText(), new ArrayList<>(), new ArrayList<>(), new ArrayList<>()) : null);
         dialog.showAndWait().ifPresent(s -> {
             try {
-                SupplierPL newSup = supplierController.addSupplier(s.getName(), s.getBusinessNumber(), s.getAddress(), ibanField.getText(), termsField.getText());
+                SupplierPL newSup = supplierController.addSupplier(s.name(), s.businessNumber(), s.address(), ibanField.getText(), termsField.getText());
                 supplierListView.getItems().add(newSup);
                 supplierListView.getSelectionModel().select(newSup);
             } catch (Exception e) {
@@ -739,7 +776,7 @@ public class SupplierDashboard {
             ControllerFactory.getInstance().getAuthController().logout();
             MainApp.showLoginScreen();
         } catch (Exception ex) {
-            ex.printStackTrace();
+            showAlert("Logout Error", "An error occurred during logout: " + ex.getMessage());
         }
     }
 

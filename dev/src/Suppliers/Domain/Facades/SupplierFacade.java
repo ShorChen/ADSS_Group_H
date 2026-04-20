@@ -9,7 +9,6 @@ import Suppliers.Domain.ValueObjects.PaymentDetails;
 import Suppliers.Domain.ValidationUtils;
 
 import java.time.DayOfWeek;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.NoSuchElementException;
@@ -219,12 +218,15 @@ public class SupplierFacade {
         return List.copyOf(suppliers.values());
     }
 
-    public List<SupplierDL> getOnDemandSuppliers() {
+    /*
+    Max said we should be able to make an order from everyone but this was the trivial approach
+        public List<SupplierDL> getOnDemandSuppliers() {
         List<SupplierDL> onDemand = new ArrayList<>();
         for (SupplierDL supplier : suppliers.values())
             if (!supplier.getOnDemandAgreements().isEmpty()) onDemand.add(supplier);
         return onDemand;
     }
+     */
 
     private SupplierDL getSupplierOrThrow(String businessNumber) {
         businessNumberValidation(businessNumber);

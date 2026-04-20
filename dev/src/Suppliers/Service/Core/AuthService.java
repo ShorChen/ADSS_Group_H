@@ -4,6 +4,7 @@ import Suppliers.Domain.Facades.AuthFacade;
 import Suppliers.Domain.Security.Role;
 import Suppliers.Service.Response;
 
+@SuppressWarnings("ClassCanBeRecord")
 public class AuthService {
     private final AuthFacade authFacade;
 

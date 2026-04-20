@@ -4,6 +4,7 @@ import Suppliers.Domain.Security.Role;
 
 import java.util.Map;
 
+@SuppressWarnings("unused")
 public interface AuthDAO {
     void addCode(String code, Role role);
 
