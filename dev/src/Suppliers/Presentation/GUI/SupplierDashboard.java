@@ -2,17 +2,18 @@ package Suppliers.Presentation.GUI;
 
 import Suppliers.Presentation.Controller.ControllerFactory;
 import Suppliers.Presentation.Controller.SupplierController;
-import Suppliers.Presentation.SupplierPL;
-import Suppliers.Presentation.ContactPersonPL;
-import Suppliers.Presentation.AgreementPL;
-import Suppliers.Presentation.ProductLinePL;
-import Suppliers.Presentation.DiscountBracketPL;
-import Suppliers.Presentation.DeliveryTermsPL;
+import Suppliers.Presentation.DTO.SupplierPL;
+import Suppliers.Presentation.DTO.ContactPersonPL;
+import Suppliers.Presentation.DTO.AgreementPL;
+import Suppliers.Presentation.DTO.ProductLinePL;
+import Suppliers.Presentation.DTO.DiscountBracketPL;
+import Suppliers.Presentation.DTO.DeliveryTermsPL;
 import javafx.geometry.Insets;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.layout.*;
 import javafx.scene.control.cell.PropertyValueFactory;
+
 import java.time.DayOfWeek;
 import java.util.ArrayList;
 import java.util.List;
@@ -551,8 +552,10 @@ public class SupplierDashboard {
                 List<DayOfWeek> fixedDays = new ArrayList<>();
                 for (int i = 0; i < 7; i++) if (days[i].isSelected()) fixedDays.add(dow[i]);
                 try {
-                    if (!fixedDays.equals(currentDays)) supplierController.updateFixedDeliveryDays(bn, agree.getAgreementId(), fixedDays);
-                    if (transportBox.isSelected() != agree.getDeliveryTerms().isSupplierTransports()) supplierController.updateSupplierTransports(bn, agree.getAgreementId(), transportBox.isSelected());
+                    if (!fixedDays.equals(currentDays))
+                        supplierController.updateFixedDeliveryDays(bn, agree.getAgreementId(), fixedDays);
+                    if (transportBox.isSelected() != agree.getDeliveryTerms().isSupplierTransports())
+                        supplierController.updateSupplierTransports(bn, agree.getAgreementId(), transportBox.isSelected());
                     DeliveryTermsPL updatedTerms = new DeliveryTermsPL(fixedDays, transportBox.isSelected());
                     AgreementPL updatedAgree = new AgreementPL(agree.getAgreementId(), agree.getStartDate(), updatedTerms, agree.getProductLines(), agree.getDiscountPolicy());
                     int idx = supplier.getAgreements().indexOf(agree);

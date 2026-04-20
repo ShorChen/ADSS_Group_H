@@ -1,9 +1,11 @@
 package Suppliers.Presentation.Controller;
 
-import Suppliers.Domain.Role;
-import Suppliers.Domain.SessionManager;
-import Suppliers.Presentation.*;
-import Suppliers.Service.*;
+import Suppliers.Domain.Security.Role;
+import Suppliers.Domain.Security.SessionManager;
+import Suppliers.Presentation.DTO.*;
+import Suppliers.Service.Core.SupplierService;
+import Suppliers.Service.DTO.*;
+import Suppliers.Service.Response;
 
 import java.time.DayOfWeek;
 import java.util.ArrayList;

@@ -1,5 +1,6 @@
 package Suppliers.Presentation.GUI;
 
+import Suppliers.Presentation.Controller.ControllerFactory;
 import javafx.application.Application;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
@@ -44,6 +45,18 @@ public class MainApp extends Application {
     }
 
     public static void main(String[] args) {
-        launch(args);
+        if (args.length > 0 && args[0].equals("--auto")) {
+            System.out.println("Starting Headless Automatic Order Execution...");
+            try {
+                ControllerFactory.getInstance().getAuthController().login("ORD123");
+                int count = ControllerFactory.getInstance().getOrderController().executeAutomaticOrders();
+                System.out.println("SUCCESS: Generated " + count + " automatic orders for today.");
+            } catch (Exception e) {
+                System.err.println("CRITICAL ERROR executing automatic orders: " + e.getMessage());
+            }
+            System.exit(0);
+        } else {
+            launch(args);
+        }
     }
 }

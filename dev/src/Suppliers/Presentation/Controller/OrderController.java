@@ -1,9 +1,13 @@
 package Suppliers.Presentation.Controller;
 
-import Suppliers.Domain.Role;
-import Suppliers.Domain.SessionManager;
-import Suppliers.Presentation.*;
-import Suppliers.Service.*;
+import Suppliers.Domain.Security.Role;
+import Suppliers.Domain.Security.SessionManager;
+import Suppliers.Presentation.DTO.*;
+import Suppliers.Service.Core.OrderService;
+import Suppliers.Service.DTO.AgreementSL;
+import Suppliers.Service.Response;
+import Suppliers.Service.DTO.SupplierSL;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -25,6 +29,45 @@ public class OrderController {
             List<String> manufacturers = new ArrayList<>(sl.getManufacturers());
             return new SupplierPL(sl.getName(), sl.getBusinessNumber(), sl.getAddress(), contacts, agreements, manufacturers);
         }).collect(Collectors.toList());
+        throw new Exception(response.getErrorMessage());
+    }
+
+    public boolean placeOnDemandOrders(List<OrderItemPL> currentOrder) throws Exception {
+        SessionManager.getInstance().requireRole(Role.ORDER_MANAGER);
+        Map<String, List<OrderItemPL>> grouped = currentOrder.stream().collect(Collectors.groupingBy(OrderItemPL::getSupplierBusinessNumber));
+
+        for (Map.Entry<String, List<OrderItemPL>> entry : grouped.entrySet()) {
+            String businessNumber = entry.getKey();
+
+            List<Integer> catalogIds = new ArrayList<>();
+            List<String> productNames = new ArrayList<>();
+            List<Integer> quantities = new ArrayList<>();
+            List<Double> listPrices = new ArrayList<>();
+            List<Double> discounts = new ArrayList<>();
+            List<Double> finalPrices = new ArrayList<>();
+
+            for (OrderItemPL item : entry.getValue()) {
+                catalogIds.add(item.getCatalogId());
+                productNames.add(item.getProductName());
+                quantities.add(item.getQuantity());
+                listPrices.add(item.getPriceBeforeDiscount());
+                discounts.add(item.getPriceBeforeDiscount() - item.getTotalPrice());
+                finalPrices.add(item.getTotalPrice());
+            }
+
+            Response<Boolean> response = orderService.placeOrder(
+                    businessNumber, catalogIds, productNames, quantities, listPrices, discounts, finalPrices
+            );
+
+            if (!response.isSuccess()) throw new Exception(response.getErrorMessage());
+        }
+        return true;
+    }
+
+    public int executeAutomaticOrders() throws Exception {
+        SessionManager.getInstance().requireRole(Role.ORDER_MANAGER);
+        Response<Integer> response = orderService.executeAutomaticOrders();
+        if (response.isSuccess()) return response.getData();
         throw new Exception(response.getErrorMessage());
     }
 

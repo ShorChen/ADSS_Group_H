@@ -17,7 +17,15 @@ public class Response<T> {
         success = false;
     }
 
-    public boolean isSuccess() { return success; }
-    public String getErrorMessage() { return errorMessage; }
-    public T getData() { return data; }
+    public boolean isSuccess() {
+        return success;
+    }
+
+    public String getErrorMessage() {
+        return errorMessage;
+    }
+
+    public T getData() {
+        return data;
+    }
 }
