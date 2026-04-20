@@ -18,6 +18,7 @@ public class EmployeeEntity {
     private String password;
     private boolean workingDoubles = false;
     private Map<Integer, Set<Integer>> unavailableShifts;
+    private boolean active;
 
     @Deprecated
     /* todo : this constructor is not meant to stay, this is only for
@@ -27,7 +28,9 @@ public class EmployeeEntity {
         this(id, "temp-name", "0000-0000-0000-0000", 100.0, "HOURLY",
                 LocalDateTime.now(),
                 "FULL_TIME", new ArrayList<>(),
-                "not free on weekends", 24, "SATURDAY",password, false, new HashMap<>()
+                "not free on weekends", 24,
+                "SATURDAY", password, false, new HashMap<>(),
+                true
         );
 
     }
@@ -37,7 +40,7 @@ public class EmployeeEntity {
                           String jobScope, List<String> qualifiedRoles,
                           String constraints, int yearlyRestDays,
                           String weeklyRestDay, String password, boolean workingDoubles,
-                          Map<Integer, Set<Integer>> unavailableShifts) {
+                          Map<Integer, Set<Integer>> unavailableShifts, boolean active) {
         this.id = id;
         this.name = name;
         this.bankAccount = bankAccount;
@@ -52,6 +55,7 @@ public class EmployeeEntity {
         this.password = password;
         this.workingDoubles = workingDoubles;
         this.unavailableShifts = unavailableShifts;
+        this.active = active;
     }
 
     public String getId() {
@@ -126,12 +130,17 @@ public class EmployeeEntity {
 
     }
 
-    public void update(EmployeeEntity entity) {
-        if (!id.equals(entity.id))
-            throw new IllegalArgumentException("Can not update an employee from another employee's account");
-        if (!password.equals(entity.password))
-            throw new IllegalArgumentException("Can not update without employee permission, password mismatch");
+    public void setWorkingDoubles(boolean workingDoubles) {
+        this.workingDoubles = workingDoubles;
+    }
 
+    public void setUnavailableShifts(Map<Integer, Set<Integer>> unavailableShifts) {
+        this.unavailableShifts = unavailableShifts;
+    }
+
+    public boolean update(EmployeeEntity entity) {
+        if (entity == null || !id.equals(entity.id) || !password.equals(entity.password))
+            return false;
         name = entity.getName();
         bankAccount = entity.getBankAccount();
         salary = entity.getSalary();
@@ -144,5 +153,15 @@ public class EmployeeEntity {
         weeklyRestDay = entity.getWeeklyRestDay();
         workingDoubles = entity.isWorkingDoubles();
         unavailableShifts = entity.getUnavailableShifts();
+        active = entity.isActive();
+        return true;
+    }
+
+    public boolean isActive() {
+        return active;
+    }
+
+    public void setActive(boolean active) {
+        this.active = active;
     }
 }

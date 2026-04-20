@@ -1,25 +1,26 @@
 package data_access.entities;
 
+import util.BoundedSet;
+
 import java.time.LocalDateTime;
-import java.util.Map;
+import java.util.*;
+import java.util.function.BiConsumer;
 
 public class ShiftEntity {
     private final LocalDateTime startDate;
     private final String day;
     private final String shiftType;
-    private final String shiftManager;
-    private final Map<String, String> employees;
-    private final Map<String, Float> additionalHours;
+    private Map<String, Set<String>> employees;
+    private Map<String, Float> additionalHours;
 
     public ShiftEntity(LocalDateTime startDate, String day,
-                       String shiftType, Map<String, String> employees,
-                       Map<String, Float> additionalHours, String shiftManager) {
+                       String shiftType, Map<String, Set<String>> employees,
+                       Map<String, Float> additionalHours) {
         this.startDate = startDate;
         this.day = day;
         this.shiftType = shiftType;
         this.employees = employees;
         this.additionalHours = additionalHours;
-        this.shiftManager = shiftManager;
     }
 
     public LocalDateTime getStartDate() {
@@ -34,15 +35,28 @@ public class ShiftEntity {
         return shiftType;
     }
 
-    public String getShiftManager() {
-        return shiftManager;
-    }
-
-    public Map<String, String> getEmployees() {
-        return employees;
+    public Map<String, Set<String>> getEmployees() {
+        Map<String, Set<String>> result = new HashMap<>();
+        employees.forEach((key, value) -> {
+            Set<String> set = new BoundedSet<>(value, value.size());
+            result.put(key, set);
+        });
+        return result;
     }
 
     public Map<String, Float> getAdditionalHours() {
         return additionalHours;
+    }
+
+
+    public boolean update(ShiftEntity entity) {
+        if (entity == null) return false;
+        if (!Objects.equals(startDate, entity.startDate) ||
+            !Objects.equals(day, entity.day) ||
+            !Objects.equals(shiftType, entity.shiftType)) return false;
+
+        employees = entity.getEmployees();
+        additionalHours = entity.getAdditionalHours();
+        return true;
     }
 }

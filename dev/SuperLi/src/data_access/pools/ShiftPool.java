@@ -55,4 +55,8 @@ public class ShiftPool {
         week.addNightShift(shift.getDay(), shift);
 
     }
+
+    public boolean update(ShiftEntity shift){
+        return shift.update(shift);
+    }
 }

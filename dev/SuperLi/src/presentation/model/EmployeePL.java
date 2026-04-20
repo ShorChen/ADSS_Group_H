@@ -24,6 +24,7 @@ public class EmployeePL {
     private WeekDay weeklyRestDay;
     private boolean workingDoubles;
     private Map<WeekDay, Set<ShiftType>> unavailableShifts;
+    private boolean active = true;
 
     public EmployeePL(String id, String name, String bankAccount,
                       double salary, SalaryType salaryType, LocalDateTime dateOfEmployment,
@@ -53,6 +54,7 @@ public class EmployeePL {
                 employee.getYearlyRestDays(), employee.getWeeklyRestDay(), employee.isWorkingDoubles(),
                 employee.getUnavailableShifts()
         );
+        this.active = employee.isActive();
     }
 
     public static class Builder {
@@ -70,6 +72,7 @@ public class EmployeePL {
         private WeekDay weeklyRestDay;
         private boolean workingDoubles;
         private Map<WeekDay, Set<ShiftType>> unavailableShifts;
+        private boolean active = true;
 
         public Builder(String id) {
             this.id = id;
@@ -144,10 +147,17 @@ public class EmployeePL {
             return this;
         }
 
+        public Builder active(boolean active) {
+            this.active = active;
+            return this;
+        }
+
         public EmployeePL build() {
-            return new EmployeePL(id, name, bankAccount, salary, salaryType,
+            EmployeePL emp = new EmployeePL(id, name, bankAccount, salary, salaryType,
                     dateOfEmployment, jobScope, qualifiedRoles, constraints, yearlyRestDays,
                     weeklyRestDay, workingDoubles, unavailableShifts);
+            emp.setActive(this.active);
+            return emp;
         }
     }
 
@@ -171,7 +181,7 @@ public class EmployeePL {
         return new Employee(
                 id, name, bankAccount, salary, salaryType, dateOfEmployment,
                 jobScope, new ArrayList<>(qualifiedRoles), constraints, yearlyRestDays,
-                weeklyRestDay , workingDoubles, unavailableShifts
+                weeklyRestDay , workingDoubles, unavailableShifts, active
         );
     }
 
@@ -258,4 +268,14 @@ public class EmployeePL {
     public Map<WeekDay, Set<ShiftType>> getUnavailableShifts() {
         return unavailableShifts;
     }
+
+    public boolean isActive() {
+        return active;
+    }
+
+    public void setActive(boolean active) {
+        this.active = active;
+    }
+
+    
 }

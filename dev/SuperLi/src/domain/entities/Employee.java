@@ -23,12 +23,13 @@ public class Employee {
     private WeekDay weeklyRestDay;
     private boolean workingDoubles = false;
     private Map<WeekDay, Set<ShiftType>> unavailableShifts;
+    private boolean active;
 
     public Employee(String id, String name, String bankAccount,
                     double salary, SalaryType salaryType, LocalDateTime dateOfEmployment,
                     JobScope jobScope, List<Role> qualifiedRoles, String constraints,
                     int yearlyRestDays, WeekDay weeklyRestDay ,boolean workingDoubles,
-                    Map<WeekDay, Set<ShiftType>> unavailableShifts) {
+                    Map<WeekDay, Set<ShiftType>> unavailableShifts, boolean active) {
         this.id = id;
         this.name = name;
         this.bankAccount = bankAccount;
@@ -42,6 +43,7 @@ public class Employee {
         this.weeklyRestDay = weeklyRestDay;
         this.workingDoubles = workingDoubles;
         this.unavailableShifts = unavailableShifts;
+        this.active = active;
 
     }
 
@@ -59,6 +61,7 @@ public class Employee {
         this.weeklyRestDay = WeekDay.valueOf(entity.getWeeklyRestDay());
         this.yearlyRestDays = entity.getYearlyRestDays();
         this.workingDoubles = entity.isWorkingDoubles();
+        this.active = entity.isActive();
 
         Map<Integer, Set<Integer>> entityUnavailableShifts = entity.getUnavailableShifts();
         this.unavailableShifts = new HashMap<>();
@@ -101,10 +104,10 @@ public class Employee {
         });
 
         return new EmployeeEntity(
-                id, name, bankAccount, salary, salaryType.name(), dateOfEmployment,
-                jobScope.name(), roles, constraints, yearlyRestDays, weeklyRestDay.name(),
-                password, workingDoubles,
-                unavailableShiftsEntity
+            id, name, bankAccount, salary, salaryType.name(), dateOfEmployment,
+            jobScope.name(), roles, constraints, yearlyRestDays, weeklyRestDay.name(),
+            password, workingDoubles,
+            unavailableShiftsEntity, active
         );
     }
 
@@ -190,5 +193,13 @@ public class Employee {
 
     public Map<WeekDay, Set<ShiftType>> getUnavailableShifts() {
         return unavailableShifts;
+    }
+
+    public boolean isActive() {
+        return active;
+    }
+
+    public void setActive(boolean active) {
+        this.active = active;
     }
 }

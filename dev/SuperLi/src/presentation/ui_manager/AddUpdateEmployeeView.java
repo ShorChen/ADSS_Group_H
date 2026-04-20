@@ -120,12 +120,10 @@ public class AddUpdateEmployeeView extends View {
     }
 
     private void updateEmployee(EmployeePL employee) {
-        try {
-            String password = getNextLine("To save changes, please enter password");
-            employeeController.updateEmployee(employee, password);
-        } catch (IllegalArgumentException e) {
-            System.out.println(e.getMessage());
-        }
+
+        String password = getNextLine("To save changes, please enter password");
+        boolean updated = employeeController.updateEmployee(employee, password);
+        if (!updated) System.out.println("Could not update. Incorrect password");
         close();
     }
 
