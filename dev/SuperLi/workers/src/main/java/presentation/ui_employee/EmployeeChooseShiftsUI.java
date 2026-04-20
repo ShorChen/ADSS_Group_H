@@ -1,7 +1,7 @@
 package presentation.ui_employee;
 
 import context.SessionManager;
-import presentation.control.EmployeeShiftController;
+import presentation.control.employee.EmployeeShiftController;
 import presentation.ui_shared.ShiftsView;
 import presentation.ui_shared.View;
 import presentation.util.Option;
@@ -11,12 +11,11 @@ import java.util.*;
 public class EmployeeChooseShiftsUI extends View {
     private final ShiftsView shiftsView = new ShiftsView(0);
     private boolean open = false;
-    private final Runnable onBack;
     private final EmployeeShiftController controller;
     Map<Integer, Set<Integer>> selectedShifts;
 
-    public EmployeeChooseShiftsUI(Runnable onBack) {
-        this.onBack = onBack;
+    public EmployeeChooseShiftsUI(Runnable onDismiss) {
+        super(onDismiss);
         controller = new EmployeeShiftController();
     }
 
@@ -31,7 +30,7 @@ public class EmployeeChooseShiftsUI extends View {
             System.out.println("U - Unsaved Changes");
 
             displayMenu(new Option.Builder("---Options---")
-                    .append("Back (Cancels Changes)", onBack)
+                    .append("Back (Cancels Changes)", onDismiss)
                     .append("Mark Shift as Unavailable", this::markShift)
                     .append("View Placement", this::viewShifts)
                     .append("Submit Availability", this::submit), "");
@@ -39,38 +38,14 @@ public class EmployeeChooseShiftsUI extends View {
     }
 
     private void viewShifts() {
-        int day = getNextInteger("Enter day (0=SUN, 1=MON, 2=TUE, 3=WED, 4=THU, 5=FRI, 6=SAT):");
-        int shift = getNextInteger("Enter shift (0=DAY, 1=NIGHT):");
-
-        if (day >= 0 && day <= 6 && shift >= 0 && shift <= 1) {
-            char mark = shiftsView.getMark(day, shift);
-            if (mark == ShiftsView.NO_SHIFT)
-                System.out.println("The Store Is Closed For This Shift");
-            else {
-                System.out.println("Shift: <Implement>"); // print the shift (ShiftPL) to string
-            }
-
-        } else {
-            System.out.println("Invalid selection.");
-        }
+        shiftsView.selectDay(shiftsView::displayShift);
     }
 
     private void markShift() {
-        int day = getNextInteger("Enter day (0=SUN, 1=MON, 2=TUE, 3=WED, 4=THU, 5=FRI, 6=SAT):");
-        int shift = getNextInteger("Enter shift (0=DAY, 1=NIGHT):");
-
-        if (day >= 0 && day <= 6 && shift >= 0 && shift <= 1) {
-            char mark = shiftsView.getMark(day, shift);
-            if (mark == ShiftsView.NO_SHIFT)
-                System.out.println("The Store Is Closed For This Shift");
-            else {
-                shiftsView.setMarked(day, shift, 'U');
-                addSelectedShift(selectedShifts, day, shift);
-            }
-
-        } else {
-            System.out.println("Invalid selection.");
-        }
+        shiftsView.selectDay(((day, shift) -> {
+            shiftsView.setMarked(day, shift, 'U');
+            addSelectedShift(selectedShifts, day, shift);
+        }));
     }
 
     private void submit() {

@@ -8,14 +8,9 @@ import presentation.util.Option;
 public class ManageEmployeesUI extends View {
     private final EmployeeController controller;
     private boolean open = false;
-    private final Runnable onBack;
 
-    public ManageEmployeesUI(Runnable onBack) {
-        this.onBack = () -> {
-            close();
-            onBack.run();
-        };
-
+    public ManageEmployeesUI(Runnable onDismiss) {
+        super(onDismiss);
         this.controller = new EmployeeController();
     }
 
@@ -24,7 +19,7 @@ public class ManageEmployeesUI extends View {
         open = true;
         while (open) {
             displayMenu(new Option.Builder("---Managing Employees---")
-                    .append("Back", onBack)
+                    .append("Back", onDismiss)
                     .append("Add Employee", this::addEmployee)
                     .append("Deactivate Employee", this::deactivateEmployee)
                     .append("View Employee Details", this::getEmployeeDetails)

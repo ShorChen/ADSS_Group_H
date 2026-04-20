@@ -7,7 +7,7 @@ public class BoundedSet<T> implements Set<T> {
     private int maximumCapacity;
 
     public BoundedSet(int maximumCapacity) {
-        data = new HashSet<>();
+        data = new LinkedHashSet<>();
         this.maximumCapacity = maximumCapacity;
     }
 

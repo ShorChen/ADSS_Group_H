@@ -1,19 +1,16 @@
 package presentation.ui_shared;
 
 import presentation.control.AuthController;
+import presentation.ui_employee.EmployeeHomeUI;
+import presentation.ui_manager.ManagerHomeUI;
 
 public class LoginUI extends View {
 
     private boolean open = false;
     AuthController controller = new AuthController();
-    private final CloseLoginUI onLoginAction;
 
-    public LoginUI(CloseLoginUI onLoginAction) {
-        this.onLoginAction = onLoginAction;
-    }
-
-    public interface CloseLoginUI {
-        void onLogin(String id, String pass, boolean manager);
+    public LoginUI() {
+        super(null);
     }
 
     @Override
@@ -27,7 +24,15 @@ public class LoginUI extends View {
             boolean logged = controller.login(id, pass);
             if (logged) {
                 System.out.println("Successfully Logged in");
-                onLoginAction.onLogin(id, pass, controller.isManager(id));
+                close();
+                boolean manager = controller.isManager(id);
+                if (manager) {
+                    ManagerHomeUI managerHomeUI = new ManagerHomeUI(this::display);
+                    managerHomeUI.display();
+                } else {
+                    EmployeeHomeUI employeeHomeUI = new EmployeeHomeUI(this::display);
+                    employeeHomeUI.display();
+                }
             } else System.out.println("Id or password are Invalid");
 
         }

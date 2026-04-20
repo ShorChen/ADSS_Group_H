@@ -7,11 +7,10 @@ import presentation.util.Option;
 
 public class EmployeeHomeUI extends View {
     private boolean open = false;
-    private final Runnable onLogout;
     private final AuthController authController;
 
-    public EmployeeHomeUI(Runnable onLogout) {
-        this.onLogout = onLogout;
+    public EmployeeHomeUI(Runnable onDismiss) {
+        super(onDismiss);
         authController = new AuthController();
     }
 
@@ -21,7 +20,7 @@ public class EmployeeHomeUI extends View {
         open = true;
         while (open) {
             displayMenu(new Option.Builder("Actions for Employee")
-                            .append("Logout", onLogout)
+                            .append("Logout", onDismiss)
                             .append("Change Password", this::changePassword)
                             .append("View Schedule & Submit Availability", this::chooseShifts)
                             .append("Request Shift Replacement", this::requestReplacement),

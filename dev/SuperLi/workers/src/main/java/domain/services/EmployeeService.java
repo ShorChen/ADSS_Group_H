@@ -21,7 +21,7 @@ public class EmployeeService {
 
     public String addEmployee(Employee employee) {
         String pass = PasswordGenerator.generatePassword();
-        if (!employees.containsEmployee(employee.getId())) {
+        if (!employees.exists(employee.getId())) {
             employees.addEmployee(employee.toEntity(pass));
             return pass;
         }

@@ -1,7 +1,10 @@
-package tests;
-
-import domain.entities.*;
-import domain.enums.*;
+import domain.entities.Employee;
+import domain.entities.Role;
+import domain.entities.Shift;
+import domain.enums.JobScope;
+import domain.enums.SalaryType;
+import domain.enums.ShiftType;
+import domain.enums.WeekDay;
 import domain.services.HRManagerShiftService;
 import util.BoundedSet;
 

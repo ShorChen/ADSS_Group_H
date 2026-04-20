@@ -15,6 +15,38 @@ public class RequestPL {
     private boolean managerApproved;
     private boolean denied;
 
+    public RequestPL(ShiftPL shift, String prevEmployee, String newEmployee,
+                     String manager, boolean prevApproved, boolean newApproved,
+                     boolean managerApproved, boolean denied) {
+        this.shift = shift;
+        this.prevEmployee = prevEmployee;
+        this.newEmployee = newEmployee;
+        this.manager = manager;
+        this.prevApproved = prevApproved;
+        this.newApproved = newApproved;
+        this.managerApproved = managerApproved;
+        this.denied = denied;
+    }
+
+    public RequestPL(Request request) {
+        this(new ShiftPL(request.getShift()),
+                request.getPrevEmployee(),
+                request.getNewEmployee(),
+                request.getManager(),
+                request.isPrevApproved(),
+                request.isNewApproved(),
+                request.isManagerApproved(),
+                request.isDenied()
+        );
+    }
+
+    public Request toRequest() {
+        return new Request(
+                shift.toShift(), prevEmployee, newEmployee, manager,
+                prevApproved, newApproved, managerApproved, denied
+        );
+    }
+
     public boolean approve(String id) {
         if (denied) return false;
         if (Objects.equals(id, prevEmployee)) {

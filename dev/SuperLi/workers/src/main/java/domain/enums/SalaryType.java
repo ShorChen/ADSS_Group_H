@@ -1,15 +1,11 @@
 package domain.enums;
 
 public enum SalaryType {
-    HOURLY("hourly"), GLOBALLY("globally");
+    HOURLY("Hourly"), GLOBALLY("Globally");
 
     public final String type;
     SalaryType(String type) {
         this.type = type;
     }
 
-    void s(){
-        valueOf("");
-
-    }
 }

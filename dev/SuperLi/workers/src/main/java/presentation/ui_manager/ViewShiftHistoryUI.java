@@ -7,18 +7,12 @@ import presentation.ui_shared.View;
 import presentation.util.Option;
 
 public class ViewShiftHistoryUI extends View {
-    private HistoryController controller;
     private boolean open = false;
-    private Runnable onBack;
     private ShiftsView shiftsView;
-    private int weeksAgo = 1; // Tracks how far back in history we are looking
+    private int weeksAgo = 1;
 
-    public ViewShiftHistoryUI(Runnable onBack) {
-        this.onBack = () -> {
-            close();
-            onBack.run();
-        };
-        this.controller = new HistoryController();
+    public ViewShiftHistoryUI(Runnable onDismiss) {
+        super(onDismiss);
     }
 
     @Override
@@ -31,7 +25,7 @@ public class ViewShiftHistoryUI extends View {
             System.out.println("X - Store Was Closed");
             System.out.println("P - Partial, Closed Early or Started Late\n");
             displayMenu(new Option.Builder("---Options---")
-                    .append("Back", onBack)
+                    .append("Back", onDismiss)
                     .append("View Previous Week", this::loadPreviousWeek)
                     .append("View Next Week", this::loadNextWeek)
                     .append("View Shift", this::viewShift), ""
@@ -40,19 +34,7 @@ public class ViewShiftHistoryUI extends View {
     }
 
     private void viewShift() {
-        int day = getNextInteger("Enter day (0=SUN, 1=MON, 2=TUE, 3=WED, 4=THU, 5=FRI, 6=SAT):");
-        int shift = getNextInteger("Enter shift (0=DAY, 1=NIGHT):");
-
-
-        if (day >= 0 && day <= 6 && shift >= 0 && shift <= 1) {
-            char mark = shiftsView.getMark(day, shift);
-            if (mark == ShiftsView.NO_SHIFT)
-                System.out.println("The Store Was Closed For This Shift");
-            else System.out.println(controller.getShiftDetails(day, shift));
-
-        } else {
-            System.out.println("Invalid selection.");
-        }
+        shiftsView.selectDay(shiftsView::displayShift);
     }
 
     private void loadPreviousWeek() {

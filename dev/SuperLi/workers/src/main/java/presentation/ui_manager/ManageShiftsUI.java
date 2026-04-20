@@ -9,14 +9,10 @@ import presentation.util.Option;
 public class ManageShiftsUI extends View {
     private final HRManagerShiftController controller;
     private boolean open = false;
-    private final Runnable onBack;
+    private ShiftsView shiftsView;
 
-    public ManageShiftsUI(Runnable onBack) {
-        this.onBack = () -> {
-            close();
-            onBack.run();
-        };
-
+    public ManageShiftsUI(Runnable onDismiss) {
+        super(onDismiss);
         this.controller = new HRManagerShiftController();
     }
 
@@ -24,11 +20,12 @@ public class ManageShiftsUI extends View {
     public void display() {
         open = true;
         while (open) {
-            ShiftsView shiftsView = new ShiftsView(0);
+            shiftsView = new ShiftsView(0);
             shiftsView.display();
             displayMenu(new Option.Builder("--- Manage Shifts ---")
-                    .append("Back", onBack)
+                    .append("Back", onDismiss)
                     .append("Open Shift", this::openShift)
+                    .append("Close Shift", this::close)
                     .append("Place Employee", this::placeEmployees)
                     .append("Set Submission Deadline", this::setDeadline)
                     .append("Handle Replacement Requests", this::handleReplacements)
@@ -41,13 +38,11 @@ public class ManageShiftsUI extends View {
     }
 
     private void openShift() {
-        /*
-         * get days with closed shifts
-         * choose day
-         * get closed shifts
-         * choose shift
-         * controller.openShift(day, shift)
-         * */
+        shiftsView.selectDay(shiftsView::openShift);
+    }
+
+    private void closeShift(){
+        shiftsView.selectDay(shiftsView::closeShift);
     }
 
     private void createTemplate() {

@@ -27,6 +27,7 @@ public class AddUpdateEmployeeView extends View {
     private final String employeeId;
 
     public AddUpdateEmployeeView(String employeeId) {
+        super(null);
         employeeController = new EmployeeController();
         roleController = new RoleController();
         this.employeeId = employeeId;

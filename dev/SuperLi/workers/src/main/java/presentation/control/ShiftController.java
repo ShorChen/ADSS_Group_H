@@ -9,6 +9,7 @@ import java.time.LocalDate;
 import java.util.HashMap;
 import java.util.Map;
 
+@Deprecated
 public class ShiftController {
     private static final int INDEX_SUN_DAY = 116;
     private static final int INDEX_SUN_NIGHT = 188;
@@ -19,13 +20,6 @@ public class ShiftController {
         service = new ShiftService();
     }
 
-    public int getIndexOf(int dayId, int typeId) {
-        WeekDay day = WeekDay.values()[dayId];
-        ShiftType type = typeId == 0 ? ShiftType.DAY : ShiftType.EVENING;
-        int i = type == ShiftType.DAY ? 0 : 1;
-        return day.ordinal() * MARGIN + INDEX_SUN_DAY +
-               (INDEX_SUN_NIGHT - INDEX_SUN_DAY) * i;
-    }
 
     public Map<Integer, Map<Integer, Character>> getNWeeksAgo(int weeksAgo) {
 

@@ -15,13 +15,9 @@ import java.util.Map;
 public class RequestReplacementUI extends View {
     private boolean open;
     private final RequestReplacementController controller;
-    private final Runnable onBack;
 
-    public RequestReplacementUI(Runnable onBack) {
-        this.onBack = () -> {
-            onBack.run();
-            close();
-        };
+    public RequestReplacementUI(Runnable onDismiss) {
+        super(onDismiss);
         controller = new RequestReplacementController();
     }
 
@@ -34,7 +30,7 @@ public class RequestReplacementUI extends View {
                     SessionManager.getCurrentEmployee().getId()
             );
             Option.Builder builder = new Option.Builder("--- Requests ---")
-                    .append("Back", onBack)
+                    .append("Back", onDismiss)
                     .append("Create new request", this::createRequest);
             requests.forEach(req ->
                     builder.append(req.toString(), () -> chooseAction(req)));

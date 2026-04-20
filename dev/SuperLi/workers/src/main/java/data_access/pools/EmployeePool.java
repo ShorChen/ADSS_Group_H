@@ -39,9 +39,6 @@ public class EmployeePool {
         employees.put(employee.getId(), employee);
     }
 
-    public boolean containsEmployee(String id) {
-        return getEmployee(id) != null;
-    }
 
     public EmployeeEntity getEmployee(String id) {
         return employees.get(id);

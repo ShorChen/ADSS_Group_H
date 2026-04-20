@@ -5,13 +5,12 @@ import presentation.ui_shared.View;
 import presentation.util.Option;
 
 public class ManageRolesUI extends View {
-    RoleController controller;
+    private final RoleController controller;
     private boolean open = false;
 
-    Runnable onBack;
 
-    public ManageRolesUI(Runnable onBack) {
-        this.onBack = onBack;
+    public ManageRolesUI(Runnable onDismiss) {
+        super(onDismiss);
         controller = new RoleController();
     }
 
@@ -20,7 +19,7 @@ public class ManageRolesUI extends View {
         open = true;
         while (open) {
             displayMenu(new Option.Builder("Managing Roles")
-                    .append("Back", onBack)
+                    .append("Back", onDismiss)
                     .append("Create Role", this::createRole), "Roles: " + controller.getAllRoles()
             );
         }

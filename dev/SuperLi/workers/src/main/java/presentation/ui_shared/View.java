@@ -7,6 +7,16 @@ import java.util.Scanner;
 
 public abstract class View {
     protected static Scanner reader = new Scanner(System.in);
+    protected Runnable onDismiss;
+
+    public View(Runnable onDismiss) {
+        this.onDismiss = () -> {
+            close();
+            if (onDismiss != null)
+                onDismiss.run();
+        };
+    }
+
 
     public abstract void display();
 
@@ -59,7 +69,7 @@ public abstract class View {
     }
 
     protected void displayMenu(Option.Builder options, String endMessage)
-        throws IllegalArgumentException{
+            throws IllegalArgumentException {
         if (options == null || options.size() == 0)
             throw new IllegalArgumentException("Menu should have at least 1 option");
         System.out.println(options.getMessage());
