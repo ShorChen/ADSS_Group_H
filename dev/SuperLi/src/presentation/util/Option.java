@@ -1,5 +1,8 @@
 package presentation.util;
 
+import java.util.ArrayList;
+import java.util.List;
+
 public class Option {
     private String name;
     private Runnable action;
@@ -8,6 +11,7 @@ public class Option {
         this.name = name;
         this.action = action;
     }
+
 
     public String getName() {
         return name;
@@ -23,5 +27,40 @@ public class Option {
 
     public void setAction(Runnable action) {
         this.action = action;
+    }
+
+    public static class Builder {
+        private String message;
+        private final List<Option> options;
+
+        public Builder(String message) {
+            options = new ArrayList<>();
+            this.message = message;
+        }
+
+        public Builder append(String name, Runnable action) {
+            options.add(new Option(name, action));
+            return this;
+        }
+
+        public String getMessage() {
+            return message;
+        }
+
+        public void setMessage(String message) {
+            this.message = message;
+        }
+
+        public List<Option> getOptions() {
+            return options;
+        }
+
+        public int size() {
+            return options.size();
+        }
+
+        public Option get(int i){
+            return options.get(i);
+        }
     }
 }

@@ -23,14 +23,14 @@ public class ManageShiftsUI extends View {
     public void display() {
         open = true;
         while (open) {
-            displayMenu("--- Manage Shifts ---", "",
-                    new Option("Back", onBack),
-                    new Option("Place Employees to Shifts", this::placeEmployees),
-                    new Option("Set Submission Deadline", this::setDeadline),
-                    new Option("Handle Replacement Requests", this::handleReplacements),
-                    new Option("Create Shift Template (Not Implemented)", this::createTemplate),
-                    new Option("Set Default Template (Not Implemented)", this::setDefaultTemplate),
-                    new Option("Issue HR Report (Not Implemented)", this::issueReport)
+            displayMenu(new Option.Builder("--- Manage Shifts ---")
+                    .append("Back", onBack)
+                    .append("Place Employees to Shifts", this::placeEmployees)
+                    .append("Set Submission Deadline", this::setDeadline)
+                    .append("Handle Replacement Requests", this::handleReplacements)
+                    .append("Create Shift Template (Not Implemented)", this::createTemplate)
+                    .append("Set Default Template (Not Implemented)", this::setDefaultTemplate)
+                    .append("Issue HR Report (Not Implemented)", this::issueReport), ""
             );
         }
     }

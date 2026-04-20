@@ -1,13 +1,28 @@
 package domain.services;
 
+import data_access.entities.WeekShiftsEntity;
+import data_access.pools.ShiftPool;
+import domain.entities.WeekShifts;
+
+import java.time.DayOfWeek;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.util.Map;
+import java.time.temporal.TemporalAdjusters;
+import java.util.HashMap;
 
 public class ShiftService {
-    public Map<Integer, Map<Integer, Character>> getNWeeksAgo(LocalDate date) {
-        System.out.println("Implement Method");
-        return null;
+    private ShiftPool shiftPool;
+
+    public ShiftService() {
+        shiftPool = ShiftPool.Instance();
+    }
+
+    public WeekShifts getNWeeksAgo(LocalDate date) {
+        LocalDate weekDate = date.with(TemporalAdjusters.previousOrSame(DayOfWeek.SUNDAY));
+        WeekShiftsEntity weekEntity = shiftPool.getWeek(weekDate);
+        if (weekEntity == null)
+            return new WeekShifts(weekDate, new HashMap<>(), new HashMap<>());
+        return new WeekShifts(weekEntity);
     }
 
     public void setDeadline(LocalDateTime dateTime) {

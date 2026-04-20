@@ -1,54 +1,77 @@
 package domain.entities;
 
+import data_access.entities.ShiftEntity;
 import domain.enums.ShiftType;
+import domain.enums.WeekDay;
 
-import java.util.Date;
+import java.time.LocalDateTime;
+import java.util.HashMap;
 import java.util.Map;
+import java.util.function.BiConsumer;
 
 public class Shift {
-    private final long shiftId;
-    private final Date startDate;
+    private final LocalDateTime startDate;
+    private final WeekDay day;
     private final ShiftType shiftType;
-    private Employee shiftManager;
-    private final Map<Employee, Role> employees;
-    private final Map<Employee, Float> additionalHours;
+    private String shiftManager;
+    private final Map<String, Role> employees;
+    private final Map<String, Float> additionalHours;
 
-    public Shift(Date startDate, ShiftType shiftType, Map<Employee, Role> employees,
-                 Map<Employee, Float> additionalHours, Employee shiftManager,
-                 long shiftId) {
+    public Shift(LocalDateTime startDate, WeekDay day, ShiftType shiftType, Map<String, Role> employees,
+                 Map<String, Float> additionalHours, String shiftManager) {
         this.startDate = startDate;
+        this.day = day;
         this.shiftType = shiftType;
         this.employees = employees;
         this.additionalHours = additionalHours;
         this.shiftManager = shiftManager;
-        this.shiftId = shiftId;
     }
 
-    public long getShiftId() {
-        return shiftId;
+    public Shift(ShiftEntity entity) {
+        this(
+                entity.getStartDate(), WeekDay.valueOf(entity.getDay()),
+                ShiftType.valueOf(entity.getShiftType()), new HashMap<>(),
+                entity.getAdditionalHours(), entity.getShiftManager()
+
+        );
+
+        entity.getEmployees().forEach((id, role) ->
+                employees.put(id, new Role(role)));
     }
 
-    public Date getStartDate() {
+    public ShiftEntity toEntity() {
+        Map<String, String> employeesToRoles = new HashMap<>();
+        employees.forEach((employee, role) ->
+                employeesToRoles.put(employee, role.getTag()));
+        Map<String, Float> employeesAdditionalHours = new HashMap<>(additionalHours);
+
+        return new ShiftEntity(startDate, day.name(), shiftType.name(),
+                employeesToRoles, employeesAdditionalHours,
+                shiftManager
+        );
+    }
+
+    public LocalDateTime getStartDate() {
         return startDate;
+    }
+
+    public WeekDay getDay() {
+        return day;
     }
 
     public ShiftType getShiftType() {
         return shiftType;
     }
 
-    public Employee getShiftManager() {
+    public String getShiftManager() {
         return shiftManager;
     }
 
-    public Map<Employee, Role> getEmployees() {
+    public Map<String, Role> getEmployees() {
         return employees;
     }
 
-    public Map<Employee, Float> getAdditionalHours() {
+    public Map<String, Float> getAdditionalHours() {
         return additionalHours;
-    }
-
-    public void setShiftManager(Employee shiftManager) {
-        this.shiftManager = shiftManager;
     }
 }

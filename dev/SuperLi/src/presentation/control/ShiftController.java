@@ -1,12 +1,11 @@
 package presentation.control;
 
+import domain.entities.WeekShifts;
 import domain.enums.ShiftType;
 import domain.enums.WeekDay;
 import domain.services.ShiftService;
 
-import java.time.DayOfWeek;
 import java.time.LocalDate;
-import java.time.temporal.TemporalAdjusters;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -29,27 +28,20 @@ public class ShiftController {
     }
 
     public Map<Integer, Map<Integer, Character>> getNWeeksAgo(int weeksAgo) {
-        LocalDate date = LocalDate.now().minusWeeks(weeksAgo)
-                .with(TemporalAdjusters.previousOrSame(DayOfWeek.SUNDAY));
 
-        // return service.getNWeeksAgo(date);
-        return tempGetNWeeks();
-    }
+        WeekShifts week = service.getNWeeksAgo(LocalDate.now().minusWeeks(weeksAgo));
 
-    private Map<Integer, Map<Integer, Character>> tempGetNWeeks() {
-       Map<Integer, Map<Integer, Character>> map = new HashMap<>();
-        map.put(0, of('5', '3'));
-        map.put(1, of('2', '2'));
-        map.put(2, of('6', '7'));
-        map.put(3, of(' ', ' '));
-        map.put(4, of(' ', ' '));
-        map.put(5, of(' ', ' '));
-        map.put(6, of('X', 'X'));
+        Map<Integer, Map<Integer, Character>> map = new HashMap<>();
+        for (int i = 0; i < WeekDay.values().length; i++)
+            map.put(WeekDay.values()[i].day, of('X', 'X'));
+
+        week.getShifts().forEach(shift ->
+                map.get(shift.getDay().day).put(shift.getShiftType().ordinal(), ' '));
 
         return map;
     }
 
-    private Map<Integer, Character> of(char day, char night){
+    private Map<Integer, Character> of(char day, char night) {
         Map<Integer, Character> map = new HashMap<>();
         map.put(0, day);
         map.put(1, night);

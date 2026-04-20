@@ -58,22 +58,23 @@ public abstract class View {
         }
     }
 
-    protected void displayMenu(String message, String endMessage, Option... options) {
-        if (options == null || options.length == 0)
+    protected void displayMenu(Option.Builder options, String endMessage) {
+        if (options == null || options.size() == 0)
             throw new IllegalArgumentException("Menu should have at least 1 option");
-        System.out.println(message);
+        System.out.println(options.getMessage());
         StringBuilder s = new StringBuilder();
-        for (int i = 0; i < options.length; i++) {
-            if (options[i] != null)
-                s.append(i).append(". ").append(options[i].getName()).append("\n");
+
+        for (int i = 0; i < options.size(); i++) {
+            if (options.get(i) != null)
+                s.append(i).append(". ").append(options.get(i).getName()).append("\n");
         }
         System.out.print(s);
         if (!endMessage.isEmpty())
             System.out.println(endMessage);
         int selection = getNextInteger("Select Option (number): ");
-        if (selection >= options.length || selection < 0)
+        if (selection >= options.size() || selection < 0)
             System.out.println("An Option With Index " + selection + " Does Not Exist.");
-        else if (options[selection].getAction() != null)
-            options[selection].getAction().run();
+        else if (options.get(selection).getAction() != null)
+            options.get(selection).getAction().run();
     }
 }

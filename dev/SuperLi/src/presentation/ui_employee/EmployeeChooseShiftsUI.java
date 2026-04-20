@@ -30,11 +30,10 @@ public class EmployeeChooseShiftsUI extends View {
             System.out.println("X - Store Is Closed");
             System.out.println("U - Unsaved Changes");
 
-            displayMenu("---Options---", "",
-                    new Option("Back (Cancels Changes)", onBack),
-                    new Option("Mark Shift as Unavailable", this::markShift),
-                    new Option("Submit Availability", this::submit)
-            );
+            displayMenu(new Option.Builder("---Options---")
+                    .append("Back (Cancels Changes)", onBack)
+                    .append("Mark Shift as Unavailable", this::markShift)
+                    .append("Submit Availability", this::submit), "");
         }
     }
 

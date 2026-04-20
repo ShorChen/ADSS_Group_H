@@ -11,14 +11,14 @@ public class ShiftsView extends View {
     public static Character NO_SHIFT = 'X';
     public static Character PARTIAL_SHIFT = 'P';
     private final ShiftController controller;
-    private final StringBuilder shifts = new StringBuilder(
+    private final StringBuilder calendar = new StringBuilder(
             """
                     +-----+---+---+---+---+---+---+---+
                     |Shift|Sun|Mon|Tue|Wed|Thu|Fri|Sat|
                     +-----+---+---+---+---+---+---+---+
-                    | day |   |   |   |   |   |   |   |
+                    | day | X | X | X | X | X | X | X |
                     +-----+---+---+---+---+---+---+---|
-                    |night|   |   |   |   |   |   |   |
+                    |night| X | X | X | X | X | X | X |
                     +-----+---+---+---+---+---+---+---+
                     """
     );
@@ -37,17 +37,17 @@ public class ShiftsView extends View {
     }
 
     public void setMarked(int day, int type, char c) {
-        shifts.setCharAt(getIndexOf(day, type), c);
+        calendar.setCharAt(getIndexOf(day, type), c);
     }
 
     public char getMark(int day, int type) {
-        return shifts.charAt(getIndexOf(day, type));
+        return calendar.charAt(getIndexOf(day, type));
     }
 
 
     @Override
     public void display() {
-        System.out.print(shifts);
+        System.out.print(calendar);
     }
 
     @Override

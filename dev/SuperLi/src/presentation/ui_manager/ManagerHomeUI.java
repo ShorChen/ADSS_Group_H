@@ -19,13 +19,13 @@ public class ManagerHomeUI extends View {
     public void display() {
         open = true;
         while (open) {
-            displayMenu("Actions for manager:", "",
-                    new Option("Logout", onLogout),
-                    new Option("Change Password", this::changePassword),
-                    new Option("View Shift History", this::viewShiftHistory),
-                    new Option("Manage shifts", this::manageShifts),
-                    new Option("Manage Employees", this::manageEmployees),
-                    new Option("Manage Roles", this::manageRoles)
+            displayMenu(new Option.Builder("Actions for manager:")
+                    .append("Logout", onLogout)
+                    .append("Change Password", this::changePassword)
+                    .append("View Shift History", this::viewShiftHistory)
+                    .append("Manage shifts", this::manageShifts)
+                    .append("Manage Employees", this::manageEmployees)
+                    .append("Manage Roles", this::manageRoles), ""
             );
 
         }

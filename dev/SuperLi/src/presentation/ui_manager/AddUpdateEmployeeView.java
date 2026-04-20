@@ -17,7 +17,7 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Set;
 
-public class AddEmployeeView extends View {
+public class AddUpdateEmployeeView extends View {
 
     private final EmployeeController employeeController;
     private final RoleController roleController;
@@ -25,7 +25,7 @@ public class AddEmployeeView extends View {
     private boolean open;
     private final String employeeId;
 
-    public AddEmployeeView(String employeeId) {
+    public AddUpdateEmployeeView(String employeeId) {
         employeeController = new EmployeeController();
         roleController = new RoleController();
         this.employeeId = employeeId;
@@ -47,13 +47,13 @@ public class AddEmployeeView extends View {
             EmployeePL employee = builder.build();
             printSummary(employee);
 
-            displayMenu("--- Options ---", "",
-                    new Option("Cancel", this::close),
-                    new Option("Update a Field", this::updateFieldMenu),
-                    new Option("Save Changes", () -> {
+            displayMenu(new Option.Builder("--- Options ---")
+                    .append("Cancel", this::close)
+                    .append("Update a Field", this::updateFieldMenu)
+                    .append("Save Changes", () -> {
                         if (employeeId == null || e == null) registerEmployee(employee);
                         else updateEmployee(employee);
-                    })
+                    }), ""
             );
 
         }
@@ -95,17 +95,17 @@ public class AddEmployeeView extends View {
     }
 
     private void updateFieldMenu() {
-        displayMenu("---Update Field ---", "",
-                new Option("Back to Summary", () -> {
-                }),
-                new Option("Name", this::name),
-                new Option("Bank Account", this::bankAccount),
-                new Option("Salary & Salary Type", this::salary),
-                new Option("Date of Employment", this::dateOfEmployment),
-                new Option("Job Scope", this::jobScope),
-                new Option("Roles", this::roles),
-                new Option("Constraints", this::constraints),
-                new Option("Yearly Rest Days", this::yearlyRestDays)
+        displayMenu(new Option.Builder("---Update Field ---")
+                .append("Back to Summary", () -> {
+                })
+                .append("Name", this::name)
+                .append("Bank Account", this::bankAccount)
+                .append("Salary & Salary Type", this::salary)
+                .append("Date of Employment", this::dateOfEmployment)
+                .append("Job Scope", this::jobScope)
+                .append("Roles", this::roles)
+                .append("Constraints", this::constraints)
+                .append("Yearly Rest Days", this::yearlyRestDays), ""
         );
     }
 
@@ -146,9 +146,9 @@ public class AddEmployeeView extends View {
     }
 
     private void salary() {
-        displayMenu("Enter Salary Type", "",
-                new Option("Hourly", () -> builder.salaryType(SalaryType.HOURLY)),
-                new Option("Globally", () -> builder.salaryType(SalaryType.GLOBALLY))
+        displayMenu(new Option.Builder("Enter Salary Type")
+                .append("Hourly", () -> builder.salaryType(SalaryType.HOURLY))
+                .append("Globally", () -> builder.salaryType(SalaryType.GLOBALLY)), ""
         );
 
         double salary = getNextDouble("Enter Employee's Salary:");
@@ -172,9 +172,9 @@ public class AddEmployeeView extends View {
     }
 
     private void jobScope() {
-        displayMenu("Enter Job Scope", "",
-                new Option("Full Time", () -> builder.jobScope(JobScope.FULL_TIME)),
-                new Option("Partial", () -> builder.jobScope(JobScope.PARTIAL))
+        displayMenu(new Option.Builder("Enter Job Scope")
+                .append("Full Time", () -> builder.jobScope(JobScope.FULL_TIME))
+                .append("Partial", () -> builder.jobScope(JobScope.PARTIAL)), ""
         );
     }
 
@@ -214,14 +214,14 @@ public class AddEmployeeView extends View {
 
     private void weeklyRestDay() {
         WeekDay[] day = new WeekDay[1];
-        displayMenu("Enter Weekly Rest Day", "",
-                new Option("Sunday", () -> day[0] = WeekDay.SUNDAY),
-                new Option("Monday", () -> day[0] = WeekDay.MONDAY),
-                new Option("Tuesday", () -> day[0] = WeekDay.TUESDAY),
-                new Option("Wednesday", () -> day[0] = WeekDay.WEDNESDAY),
-                new Option("Thursday", () -> day[0] = WeekDay.THURSDAY),
-                new Option("Friday", () -> day[0] = WeekDay.FRIDAY),
-                new Option("Saturday", () -> day[0] = WeekDay.SATURDAY)
+        displayMenu(new Option.Builder("Enter Weekly Rest Day")
+                .append("Sunday", () -> day[0] = WeekDay.SUNDAY)
+                .append("Monday", () -> day[0] = WeekDay.MONDAY)
+                .append("Tuesday", () -> day[0] = WeekDay.TUESDAY)
+                .append("Wednesday", () -> day[0] = WeekDay.WEDNESDAY)
+                .append("Thursday", () -> day[0] = WeekDay.THURSDAY)
+                .append("Friday", () -> day[0] = WeekDay.FRIDAY)
+                .append("Saturday", () -> day[0] = WeekDay.SATURDAY), ""
         );
         builder.weeklyRestDay(day[0]);
     }

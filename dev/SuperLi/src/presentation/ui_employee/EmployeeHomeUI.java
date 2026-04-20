@@ -20,12 +20,12 @@ public class EmployeeHomeUI extends View {
     public void display() {
         open = true;
         while (open) {
-            displayMenu("Actions for Employee", "",
-                    new Option("Logout", onLogout),
-                    new Option("Change Password", this::changePassword),
-                    new Option("View Schedule & Submit Availability", this::chooseShifts),
-                    new Option("Request Shift Replacement", this::requestReplacement)
-            );
+            displayMenu(new Option.Builder("Actions for Employee")
+                            .append("Logout", onLogout)
+                            .append("Change Password", this::changePassword)
+                            .append("View Schedule & Submit Availability", this::chooseShifts)
+                            .append("Request Shift Replacement", this::requestReplacement),
+                    "");
         }
     }
 

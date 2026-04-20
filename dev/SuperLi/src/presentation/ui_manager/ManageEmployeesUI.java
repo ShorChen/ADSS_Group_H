@@ -23,19 +23,19 @@ public class ManageEmployeesUI extends View {
     public void display() {
         open = true;
         while (open) {
-            displayMenu("---Managing Employees---", "",
-                    new Option("Back", onBack),
-                    new Option("Add Employee", this::addEmployee),
-                    new Option("Deactivate Employee", this::deactivateEmployee),
-                    new Option("View Employee Details", this::getEmployeeDetails),
-                    new Option("Update Employee", this::updateEmployeeDetails)
+            displayMenu(new Option.Builder("---Managing Employees---")
+                    .append("Back", onBack)
+                    .append("Add Employee", this::addEmployee)
+                    .append("Deactivate Employee", this::deactivateEmployee)
+                    .append("View Employee Details", this::getEmployeeDetails)
+                    .append("Update Employee", this::updateEmployeeDetails), ""
             );
         }
     }
 
     private void addEmployee() {
-        AddEmployeeView addEmployeeView = new AddEmployeeView(null);
-        addEmployeeView.display();
+        AddUpdateEmployeeView addUpdateEmployeeView = new AddUpdateEmployeeView(null);
+        addUpdateEmployeeView.display();
     }
 
     private void deactivateEmployee() {
@@ -74,8 +74,8 @@ public class ManageEmployeesUI extends View {
 
     private void updateEmployeeDetails() {
         String id = getNextLine("Enter employee id");
-        AddEmployeeView addEmployeeView = new AddEmployeeView(id);
-        addEmployeeView.display();
+        AddUpdateEmployeeView addUpdateEmployeeView = new AddUpdateEmployeeView(id);
+        addUpdateEmployeeView.display();
     }
 
     @Override

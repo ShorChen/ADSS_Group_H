@@ -30,11 +30,11 @@ public class ViewShiftHistoryUI extends View {
             shiftsView.display();
             System.out.println("X - Store Was Closed");
             System.out.println("P - Partial, Closed Early or Started Late\n");
-            displayMenu("---Options---", "",
-                    new Option("Back", onBack),
-                    new Option("View Previous Week", this::loadPreviousWeek),
-                    new Option("View Next Week", this::loadNextWeek),
-                    new Option("View Shift", this::viewShift)
+            displayMenu(new Option.Builder("---Options---")
+                    .append("Back", onBack)
+                    .append("View Previous Week", this::loadPreviousWeek)
+                    .append("View Next Week", this::loadNextWeek)
+                    .append("View Shift", this::viewShift), ""
             );
         }
     }
