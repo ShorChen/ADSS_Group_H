@@ -37,7 +37,7 @@ public class ShiftsView extends View {
         int shift = getNextInteger("Enter shift (0=DAY, 1=NIGHT):");
 
         if (day >= 0 && day <= 6 && shift >= 0 && shift <= 1) {
-            char mark = shiftsView.getMark(day, shift);
+            char mark = getMark(day, shift);
             if (mark == ShiftsView.NO_SHIFT)
                 System.out.println("The Store Is Closed For This Shift");
             else onSuccess.run();
