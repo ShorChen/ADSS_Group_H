@@ -1,4 +1,5 @@
 package domain.entities;
+
 import java.util.Objects;
 
 public class Role {
@@ -33,4 +34,6 @@ public class Role {
     public int hashCode() {
         return Objects.hash(tag); 
     }
+
+
 }

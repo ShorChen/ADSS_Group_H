@@ -100,7 +100,7 @@ public class Employee {
         unavailableShifts.forEach((day, shiftTypes) -> {
             Set<Integer> shifts = new HashSet<>();
             shiftTypes.forEach(type -> shifts.add(type.ordinal()));
-            unavailableShiftsEntity.put(day.day, shifts);
+            unavailableShiftsEntity.put(day.ordinal(), shifts);
         });
 
         return new EmployeeEntity(

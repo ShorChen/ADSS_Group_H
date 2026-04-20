@@ -15,6 +15,7 @@ import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
 import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 public class AddUpdateEmployeeView extends View {
@@ -212,15 +213,11 @@ public class AddUpdateEmployeeView extends View {
 
     private void weeklyRestDay() {
         WeekDay[] day = new WeekDay[1];
-        displayMenu(new Option.Builder("Enter Weekly Rest Day")
-                .append("Sunday", () -> day[0] = WeekDay.SUNDAY)
-                .append("Monday", () -> day[0] = WeekDay.MONDAY)
-                .append("Tuesday", () -> day[0] = WeekDay.TUESDAY)
-                .append("Wednesday", () -> day[0] = WeekDay.WEDNESDAY)
-                .append("Thursday", () -> day[0] = WeekDay.THURSDAY)
-                .append("Friday", () -> day[0] = WeekDay.FRIDAY)
-                .append("Saturday", () -> day[0] = WeekDay.SATURDAY), ""
-        );
+        Option.Builder menuBuilder = new Option.Builder("Enter Weekly Rest Day");
+        List<WeekDay> closedDays = new ArrayList<>(); //controller.getClosedDays();
+        closedDays.forEach(d -> menuBuilder.append(d.day, () -> day[0] = d));
+        displayMenu(menuBuilder, "");
+
         builder.weeklyRestDay(day[0]);
     }
 

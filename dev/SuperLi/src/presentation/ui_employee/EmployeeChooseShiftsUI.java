@@ -33,7 +33,25 @@ public class EmployeeChooseShiftsUI extends View {
             displayMenu(new Option.Builder("---Options---")
                     .append("Back (Cancels Changes)", onBack)
                     .append("Mark Shift as Unavailable", this::markShift)
+                    .append("View Placement", this::viewShifts)
                     .append("Submit Availability", this::submit), "");
+        }
+    }
+
+    private void viewShifts() {
+        int day = getNextInteger("Enter day (0=SUN, 1=MON, 2=TUE, 3=WED, 4=THU, 5=FRI, 6=SAT):");
+        int shift = getNextInteger("Enter shift (0=DAY, 1=NIGHT):");
+
+        if (day >= 0 && day <= 6 && shift >= 0 && shift <= 1) {
+            char mark = shiftsView.getMark(day, shift);
+            if (mark == ShiftsView.NO_SHIFT)
+                System.out.println("The Store Is Closed For This Shift");
+            else {
+                System.out.println("Shift: <Implement>"); // print the shift (ShiftPL) to string
+            }
+
+        } else {
+            System.out.println("Invalid selection.");
         }
     }
 

@@ -66,7 +66,7 @@ public class EmployeeService {
                 for (ShiftType type : types) {
                     shiftInts.add(type.ordinal());
                 }
-                entityShifts.put(day.day, shiftInts);
+                entityShifts.put(day.ordinal(), shiftInts);
             });
         }
 

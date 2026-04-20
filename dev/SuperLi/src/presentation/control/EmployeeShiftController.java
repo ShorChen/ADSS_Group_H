@@ -1,7 +1,6 @@
 package presentation.control;
 
-import domain.entities.ExceptionalPlacementRequest;
-import domain.entities.ReplacementRequest;
+import domain.entities.Request;
 import domain.entities.Shift;
 import domain.services.ShiftService;
 import domain.services.EmployeeService;
@@ -44,7 +43,7 @@ public class EmployeeShiftController {
         // todo: implement
     }
 
-    public void requestReplacement(ReplacementRequest request){
+    public void requestReplacement(Request request){
         // todo
     }
 
@@ -54,7 +53,5 @@ public class EmployeeShiftController {
         return null;
     }
 
-    public void handleExceptionalPlacementRequest(ExceptionalPlacementRequest request, boolean approve) {
-    }
 
 }

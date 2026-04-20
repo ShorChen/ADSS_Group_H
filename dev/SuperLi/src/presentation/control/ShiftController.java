@@ -23,7 +23,7 @@ public class ShiftController {
         WeekDay day = WeekDay.values()[dayId];
         ShiftType type = typeId == 0 ? ShiftType.DAY : ShiftType.EVENING;
         int i = type == ShiftType.DAY ? 0 : 1;
-        return day.day * MARGIN + INDEX_SUN_DAY +
+        return day.ordinal() * MARGIN + INDEX_SUN_DAY +
                (INDEX_SUN_NIGHT - INDEX_SUN_DAY) * i;
     }
 
@@ -33,10 +33,10 @@ public class ShiftController {
 
         Map<Integer, Map<Integer, Character>> map = new HashMap<>();
         for (int i = 0; i < WeekDay.values().length; i++)
-            map.put(WeekDay.values()[i].day, of('X', 'X'));
+            map.put(WeekDay.values()[i].ordinal(), of('X', 'X'));
 
         week.getShifts().forEach(shift ->
-                map.get(shift.getDay().day).put(shift.getShiftType().ordinal(), ' '));
+                map.get(shift.getDay().ordinal()).put(shift.getShiftType().ordinal(), ' '));
 
         return map;
     }

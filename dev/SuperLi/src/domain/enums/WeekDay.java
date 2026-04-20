@@ -1,17 +1,19 @@
 package domain.enums;
 
+// ordinal() method is being used in code!
+// DO NOT CHANGE THE ORDER OF ENTRIES!
 public enum WeekDay {
-    SUNDAY(0),
-    MONDAY(1),
-    TUESDAY(2),
-    WEDNESDAY(3),
-    THURSDAY(4),
-    FRIDAY(5),
-    SATURDAY(6);
+    SUNDAY("Sunday"),
+    MONDAY("Monday"),
+    TUESDAY("Tuesday"),
+    WEDNESDAY("Wednesday"),
+    THURSDAY("Thursday"),
+    FRIDAY("Friday"),
+    SATURDAY("Saturday");
 
-    public final int day;
+    public final String day;
 
-    WeekDay(int day) {
+    WeekDay(String day) {
         this.day = day;
     }
 

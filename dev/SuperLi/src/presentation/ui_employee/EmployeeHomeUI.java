@@ -53,7 +53,9 @@ public class EmployeeHomeUI extends View {
 
 
     private void requestReplacement() {
-        System.out.println("not implemented");
+        RequestReplacementUI requestUI = new RequestReplacementUI(this::display);
+        close();
+        requestUI.display();
     }
 
     @Override

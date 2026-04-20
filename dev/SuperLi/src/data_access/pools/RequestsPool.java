@@ -1,14 +1,12 @@
 package data_access.pools;
 
-import domain.entities.ExceptionalPlacementRequest;
-import domain.entities.ReplacementRequest;
+import data_access.entities.RequestEntity;
 
 import java.util.ArrayList;
 import java.util.List;
 
 public class RequestsPool {
-    private final List<ReplacementRequest> replacementRequests;
-    private final List<ExceptionalPlacementRequest> exceptionalPlacementRequests;
+    private final List<RequestEntity> replacementRequests;
 
     private static RequestsPool instance;
     public static RequestsPool Instance() {
@@ -19,18 +17,11 @@ public class RequestsPool {
 
     private RequestsPool() {
         this.replacementRequests = new ArrayList<>();
-        this.exceptionalPlacementRequests =new ArrayList<>();
     }
 
-    public ReplacementRequest getRequest(long requestId) {
-        for (ReplacementRequest r : replacementRequests)
-            if (r.getRequestId() == requestId)
-                return r;
-        return null;
-    }
-    public ExceptionalPlacementRequest getExceptionalRequest(long requestId) {
-        for (ExceptionalPlacementRequest r : exceptionalPlacementRequests)
-            if (r.getRequestId() == requestId)
+    public RequestEntity getRequest(long requestId) {
+        for (RequestEntity r : replacementRequests)
+            if (r.getId() == requestId)
                 return r;
         return null;
     }

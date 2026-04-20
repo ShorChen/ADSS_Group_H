@@ -16,9 +16,9 @@ public class ShiftsView extends View {
                     +-----+---+---+---+---+---+---+---+
                     |Shift|Sun|Mon|Tue|Wed|Thu|Fri|Sat|
                     +-----+---+---+---+---+---+---+---+
-                    | day | X | X | X | X | X | X | X |
+                    | day |   |   |   |   |   |   |   |
                     +-----+---+---+---+---+---+---+---|
-                    |night| X | X | X | X | X | X | X |
+                    |night|   |   |   |   |   |   |   |
                     +-----+---+---+---+---+---+---+---+
                     """
     );
@@ -30,6 +30,20 @@ public class ShiftsView extends View {
             setMarked(day, 0, chars.get(0));
             setMarked(day, 1, chars.get(1));
         });
+    }
+
+    private void markShift(Runnable onSuccess) {
+        int day = getNextInteger("Enter day (0=SUN, 1=MON, 2=TUE, 3=WED, 4=THU, 5=FRI, 6=SAT):");
+        int shift = getNextInteger("Enter shift (0=DAY, 1=NIGHT):");
+
+        if (day >= 0 && day <= 6 && shift >= 0 && shift <= 1) {
+            char mark = shiftsView.getMark(day, shift);
+            if (mark == ShiftsView.NO_SHIFT)
+                System.out.println("The Store Is Closed For This Shift");
+            else onSuccess.run();
+        } else {
+            System.out.println("Invalid selection.");
+        }
     }
 
     private int getIndexOf(int day, int type) {

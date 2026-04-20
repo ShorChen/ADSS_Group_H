@@ -1,9 +1,6 @@
 package context;
 
-import domain.entities.Role;
 import presentation.model.EmployeePL;
-
-import java.util.List;
 
 public class SessionManager {
     private static EmployeePL currentEmployee;
@@ -24,8 +21,4 @@ public class SessionManager {
         return currentEmployee != null;
     }
 
-    public static List<Role> getContext() {
-        if (!hasContext()) return null;
-        return currentEmployee.getQualifiedRoles();
-    }
 }
