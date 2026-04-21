@@ -30,13 +30,13 @@ public class ShiftPool {
         );
 
         Map<String, Set<String>> employees = new HashMap<>();
-        Set<String> shiftManager = new BoundedSet<>(1);
+        Set<String> shiftManager = new HashSet<>();
         shiftManager.add("<SHIFT MANAGER ID>");
         employees.put("Shift Manager", shiftManager);
-        week.addDayShift("SUNDAY", new ShiftEntity(null, "SUNDAY",
+        week.addDayShift(new ShiftEntity(null, "SUNDAY",
                 "DAY", employees, new HashMap<>()));
 
-        week.addNightShift("SUNDAY", new ShiftEntity(null, "SUNDAY",
+        week.addNightShift(new ShiftEntity(null, "SUNDAY",
                 "EVENING", employees, new HashMap<>()));
 
 
@@ -73,7 +73,7 @@ public class ShiftPool {
             week = new WeekShiftsEntity(weekDate, new HashMap<>(), new HashMap<>());
             weeks.put(week.getDate(), week);
         }
-        week.addDayShift(shift.getDay(), shift);
+        week.addDayShift(shift);
 
     }
 
@@ -83,7 +83,7 @@ public class ShiftPool {
             week = new WeekShiftsEntity(weekDate, new HashMap<>(), new HashMap<>());
             weeks.put(week.getDate(), week);
         }
-        week.addNightShift(shift.getDay(), shift);
+        week.addNightShift(shift);
 
     }
 

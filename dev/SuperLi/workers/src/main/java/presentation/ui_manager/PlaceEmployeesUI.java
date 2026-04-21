@@ -37,10 +37,16 @@ public class PlaceEmployeesUI extends View {
                     employeeMenu.append(employeePL.getId(), () ->
                             selectedEmployee[0] = employeePL));
 
-            displayMenu(employeeMenu, "");
+            try {
+                displayMenu(employeeMenu, "");
+                controller.assignToShift(day, type, selectedEmployee[0], selectedRole[0]);
+            } catch (UnsupportedOperationException e) {
+                System.out.println(e.getMessage());
+            } catch (Exception _) {
+
+            }
 
 
-            controller.assignToShift(day, type, selectedEmployee[0], selectedRole[0]);
         });
         onDismiss.run();
 

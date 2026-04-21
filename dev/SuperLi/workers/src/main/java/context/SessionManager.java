@@ -9,6 +9,7 @@ public abstract class SessionManager {
 
     private static Debugger debugger;
     private static EmployeePL currentEmployee;
+    private static LocalDateTime deadline;
 
     public static void login(EmployeePL user) {
         currentEmployee = user;
@@ -40,5 +41,15 @@ public abstract class SessionManager {
 
     public static boolean isDebugMode() {
         return debugger != null;
+    }
+
+    public static void setDeadline(LocalDateTime deadline) {
+        SessionManager.deadline = deadline;
+    }
+
+    public static LocalDateTime getDeadline() {
+        if (deadline == null)
+            return now().plusDays(1);
+        return deadline;
     }
 }

@@ -16,7 +16,6 @@ import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.Map;
 
-/* requirement no. 6 7 9 18 24 25 32*/
 public class HRManagerShiftController {
     private ShiftService service;
     private HRManagerShiftService hrService;
@@ -54,10 +53,10 @@ public class HRManagerShiftController {
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm");
         try {
             LocalDateTime dateTime = LocalDateTime.parse(date, formatter);
-            if (dateTime.minusDays(1).isBefore(SessionManager.now()))
+            if (!dateTime.minusDays(1).plusMinutes(1).isAfter(SessionManager.now()))
                 throw new IllegalArgumentException("Deadline date must be at least one day from now");
+            SessionManager.setDeadline(dateTime);
 
-            service.setDeadline(dateTime);
         } catch (Exception e) {
             throw new IllegalArgumentException(e.getMessage());
         }

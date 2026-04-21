@@ -91,7 +91,8 @@ public class Shift {
     }
 
     public boolean assign(Role role, Employee employee) {
-        if (!employees.containsKey(role)) employees.put(role, new BoundedSet<>(5));
+        if (!employees.containsKey(role)) employees.put(role,
+                new BoundedSet<>(5));
         if (employee.getQualifiedRoles().contains(role)) {
             return employees.get(role).add(employee.getId());
         }

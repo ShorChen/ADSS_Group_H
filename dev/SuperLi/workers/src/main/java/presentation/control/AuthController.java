@@ -14,10 +14,6 @@ public class AuthController {
         this.service = new AuthService();
     }
 
-    public boolean registerManager(String id, String password){
-        //todo
-        return false;
-    }
     public boolean login(String id, String password) {
         Employee employee = service.login(id, password);
         if (employee == null) return false;

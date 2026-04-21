@@ -3,7 +3,7 @@ package presentation.ui_shared;
 import context.Debugger;
 import context.SessionManager;
 import domain.enums.WeekDay;
-import presentation.ui_manager.CreateStoreController;
+import presentation.control.CreateStoreController;
 import presentation.util.Option;
 
 import java.util.ArrayList;
@@ -11,9 +11,9 @@ import java.util.List;
 
 public class CreateStoreUI extends View {
 
-    private CreateStoreController controller;
+    private final CreateStoreController controller;
     private boolean open = false;
-    private List<WeekDay> closeDays = new ArrayList<>();
+    private final List<WeekDay> closeDays = new ArrayList<>();
 
     public CreateStoreUI() {
         super(null);
@@ -27,11 +27,15 @@ public class CreateStoreUI extends View {
             displayMenu(new Option.Builder("--- Init System ---")
                     .append("Register Store Manager", this::registerManager)
                     .append("Set Closed Days", this::setClosedDays)
+                    .append("Load Data", this::loadData)
                     .append("Debug Mode", this::isDebugMode), "");
         }
 
     }
 
+    private void loadData() {
+        controller.load();
+    }
 
     private void isDebugMode() {
         boolean debug = getNextBoolean("Enter debug mode (y/n)");

@@ -4,8 +4,6 @@ import domain.enums.JobScope;
 import domain.enums.SalaryType;
 import domain.enums.WeekDay;
 import presentation.control.AddUpdateEmployeeController;
-import presentation.control.EmployeeController;
-import presentation.control.RoleController;
 import presentation.model.EmployeePL;
 import presentation.ui_shared.View;
 import presentation.util.Option;
@@ -20,8 +18,7 @@ import java.util.Set;
 
 public class AddUpdateEmployeeView extends View {
 
-    private final EmployeeController employeeController;
-    private final RoleController roleController;
+
     private final AddUpdateEmployeeController controller;
 
     private EmployeePL.Builder builder;
@@ -30,8 +27,6 @@ public class AddUpdateEmployeeView extends View {
 
     public AddUpdateEmployeeView(String employeeId) {
         super(null);
-        employeeController = new EmployeeController();
-        roleController = new RoleController();
         this.employeeId = employeeId;
         controller = new AddUpdateEmployeeController();
     }
@@ -40,7 +35,7 @@ public class AddUpdateEmployeeView extends View {
     public void display() {
         open = true;
 
-        EmployeePL e = new EmployeeController().getEmployeeDetails(employeeId);
+        EmployeePL e = controller.getEmployeeDetails(employeeId);
         if (employeeId == null)
             buildEmployee("\n--- Add New Employee ---");
         else if (e == null)
@@ -120,7 +115,7 @@ public class AddUpdateEmployeeView extends View {
 
     private void registerEmployee(EmployeePL employee) {
         try {
-            System.out.println("Your password: " + employeeController.addEmployee(employee) +
+            System.out.println("Your password: " + controller.addEmployee(employee) +
                                " make sure to change it as soon as you get access to the system");
         } catch (IllegalArgumentException e) {
             System.out.println(e.getMessage());
@@ -131,7 +126,7 @@ public class AddUpdateEmployeeView extends View {
     private void updateEmployee(EmployeePL employee) {
 
         String password = getNextLine("To save changes, please enter password");
-        boolean updated = employeeController.updateEmployee(employee, password);
+        boolean updated = controller.updateEmployee(employee, password);
         if (!updated) System.out.println("Could not update. Incorrect password");
         close();
     }
@@ -188,14 +183,14 @@ public class AddUpdateEmployeeView extends View {
     private void roles() {
         Set<String> qualifiedRoles = new HashSet<>();
         System.out.println("\n--- Add Qualified Roles ---");
-        System.out.println("Roles: " + roleController.getAllRoles());
+        System.out.println("Roles: " + controller.getAllRoles());
         boolean stop = false;
         while (!stop) {
             String roleName = getNextLine("Enter a qualified role name (or type '0' to finish):");
             if (roleName.equals("0"))
                 stop = true;
             else if (!roleName.trim().isEmpty()) {
-                String role = roleController.getRole(roleName);
+                String role = controller.getRole(roleName);
 
                 if (role != null) {
                     qualifiedRoles.add(role);
@@ -210,7 +205,8 @@ public class AddUpdateEmployeeView extends View {
     }
 
     private void constraints() {
-        String constraints = getNextLine("Enter Employee Constraints (or press Enter to skip):");
+        System.out.println("Enter Employee Constraints (or press Enter to skip):");
+        String constraints = reader.nextLine();
         builder.constraints(constraints);
     }
 

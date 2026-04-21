@@ -20,11 +20,13 @@ public class RequestReplacementController {
     private final RequestReplacementService service;
     private final EmployeeService employeeService;
     private final ShiftService shiftService;
+    private final AuthController authController;
 
     public RequestReplacementController() {
         service = new RequestReplacementService();
         employeeService = new EmployeeService();
         shiftService = new ShiftService();
+        authController = new AuthController();
     }
 
     public boolean requestShiftReplacement(int day, int type, String id,
@@ -49,6 +51,8 @@ public class RequestReplacementController {
 
     public List<RequestPL> getPendingRequests(String id) {
         List<Request> requests = service.getPendingRequests(id);
+        if (authController.isManager(id)) requests = service.getAllRequests();
+
         List<RequestPL> pendingRequests = new ArrayList<>();
         requests.forEach(request -> pendingRequests.add(new RequestPL(request)));
         return pendingRequests;
@@ -74,9 +78,9 @@ public class RequestReplacementController {
         return service.deny(request.toReplacementRequest(), id);
     }
 
-    public boolean getEmployeeShiftsPredicate(ShiftPL shiftPL, boolean isManager) {
-
+    public boolean getEmployeeShiftsPredicate(ShiftPL shiftPL, String id) {
+        boolean isManager = authController.isManager(id);
         return shiftPL != null &&
-               (shiftPL.find(SessionManager.getCurrentEmployee().getId()) != null || isManager);
+               (shiftPL.find(id) != null || isManager);
     }
 }

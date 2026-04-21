@@ -6,7 +6,7 @@ import java.time.LocalDateTime;
 import java.util.*;
 
 public class EmployeeEntity {
-    private String id;
+    private final String id;
     private String name;
     private String bankAccount;
     private double salary;
@@ -18,14 +18,11 @@ public class EmployeeEntity {
     private int yearlyRestDays;
     private String weeklyRestDay;
     private String password;
-    private boolean workingDoubles = false;
+    private boolean workingDoubles;
     private Map<Integer, Set<Integer>> unavailableShifts;
     private boolean active;
 
-    @Deprecated
-    /* todo : this constructor is not meant to stay, this is only for
-        initiating a manager and an employee for now
-     */
+
     public EmployeeEntity(String id, String password) {
         this(id, "temp-name", "0000-0000-0000-0000", 100.0, "HOURLY",
                 SessionManager.now(),

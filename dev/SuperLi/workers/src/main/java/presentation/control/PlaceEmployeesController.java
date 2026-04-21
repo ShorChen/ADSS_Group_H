@@ -10,6 +10,7 @@ import domain.services.EmployeeService;
 import domain.services.RoleService;
 import domain.services.ShiftService;
 import presentation.model.EmployeePL;
+import presentation.model.ShiftPL;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -45,6 +46,8 @@ public class PlaceEmployeesController {
         Shift s = week.getDayShifts().get(WeekDay.values()[day]);
         if (shiftType == ShiftType.EVENING)
             s = week.getNightShifts().get(WeekDay.values()[day]);
+        if (new ShiftPL(s).find(employeePL.getId()) != null)
+            throw new UnsupportedOperationException("Employee is already in the shift");
 
         s.assign(new Role(role), employeePL.toEmployee());
         shiftService.updateWeek(week);

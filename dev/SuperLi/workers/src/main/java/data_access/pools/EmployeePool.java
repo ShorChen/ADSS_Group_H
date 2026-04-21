@@ -22,26 +22,6 @@ public class EmployeePool {
 
     private EmployeePool() {
         this.employees = new HashMap<>();
-
-        String pass = PasswordGenerator.generatePassword();
-        String pass2 = PasswordGenerator.generatePassword();
-
-        EmployeeEntity e = new EmployeeEntity("1234", pass);
-        EmployeeEntity e2 = new EmployeeEntity("4321", pass2);
-        EmployeeEntity e3 = new EmployeeEntity("<SHIFT MANAGER ID>", pass2);
-        EmployeeEntity e4 = new EmployeeEntity("cashier", pass2);
-        e.setQualifiedRoles(Role.MANAGER.getTag());
-        e2.setQualifiedRoles(Role.Cashier.getTag());
-        e3.setQualifiedRoles(Role.ShiftManager.getTag());
-        e4.setQualifiedRoles(Role.ShiftManager.getTag(), Role.Cashier.getTag());
-
-
-        addEmployee(e);
-        addEmployee(e2);
-        addEmployee(e3);
-
-        System.out.println("1234" + ", password: " + pass);
-        System.out.println("4321" + ", password: " + pass2);
     }
 
     public void addEmployee(EmployeeEntity employee) {

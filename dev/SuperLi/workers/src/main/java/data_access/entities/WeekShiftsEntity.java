@@ -39,12 +39,12 @@ public class WeekShiftsEntity {
         this.nightShifts = nightShifts;
     }
 
-    public void addDayShift(String day, ShiftEntity shift) {
-        dayShifts.put(day, shift);
+    public void addDayShift(ShiftEntity shift) {
+        dayShifts.put(shift.getDay(), shift);
     }
 
-    public void addNightShift(String day, ShiftEntity shift) {
-        nightShifts.put(day, shift);
+    public void addNightShift(ShiftEntity shift) {
+        nightShifts.put(shift.getDay(), shift);
     }
 
     public ShiftEntity getShift(String day, String shiftType) {

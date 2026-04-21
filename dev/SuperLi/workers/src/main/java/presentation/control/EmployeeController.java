@@ -5,7 +5,6 @@ import domain.entities.Role;
 import domain.services.EmployeeService;
 import presentation.model.EmployeePL;
 
-/* requirement no. 1 */
 public class EmployeeController {
     private final EmployeeService service;
 

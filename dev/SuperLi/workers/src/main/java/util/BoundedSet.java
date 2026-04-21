@@ -2,6 +2,11 @@ package util;
 
 import java.util.*;
 
+// this caused a problem where if data is brought from the
+// memory layer we convert it to upper layers using new BoundedSet<>(set, set.size())
+// bounding it to not accept more employees of this role.
+// so for now we won't have an upper bound on this class
+// in short. treat BoundedSet as a normal HashSet
 public class BoundedSet<T> implements Set<T> {
     private final Set<T> data;
     private int maximumCapacity;
@@ -56,7 +61,7 @@ public class BoundedSet<T> implements Set<T> {
 
     @Override
     public boolean add(T t) {
-        if (size() == maximumCapacity) return false;
+        //if (size() == maximumCapacity) return false;
         return data.add(t);
     }
 

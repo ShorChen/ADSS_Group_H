@@ -1,4 +1,4 @@
-package presentation.ui_manager;
+package presentation.control;
 
 import context.SessionManager;
 import domain.entities.Employee;
@@ -6,6 +6,7 @@ import domain.entities.Role;
 import domain.enums.JobScope;
 import domain.enums.SalaryType;
 import domain.enums.WeekDay;
+import domain.services.DataService;
 import domain.services.EmployeeService;
 import domain.services.ShiftService;
 
@@ -17,10 +18,12 @@ import java.util.List;
 public class CreateStoreController {
     private final EmployeeService employeeService;
     private final ShiftService shiftService;
+    private final DataService dataService;
 
     public CreateStoreController() {
         employeeService = new EmployeeService();
         shiftService = new ShiftService();
+        dataService = new DataService();
     }
 
     public String registerManager(String id, String name, String bankAccount, String weekDay) {
@@ -38,5 +41,9 @@ public class CreateStoreController {
         List<String> closed = new ArrayList<>();
         closeDays.forEach(w -> closed.add(w.name()));
         shiftService.setClosedDays(closed);
+    }
+
+    public void load() {
+        dataService.load();
     }
 }

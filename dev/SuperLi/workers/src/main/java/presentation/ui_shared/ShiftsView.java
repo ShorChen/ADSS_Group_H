@@ -53,12 +53,12 @@ public class ShiftsView extends View {
 
             ShiftPL s = shifts.get(0);
             setMarked(day, 0,
-                    predicate.apply(s) ? ' ' : 'X');
+                    predicate.apply(s) ? ' ' : NO_SHIFT);
             //s == null ? NO_SHIFT : predicate.apply(s) ? 'V' : ' ');
 
             s = shifts.get(1);
             setMarked(day, 1,
-                    predicate.apply(s) ? ' ' : 'X');
+                    predicate.apply(s) ? ' ' : NO_SHIFT);
             //s == null ? NO_SHIFT : predicate.apply(s) ? 'V' : ' ');
         });
     }
@@ -141,8 +141,8 @@ public class ShiftsView extends View {
         shift.getEmployees().forEach((role, workers) -> {
             workers.forEach(employee -> {
                 EmployeePL employeePL = controller.getEmployeeDetails(employee);
-                stringBuilder.append("Name: ").append(employeePL.getName())
-                        .append(", Role: ").append(role);
+                stringBuilder.append(" ,Id: ").append(employeePL.getId())
+                        .append(", Role: ").append(role).append("\n");
             });
         });
 

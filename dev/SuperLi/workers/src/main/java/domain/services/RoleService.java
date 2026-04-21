@@ -6,10 +6,9 @@ import domain.entities.Role;
 import java.util.ArrayList;
 import java.util.List;
 
-/* requirement no. 5 */
 public class RoleService {
 
-    private RolePool pool;
+    private final RolePool pool;
 
     public RoleService() {
         this.pool = RolePool.Instance();
@@ -28,7 +27,7 @@ public class RoleService {
         return new Role(role);
     }
 
-    public boolean hasRole(String tag) {
+    public boolean containsRole(String tag) {
         return pool.getRole(tag) != null;
     }
 

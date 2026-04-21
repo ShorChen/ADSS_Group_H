@@ -1,24 +1,18 @@
 package presentation.control;
 
-import domain.entities.Request;
-import domain.entities.Shift;
-import domain.services.ShiftService;
-import domain.services.EmployeeService;
-import domain.enums.WeekDay;
 import domain.enums.ShiftType;
+import domain.enums.WeekDay;
+import domain.services.EmployeeService;
 
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
 
 public class EmployeeShiftController {
-    private ShiftService service;
-    private EmployeeService employeeService;
+    private final EmployeeService employeeService;
 
     public EmployeeShiftController(){
-        this.service = new ShiftService();
         this.employeeService = new EmployeeService();
     }
     public void setAvailability(String employeeId, Map<Integer, Set<Integer>> shifts,
@@ -38,16 +32,5 @@ public class EmployeeShiftController {
         }
         employeeService.updateAvailability(employeeId, domainShifts, canWorkDoubleShifts);
     }
-
-    public void requestReplacement(Request request){
-        // todo
-    }
-
-    //day to shifts
-    public Map<String, List<Shift>> getShifts(){
-        // todo
-        return null;
-    }
-
 
 }

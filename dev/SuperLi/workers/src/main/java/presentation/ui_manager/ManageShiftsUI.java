@@ -1,14 +1,15 @@
 package presentation.ui_manager;
 
-import domain.services.RoleService;
+import context.SessionManager;
 import presentation.control.HRManagerShiftController;
-import presentation.model.EmployeePL;
 import presentation.ui_employee.RequestReplacementUI;
 import presentation.ui_shared.ShiftsView;
 import presentation.ui_shared.View;
 import presentation.util.Option;
 
-import java.util.List;
+import java.time.Duration;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 
 public class ManageShiftsUI extends View {
     private final HRManagerShiftController controller;
@@ -69,9 +70,19 @@ public class ManageShiftsUI extends View {
     }
 
     private void placeEmployees() {
-        PlaceEmployeesUI placeEmployeesUI = new PlaceEmployeesUI(this::display);
-        close();
-        placeEmployeesUI.display();
+        LocalDateTime deadline = SessionManager.getDeadline();
+        LocalDateTime now = SessionManager.now();
+
+        if (now.isAfter(deadline)) {
+            PlaceEmployeesUI placeEmployeesUI = new PlaceEmployeesUI(this::display);
+            close();
+            placeEmployeesUI.display();
+        } else {
+            String deadlineString = deadline
+                    .format(DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm"));
+            System.out.println("Placements can only occur after the deadline");
+            System.out.println("Come back at " + deadlineString);
+        }
 
     }
 

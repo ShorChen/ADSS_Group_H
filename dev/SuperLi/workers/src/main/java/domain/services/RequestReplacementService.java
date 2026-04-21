@@ -51,4 +51,10 @@ public class RequestReplacementService {
         requestsPool.updateRequest(request.toEntity());
         return true;
     }
+
+    public List<Request> getAllRequests() {
+        List<Request> list = new ArrayList<>();
+        requestsPool.getAll().forEach(r -> list.add(new Request(r)));
+        return list;
+    }
 }

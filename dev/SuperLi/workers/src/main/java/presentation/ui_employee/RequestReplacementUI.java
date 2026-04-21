@@ -1,7 +1,6 @@
 package presentation.ui_employee;
 
 import context.SessionManager;
-import presentation.control.AuthController;
 import presentation.control.RequestReplacementController;
 import presentation.model.RequestPL;
 import presentation.ui_shared.ShiftsView;
@@ -13,13 +12,11 @@ import java.util.List;
 public class RequestReplacementUI extends View {
     private boolean open;
     private final RequestReplacementController controller;
-    private final AuthController authController;
     private ShiftsView shiftsView;
 
     public RequestReplacementUI(Runnable onDismiss) {
         super(onDismiss);
         controller = new RequestReplacementController();
-        authController = new AuthController();
     }
 
     @Override
@@ -28,7 +25,7 @@ public class RequestReplacementUI extends View {
         while (open) {
             shiftsView = new ShiftsView(0,
                     shiftPL -> controller.getEmployeeShiftsPredicate(shiftPL,
-                            authController.isManager(SessionManager.getCurrentEmployee().getId())));
+                            SessionManager.getCurrentEmployee().getId()));
             shiftsView.display();
             System.out.println("X - You were not placed for this shift\n");
 
@@ -73,7 +70,7 @@ public class RequestReplacementUI extends View {
                         SessionManager.getCurrentEmployee().getId(), otherId);
 
                 if (request) System.out.println("Request Submitted");
-                else System.out.println("Could not submit request");
+                else System.out.println("other employee is not qualified for your job");
             } catch (IllegalArgumentException e) {
                 System.out.println(e.getMessage());
             }

@@ -59,11 +59,7 @@ public class EmployeeChooseShiftsUI extends View {
     }
 
     private void addSelectedShift(Map<Integer, Set<Integer>> map, int key, int value) {
-        if (map.containsKey(key))
-            map.get(key).add(value);
-        Set<Integer> values = new HashSet<>();
-        values.add(value);
-        map.put(key, values);
+        map.computeIfAbsent(key, _ -> new HashSet<>()).add(value);
     }
 
     @Override

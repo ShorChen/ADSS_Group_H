@@ -17,7 +17,7 @@ import java.util.HashMap;
 import java.util.List;
 
 public class ShiftService {
-    private ShiftPool shiftPool;
+    private final ShiftPool shiftPool;
 
     public ShiftService() {
         shiftPool = ShiftPool.Instance();
@@ -31,11 +31,6 @@ public class ShiftService {
         return new WeekShifts(weekEntity);
     }
 
-    public void setDeadline(LocalDateTime dateTime) {
-        System.out.println("Implement Method");
-    }
-
-
     public void updateWeek(WeekShifts weekShifts) {
         shiftPool.updateWeek(weekShifts.toEntity());
     }
@@ -44,8 +39,8 @@ public class ShiftService {
         LocalDate weekDate = date.with(TemporalAdjusters.previousOrSame(DayOfWeek.SUNDAY));
         WeekShiftsEntity week = shiftPool.getWeek(weekDate);
         ShiftEntity shiftEntity = shift == null ? null : shift.toEntity();
-        if (type == ShiftType.DAY) week.addDayShift(day.name(), shiftEntity);
-        else if (type == ShiftType.EVENING) week.addNightShift(day.name(), shiftEntity);
+        if (type == ShiftType.DAY) week.addDayShift(shiftEntity);
+        else if (type == ShiftType.EVENING) week.addNightShift(shiftEntity);
     }
 
     public void setClosedDays(List<String> closed) {

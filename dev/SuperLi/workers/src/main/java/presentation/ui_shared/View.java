@@ -24,8 +24,12 @@ public abstract class View {
     public abstract void close();
 
     public String getNextLine(String message) {
-        System.out.println(message);
-        return reader.nextLine();
+        while (true) {
+            System.out.println(message);
+            String s = reader.nextLine();
+            if (!s.trim().isEmpty()) return s;
+            System.out.println("Input must be non empty, try again");
+        }
     }
 
     public int getNextInteger(String message) {

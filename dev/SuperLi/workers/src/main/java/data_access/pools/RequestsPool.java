@@ -22,10 +22,6 @@ public class RequestsPool {
         this.requests = new HashMap<>();
     }
 
-    public RequestEntity getRequest(int requestId) {
-        return requests.getOrDefault(requestId, null);
-    }
-
     public boolean addRequest(RequestEntity request) {
         return requests.put(request.getShift().getStartDate(), request) == null;
     }
@@ -44,5 +40,9 @@ public class RequestsPool {
 
     public void updateRequest(RequestEntity entity) {
         requests.put(entity.getShift().getStartDate(), entity);
+    }
+
+    public List<RequestEntity> getAll() {
+        return new ArrayList<>(requests.values());
     }
 }

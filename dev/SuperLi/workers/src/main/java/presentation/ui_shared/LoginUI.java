@@ -1,5 +1,6 @@
 package presentation.ui_shared;
 
+import context.SessionManager;
 import presentation.control.AuthController;
 import presentation.ui_employee.EmployeeHomeUI;
 import presentation.ui_manager.ManagerHomeUI;
@@ -15,6 +16,7 @@ public class LoginUI extends View {
 
     @Override
     public void display() {
+        SessionManager.logout();
         System.out.println("---Welcome to SuperLi!---");
         open = true;
         while (open) {

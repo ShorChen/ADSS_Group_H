@@ -9,8 +9,10 @@ import domain.enums.WeekDay;
 import domain.services.HRManagerShiftService;
 import util.BoundedSet;
 
+import java.awt.*;
 import java.time.LocalDateTime;
 import java.util.*;
+import java.util.List;
 
 public class ShiftPlacementTest {
 
@@ -60,7 +62,7 @@ public class ShiftPlacementTest {
         HRManagerShiftService service = new HRManagerShiftService();
         List<Shift> mockShifts = new ArrayList<>();
         mockShifts.add(sundayMorningShift);
-        
+
 //        List<String> warnings = service.placeToShifts(mockEmployees, mockShifts);
 //
 //        // 6. הדפסת התוצאות לבקרה

@@ -28,7 +28,7 @@ public class RequestPL {
 
     public RequestPL(ShiftPL shift, String prevEmployee, String newEmployee) {
         this(shift, prevEmployee, newEmployee, null,
-                false, false, false, false);
+                true, false, false, false);
     }
 
     public RequestPL(Request request) {
@@ -85,18 +85,21 @@ public class RequestPL {
     public String toString() {
         StringBuilder s = new StringBuilder();
         s.append("Day: ").append(shift.getDay().day)
-                .append("At: ").append(shift.getShiftType().type).append("\n");
+                .append(" At: ").append(shift.getShiftType().type).append("\n");
 
         if (newEmployee != null) {
-            if (manager != null) {
-                String status = managerApproved ? "Approved" : "Denied";
-                s.append(manager).append(" (").append(status).append(") on request: ");
-            }
+
+            boolean managerDenied = manager != null && !managerApproved;
+            String status = managerApproved ? "Approved" :
+                    managerDenied? "Denied" : "Pending";
+            s.append("\t").append(manager == null? "" : manager).append(" (")
+                    .append(status).append(") on request: ");
+
             String prevStatus = prevApproved ? "Accepted" : "Denied";
             String newStatus = newApproved ? "Accepted" : denied ? "Denied" : "Pending";
 
             s.append(newEmployee).append(" (").append(newStatus).append(") ")
-                    .append("==>")
+                    .append("==> ")
                     .append(prevEmployee).append(" (").append(prevStatus).append(") ");
         } else {
             String status = managerApproved ? "Approved" : "Denied";

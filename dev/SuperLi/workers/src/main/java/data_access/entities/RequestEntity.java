@@ -1,7 +1,5 @@
 package data_access.entities;
 
-import java.util.Objects;
-
 public class RequestEntity {
     private ShiftEntity shift;
     private String prevEmployee;
@@ -24,6 +22,11 @@ public class RequestEntity {
         this.newApproved = newApproved;
         this.managerApproved = managerApproved;
         this.denied = denied;
+    }
+
+    public RequestEntity(ShiftEntity shift, String prevEmployee, String newEmployee) {
+        this(shift, prevEmployee, newEmployee, null,true,
+                false, false, false);
     }
 
     public ShiftEntity getShift() {

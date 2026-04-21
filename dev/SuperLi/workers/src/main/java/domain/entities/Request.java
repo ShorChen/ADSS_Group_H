@@ -88,7 +88,7 @@ public class Request {
         if (Objects.equals(id, newEmployee)) {
             newApproved = true;
         }
-        if (Objects.equals(id, manager)) {
+        if (manager == null) {
             managerApproved = true;
         }
         return false;
@@ -108,7 +108,7 @@ public class Request {
             return true;
 
         }
-        if (Objects.equals(id, manager)) {
+        if (manager == null) {
             managerApproved = false;
             denied = true;
             return true;
