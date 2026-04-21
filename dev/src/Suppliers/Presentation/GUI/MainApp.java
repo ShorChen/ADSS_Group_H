@@ -35,9 +35,9 @@ public class MainApp extends Application {
     }
 
     public static void switchScene(Scene newScene) {
-        if (primaryStage.getScene() == null) {
+        if (primaryStage.getScene() == null)
             primaryStage.setScene(newScene);
-        } else {
+        else {
             Parent root = newScene.getRoot();
             newScene.setRoot(new Pane());
             primaryStage.getScene().setRoot(root);
