@@ -211,4 +211,13 @@ public class SupplierService {
             return new Response<>(e.getMessage());
         }
     }
+
+    public Response<Boolean> loadExampleSuppliers() {
+        try {
+            supplierFacade.loadExampleSuppliers();
+            return new Response<>(true);
+        } catch (Exception e) {
+            return new Response<>(e.getMessage());
+        }
+    }
 }

@@ -1,6 +1,7 @@
 package Suppliers.Domain.Facades;
 
 import Suppliers.DataAccess.SupplierDAO;
+import Suppliers.Domain.DataSeeder;
 import Suppliers.Domain.Entities.AgreementDL;
 import Suppliers.Domain.Entities.ContactPersonDL;
 import Suppliers.Domain.Entities.ProductLineDL;
@@ -216,6 +217,10 @@ public class SupplierFacade {
 
     public List<SupplierDL> getAllSuppliers() {
         return List.copyOf(suppliers.values());
+    }
+
+    public void loadExampleSuppliers() {
+        DataSeeder.loadExampleSuppliers(this);
     }
 
     /*

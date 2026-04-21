@@ -1,6 +1,7 @@
 package Suppliers.Domain.Facades;
 
 import Suppliers.DataAccess.OrderDAO;
+import Suppliers.Domain.DataSeeder;
 import Suppliers.Domain.Entities.OrderDL;
 import Suppliers.Domain.ValueObjects.OrderItemDL;
 
@@ -24,5 +25,9 @@ public class OrderFacade {
         orders.put(order.getOrderId(), order);
         orderDAO.addOrder(order);
         return order;
+    }
+
+    public void loadExampleOrders() {
+        DataSeeder.loadExampleOrders(this);
     }
 }

@@ -7,6 +7,8 @@ import javafx.scene.Scene;
 import javafx.scene.layout.Pane;
 import javafx.stage.Stage;
 
+import java.io.File;
+
 public class MainApp extends Application {
     private static Stage primaryStage;
 
@@ -46,6 +48,7 @@ public class MainApp extends Application {
 
     @SuppressWarnings("unused")
     public static void main(String[] args) {
+        clearDataOnBoot();
         if (args.length > 0 && args[0].equals("--auto")) {
             System.out.println("Starting Headless Automatic Order Execution...");
             try {
@@ -59,5 +62,12 @@ public class MainApp extends Application {
         } else {
             launch(args);
         }
+    }
+
+    @SuppressWarnings("ResultOfMethodCallIgnored")
+    private static void clearDataOnBoot() {
+        new File("dev/src/Suppliers/Table/suppliers.dat").delete();
+        new File("dev/src/Suppliers/Table/orders.dat").delete();
+        System.out.println("System booted: All previous data has been reset.");
     }
 }

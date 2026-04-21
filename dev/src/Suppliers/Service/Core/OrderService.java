@@ -100,4 +100,13 @@ public class OrderService {
             return new Response<>(ex.getMessage());
         }
     }
+
+    public Response<Boolean> loadExampleOrders() {
+        try {
+            orderFacade.loadExampleOrders();
+            return new Response<>(true);
+        } catch (Exception e) {
+            return new Response<>(e.getMessage());
+        }
+    }
 }

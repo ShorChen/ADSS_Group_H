@@ -71,6 +71,13 @@ public class OrderController {
         throw new Exception(response.getErrorMessage());
     }
 
+    @SuppressWarnings("UnusedReturnValue")
+    public boolean loadExampleOrders() throws Exception {
+        Response<Boolean> response = orderService.loadExampleOrders();
+        if (response.isSuccess()) return response.getData();
+        throw new Exception(response.getErrorMessage());
+    }
+
     private AgreementPL convertAgreementSLToPL(AgreementSL data) {
         DeliveryTermsPL deliveryTermsPL = new DeliveryTermsPL(data.deliveryTerms().fixedDeliveryDays(), data.deliveryTerms().supplierTransports());
         List<ProductLinePL> productLinesPL = data.productLines().stream().map(pl -> new ProductLinePL(pl.supplierCatalogId(), pl.name(), pl.basePrice(), pl.quantity())).collect(Collectors.toList());
