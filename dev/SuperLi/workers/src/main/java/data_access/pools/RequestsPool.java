@@ -1,11 +1,9 @@
 package data_access.pools;
 
 import data_access.entities.RequestEntity;
-import domain.entities.Request;
 
 import java.time.LocalDateTime;
 import java.util.*;
-import java.util.function.BiConsumer;
 
 public class RequestsPool {
     private final Map<LocalDateTime, RequestEntity> requests;
@@ -44,5 +42,9 @@ public class RequestsPool {
 
     public List<RequestEntity> getAll() {
         return new ArrayList<>(requests.values());
+    }
+
+    public void clear() {
+        requests.clear();
     }
 }

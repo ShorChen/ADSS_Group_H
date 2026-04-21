@@ -47,6 +47,9 @@ public class EmployeeService {
     }
 
     public boolean updateEmployee(Employee employee, String password) {
+        if (!employees.exists(employee.getId())) {
+            return false;
+        }
         return employees.getEmployee(employee.getId()).update(employee.toEntity(password));
     }
 
