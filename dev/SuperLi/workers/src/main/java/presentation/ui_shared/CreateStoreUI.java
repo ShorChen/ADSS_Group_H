@@ -43,7 +43,7 @@ public class CreateStoreUI extends View {
     }
 
     private void setClosedDays() {
-        boolean[] set = {true};
+        boolean[] set = {closeDays.size() < 6};
         while (set[0]) {
             List<WeekDay> days = new ArrayList<>();
             WeekDay[] values = WeekDay.values();
@@ -58,7 +58,10 @@ public class CreateStoreUI extends View {
 
             displayMenu(builder, "Closed Days: " + closeDays);
             controller.setClosedDays(closeDays);
+            if (closeDays.size() == 6) set[0] = false;
         }
+        System.out.println(closeDays);
+        System.out.println("Can not close all days, going back.");
 
 
     }

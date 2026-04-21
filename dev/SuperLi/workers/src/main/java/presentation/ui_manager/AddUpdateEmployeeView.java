@@ -20,6 +20,7 @@ public class AddUpdateEmployeeView extends View {
 
 
     private final AddUpdateEmployeeController controller;
+    private boolean addEmployee;
 
     private EmployeePL.Builder builder;
     private boolean open;
@@ -36,12 +37,15 @@ public class AddUpdateEmployeeView extends View {
         open = true;
 
         EmployeePL e = controller.getEmployeeDetails(employeeId);
-        if (employeeId == null)
+        if (employeeId == null) {
             buildEmployee("\n--- Add New Employee ---");
-        else if (e == null)
+            addEmployee = true;
+        } else if (e == null) {
             buildEmployee("Could not find employee... Adding New Employee");
-        else {
+            addEmployee = true;
+        } else {
             System.out.println("\n--- Update Existing Employee ---");
+            addEmployee = false;
             builder = new EmployeePL.Builder(employeeId);
         }
 
@@ -71,7 +75,8 @@ public class AddUpdateEmployeeView extends View {
         jobScope();
         roles();
         constraints();
-        yearlyRestDays();
+        if (addEmployee)
+            yearlyRestDays();
         weeklyRestDay();
     }
 

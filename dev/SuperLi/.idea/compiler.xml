@@ -9,5 +9,8 @@
         <module name="workers" />
       </profile>
     </annotationProcessing>
+    <bytecodeTargetLevel>
+      <module name="untitled" target="24" />
+    </bytecodeTargetLevel>
   </component>
 </project>
