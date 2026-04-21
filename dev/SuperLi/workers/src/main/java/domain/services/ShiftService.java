@@ -39,8 +39,8 @@ public class ShiftService {
         LocalDate weekDate = date.with(TemporalAdjusters.previousOrSame(DayOfWeek.SUNDAY));
         WeekShiftsEntity week = shiftPool.getWeek(weekDate);
         ShiftEntity shiftEntity = shift == null ? null : shift.toEntity();
-        if (type == ShiftType.DAY) week.addDayShift(shiftEntity);
-        else if (type == ShiftType.EVENING) week.addNightShift(shiftEntity);
+        if (type == ShiftType.DAY) week.addDayShift(day.name(), shiftEntity);
+        else if (type == ShiftType.EVENING) week.addNightShift(day.name(), shiftEntity);
     }
 
     public void setClosedDays(List<String> closed) {

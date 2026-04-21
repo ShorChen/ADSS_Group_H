@@ -23,24 +23,24 @@ public class ShiftPool {
     private ShiftPool() {
         this.weeks = new HashMap<>();
         this.closedDays = new ArrayList<>();
-
-        WeekShiftsEntity week = new WeekShiftsEntity(
-                LocalDate.now().with(TemporalAdjusters.previousOrSame(DayOfWeek.SUNDAY))
-                , new HashMap<>(), new HashMap<>()
-        );
-
-        Map<String, Set<String>> employees = new HashMap<>();
-        Set<String> shiftManager = new HashSet<>();
-        shiftManager.add("<SHIFT MANAGER ID>");
-        employees.put("Shift Manager", shiftManager);
-        week.addDayShift(new ShiftEntity(null, "SUNDAY",
-                "DAY", employees, new HashMap<>()));
-
-        week.addNightShift(new ShiftEntity(null, "SUNDAY",
-                "EVENING", employees, new HashMap<>()));
-
-
-        weeks.put(week.getDate(), week);
+//
+//        WeekShiftsEntity week = new WeekShiftsEntity(
+//                LocalDate.now().with(TemporalAdjusters.previousOrSame(DayOfWeek.SUNDAY))
+//                , new HashMap<>(), new HashMap<>()
+//        );
+//
+//        Map<String, Set<String>> employees = new HashMap<>();
+//        Set<String> shiftManager = new HashSet<>();
+//        shiftManager.add("<SHIFT MANAGER ID>");
+//        employees.put("Shift Manager", shiftManager);
+//        week.addDayShift(new ShiftEntity(null, "SUNDAY",
+//                "DAY", employees, new HashMap<>()));
+//
+//        week.addNightShift(new ShiftEntity(null, "SUNDAY",
+//                "EVENING", employees, new HashMap<>()));
+//
+//
+//        weeks.put(week.getDate(), week);
 
     }
 
@@ -73,7 +73,7 @@ public class ShiftPool {
             week = new WeekShiftsEntity(weekDate, new HashMap<>(), new HashMap<>());
             weeks.put(week.getDate(), week);
         }
-        week.addDayShift(shift);
+        week.addDayShift(shift.getDay(), shift);
 
     }
 
@@ -83,7 +83,7 @@ public class ShiftPool {
             week = new WeekShiftsEntity(weekDate, new HashMap<>(), new HashMap<>());
             weeks.put(week.getDate(), week);
         }
-        week.addNightShift(shift);
+        week.addNightShift(shift.getDay(), shift);
 
     }
 

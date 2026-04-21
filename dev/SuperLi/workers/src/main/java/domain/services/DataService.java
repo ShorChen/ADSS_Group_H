@@ -60,7 +60,7 @@ public class DataService {
                 LocalDate.of(2026, 4, 19),
                 new HashMap<>(), new HashMap<>()
         );
-        w1.addDayShift(s1);
+        w1.addDayShift(s1.getDay(), s1);
 
         WeekShiftsEntity w2 = new WeekShiftsEntity(
                 LocalDate.of(2026, 4, 12),
@@ -71,7 +71,7 @@ public class DataService {
                 LocalDate.of(2026, 3, 29),
                 new HashMap<>(), new HashMap<>()
         );
-        w3.addNightShift(m2);
+        w3.addNightShift(m2.getDay(), m2);
 
         shiftPool.updateWeek(w1);
         shiftPool.updateWeek(w2);
