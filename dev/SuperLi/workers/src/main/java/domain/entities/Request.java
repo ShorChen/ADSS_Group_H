@@ -1,5 +1,9 @@
 package domain.entities;
 
+import data_access.entities.RequestEntity;
+
+import java.util.Objects;
+
 public class Request {
     private Shift shift;
     private String prevEmployee;
@@ -30,8 +34,17 @@ public class Request {
         this.denied = denied;
     }
 
-    public Shift getShifts() {
-        return shift;
+    public RequestEntity toEntity() {
+        return new RequestEntity(shift.toEntity(), prevEmployee, newEmployee, manager,
+                prevApproved, newApproved, managerApproved, denied);
+    }
+
+    public Request(RequestEntity entity) {
+        this(
+                new Shift(entity.getShift()),
+                entity.getPrevEmployee(), entity.getNewEmployee(), entity.getManager(),
+                entity.isPrevApproved(), entity.isNewApproved(),
+                entity.isManagerApproved(), entity.isDenied());
     }
 
     public String getPrevEmployee() {
@@ -64,5 +77,47 @@ public class Request {
 
     public boolean isPrevApproved() {
         return prevApproved;
+    }
+
+    public boolean approve(String id) {
+        if (denied) return false;
+        if (Objects.equals(id, prevEmployee)) {
+            prevApproved = true;
+            return true;
+        }
+        if (Objects.equals(id, newEmployee)) {
+            newApproved = true;
+        }
+        if (Objects.equals(id, manager)) {
+            managerApproved = true;
+        }
+        return false;
+
+    }
+
+    public boolean deny(String id) {
+        if (isApproved() || denied) return false;
+        if (Objects.equals(id, prevEmployee)) {
+            prevApproved = false;
+            denied = true;
+            return true;
+        }
+        if (Objects.equals(id, newEmployee)) {
+            newApproved = false;
+            denied = true;
+            return true;
+
+        }
+        if (Objects.equals(id, manager)) {
+            managerApproved = false;
+            denied = true;
+            return true;
+        }
+        return false;
+    }
+
+    public boolean isApproved() {
+        return prevApproved && (newApproved || newEmployee == null) &&
+               managerApproved && !denied;
     }
 }

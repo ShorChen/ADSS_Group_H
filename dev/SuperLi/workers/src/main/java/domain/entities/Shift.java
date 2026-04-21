@@ -27,6 +27,20 @@ public class Shift {
         this.additionalHours = additionalHours;
     }
 
+    public Shift(WeekDay day, ShiftType type, String id) {
+        startDate = null;
+        this.day = day;
+        this.shiftType = type;
+        employees = new HashMap<>();
+
+        BoundedSet<String> shiftManager = new BoundedSet<>(1);
+        shiftManager.add(id);
+
+        employees.put(Role.ShiftManager, shiftManager);
+
+        additionalHours = new HashMap<>();
+    }
+
     public Shift(ShiftEntity entity) {
         this(
                 entity.getStartDate(), WeekDay.valueOf(entity.getDay()),
@@ -77,6 +91,7 @@ public class Shift {
     }
 
     public boolean assign(Role role, Employee employee) {
+        if (!employees.containsKey(role)) employees.put(role, new BoundedSet<>(5));
         if (employee.getQualifiedRoles().contains(role)) {
             return employees.get(role).add(employee.getId());
         }

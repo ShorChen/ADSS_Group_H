@@ -1,7 +1,6 @@
 package presentation.ui_manager;
 
 
-import presentation.control.HistoryController;
 import presentation.ui_shared.ShiftsView;
 import presentation.ui_shared.View;
 import presentation.util.Option;
@@ -34,7 +33,7 @@ public class ViewShiftHistoryUI extends View {
     }
 
     private void viewShift() {
-        shiftsView.selectDay(shiftsView::displayShift);
+        shiftsView.selectShift(shiftsView::displayShift);
     }
 
     private void loadPreviousWeek() {

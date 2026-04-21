@@ -25,7 +25,8 @@ public class AuthService {
 
     public Employee login(String id, String password) {
         EmployeeEntity entity = employees.getEmployee(id);
-        if (entity != null && entity.checkPassword(password))
+        if (entity == null || !entity.isActive()) return null;
+        if (entity.checkPassword(password))
             return new Employee(entity);
         return null;
     }

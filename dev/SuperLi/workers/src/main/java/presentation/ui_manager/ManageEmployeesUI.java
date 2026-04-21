@@ -61,7 +61,7 @@ public class ManageEmployeesUI extends View {
             if (employee.getQualifiedRoles().isEmpty()) {
                 System.out.println("None");
             } else {
-                employee.getQualifiedRoles().forEach(role -> System.out.print(role.getTag() + " ")); // Assuming Role has a getTag() or getName()
+                employee.getQualifiedRoles().forEach(role -> System.out.print(role + " "));
                 System.out.println();
             }
         }

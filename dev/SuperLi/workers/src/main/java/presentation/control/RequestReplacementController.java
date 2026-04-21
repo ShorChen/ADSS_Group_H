@@ -1,54 +1,82 @@
 package presentation.control;
 
+import context.SessionManager;
+import domain.entities.Request;
+import domain.entities.Shift;
+import domain.entities.WeekShifts;
 import domain.enums.ShiftType;
 import domain.enums.WeekDay;
+import domain.services.EmployeeService;
+import domain.services.RequestReplacementService;
+import domain.services.ShiftService;
 import presentation.model.RequestPL;
+import presentation.model.ShiftPL;
 
-import java.util.*;
+import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.List;
 
 public class RequestReplacementController {
+    private final RequestReplacementService service;
+    private final EmployeeService employeeService;
+    private final ShiftService shiftService;
 
-    public List<ShiftType> getOpenShifts(WeekDay i) {
-        return Arrays.asList(ShiftType.values());
+    public RequestReplacementController() {
+        service = new RequestReplacementService();
+        employeeService = new EmployeeService();
+        shiftService = new ShiftService();
     }
 
-    public boolean requestShiftReplacement(WeekDay[] day, ShiftType[] type, String id,
+    public boolean requestShiftReplacement(int day, int type, String id,
                                            String otherId) {
 
+        Shift shift = service.getShift(SessionManager.now().toLocalDate(),
+                WeekDay.values()[day],
+                ShiftType.values()[type]);
+        ShiftPL shiftPL = new ShiftPL(shift);
+
+        if (shiftPL.find(otherId) != null)
+            throw new IllegalArgumentException("Employee already in enrolled in that shift");
+
+        String role = shiftPL.find(id);
+
+        if (employeeService.containsRole(otherId, role)) {
+            RequestPL r = new RequestPL(shiftPL, id, otherId);
+            return service.requestReplacement(r.toRequest());
+        }
         return false;
     }
 
     public List<RequestPL> getPendingRequests(String id) {
-        return new ArrayList<>();
+        List<Request> requests = service.getPendingRequests(id);
+        List<RequestPL> pendingRequests = new ArrayList<>();
+        requests.forEach(request -> pendingRequests.add(new RequestPL(request)));
+        return pendingRequests;
     }
 
     public boolean approve(RequestPL request, String id) {
-        return false;
+        if (!service.approve(request.toRequest(), id)) return false;
+
+
+        LocalDate weekDate = SessionManager.now().toLocalDate();
+        WeekShifts weekShifts = shiftService.getNWeeksAgo(weekDate);
+        Shift shift = request.getShift().toShift();
+        switch (shift.getShiftType()) {
+            case ShiftType.DAY -> weekShifts.addDayShift(shift.getDay(), shift);
+            case ShiftType.EVENING -> weekShifts.addNightShift(shift.getDay(), shift);
+        }
+        shiftService.updateWeek(weekShifts);
+
+        return true;
     }
 
-    public void deny(RequestPL request, String id) {
+    public boolean deny(RequestPL request, String id) {
+        return service.deny(request.toReplacementRequest(), id);
     }
 
-    public Map<WeekDay, List<ShiftType>> getWorkingShifts(String id) {
-        return getworkingshiftsdemo();
-    }
+    public boolean getEmployeeShiftsPredicate(ShiftPL shiftPL, boolean isManager) {
 
-    private Map<WeekDay, List<ShiftType>> getworkingshiftsdemo() {
-        Map<WeekDay, List<ShiftType>> map = new LinkedHashMap<>();
-        map.put(WeekDay.SUNDAY, of(true, true));
-        map.put(WeekDay.MONDAY, of(true, true));
-        map.put(WeekDay.TUESDAY, of(true, true));
-        map.put(WeekDay.WEDNESDAY, of(false, true));
-        map.put(WeekDay.THURSDAY, of(false, true));
-        map.put(WeekDay.FRIDAY, of(true, true));
-        map.put(WeekDay.SATURDAY, of(false, false));
-        return map;
-    }
-
-    private List<ShiftType> of(boolean day, boolean night) {
-        List<ShiftType> list = new ArrayList<>();
-        if (day) list.add(ShiftType.DAY);
-        if (night) list.add(ShiftType.EVENING);
-        return list;
+        return shiftPL != null &&
+               (shiftPL.find(SessionManager.getCurrentEmployee().getId()) != null || isManager);
     }
 }

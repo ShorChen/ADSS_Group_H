@@ -1,3 +1,4 @@
+import context.SessionManager;
 import domain.entities.Employee;
 import domain.entities.Role;
 import domain.entities.Shift;
@@ -82,7 +83,8 @@ public class ShiftPlacementTest {
 
     private static Employee createDummyEmployee(String id, String name, boolean isActive) {
         return new Employee(
-                id, name, "123456", 50.0, SalaryType.HOURLY, LocalDateTime.now(),
+                id, name, "123456", 50.0, SalaryType.HOURLY,
+                SessionManager.now(),
                 JobScope.FULL_TIME, new ArrayList<>(), "No constraints", 12,
                 WeekDay.SATURDAY, false, new HashMap<>(), isActive
         );

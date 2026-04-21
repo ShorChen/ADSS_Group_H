@@ -1,5 +1,6 @@
 package presentation.ui_shared;
 
+import context.SessionManager;
 import presentation.util.Option;
 
 import java.util.InputMismatchException;
@@ -68,8 +69,8 @@ public abstract class View {
         }
     }
 
-    protected void displayMenu(Option.Builder options, String endMessage)
-            throws IllegalArgumentException {
+    protected void displayMenu(Option.Builder options, String endMessage) {
+        if (SessionManager.isDebugMode()) debug(options);
         if (options == null || options.size() == 0)
             throw new IllegalArgumentException("Menu should have at least 1 option");
         System.out.println(options.getMessage());
@@ -90,4 +91,14 @@ public abstract class View {
         if (options.get(selection).getAction() != null)
             options.get(selection).getAction().run();
     }
+
+
+    private void debug(Option.Builder options) {
+        options.append("Move time (DEBUGGING)", () -> {
+            int hours = getNextInteger("Move hours forward");
+            SessionManager.debug(hours);
+            System.out.println("Set time to " + SessionManager.now());
+        });
+    }
+
 }

@@ -1,13 +1,12 @@
 package domain.services;
 
-import java.util.Map;
-import java.util.Set;
-import java.util.HashMap;
-import java.util.HashSet;
+import java.util.*;
 
 import data_access.entities.EmployeeEntity;
 import data_access.pools.EmployeePool;
 import domain.entities.Employee;
+import domain.entities.Role;
+import domain.enums.WeekDay;
 import domain.util.PasswordGenerator;
 import domain.enums.ShiftType;
 
@@ -73,5 +72,22 @@ public class EmployeeService {
         entity.setUnavailableShifts(entityShifts);
         entity.setWorkingDoubles(canWorkDoubleShifts);
 
+    }
+
+    public List<Employee> getAvailableEmployees(WeekDay weekDay, ShiftType shiftType, Role role) {
+        List<Employee> employeeList = new ArrayList<>();
+        employees.getEmployees(role.getTag()).forEach(
+                e -> {
+                    Employee employee = new Employee(e);
+                    if (!employee.getUnavailableShifts()
+                            .getOrDefault(weekDay, new HashSet<>()).contains(shiftType))
+                        employeeList.add(employee);
+                });
+
+        return employeeList;
+    }
+
+    public boolean containsRole(String id, String role) {
+        return employees.containsRole(id, role);
     }
 }

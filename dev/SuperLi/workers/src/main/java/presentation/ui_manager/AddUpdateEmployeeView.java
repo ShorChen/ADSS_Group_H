@@ -1,9 +1,9 @@
 package presentation.ui_manager;
 
-import domain.entities.Role;
 import domain.enums.JobScope;
 import domain.enums.SalaryType;
 import domain.enums.WeekDay;
+import presentation.control.AddUpdateEmployeeController;
 import presentation.control.EmployeeController;
 import presentation.control.RoleController;
 import presentation.model.EmployeePL;
@@ -22,6 +22,8 @@ public class AddUpdateEmployeeView extends View {
 
     private final EmployeeController employeeController;
     private final RoleController roleController;
+    private final AddUpdateEmployeeController controller;
+
     private EmployeePL.Builder builder;
     private boolean open;
     private final String employeeId;
@@ -31,6 +33,7 @@ public class AddUpdateEmployeeView extends View {
         employeeController = new EmployeeController();
         roleController = new RoleController();
         this.employeeId = employeeId;
+        controller = new AddUpdateEmployeeController();
     }
 
     @Override
@@ -42,8 +45,10 @@ public class AddUpdateEmployeeView extends View {
             buildEmployee("\n--- Add New Employee ---");
         else if (e == null)
             buildEmployee("Could not find employee... Adding New Employee");
-        else
+        else {
             System.out.println("\n--- Update Existing Employee ---");
+            builder = new EmployeePL.Builder(employeeId);
+        }
 
         while (open) {
             EmployeePL employee = builder.build();
@@ -85,13 +90,15 @@ public class AddUpdateEmployeeView extends View {
         System.out.println("Job Scope: " + employee.getJobScope());
         System.out.println("Yearly Rest Days: " + employee.getYearlyRestDays());
         System.out.println("Weekly Rest Day: " + employee.getWeeklyRestDay());
-        System.out.println("Constraints: " + (employee.getConstraints().isEmpty() ? "None" : employee.getConstraints()));
+        System.out.println("Constraints: " + (employee.getConstraints() == null ||
+                                              employee.getConstraints().isEmpty() ?
+                "None" : employee.getConstraints()));
 
         System.out.print("Roles: ");
         if (employee.getQualifiedRoles().isEmpty()) {
             System.out.println("None");
         } else {
-            employee.getQualifiedRoles().forEach(role -> System.out.print(role.getTag() + " "));
+            employee.getQualifiedRoles().forEach(role -> System.out.print(role + " "));
             System.out.println();
         }
     }
@@ -179,7 +186,7 @@ public class AddUpdateEmployeeView extends View {
     }
 
     private void roles() {
-        Set<Role> qualifiedRoles = new HashSet<>();
+        Set<String> qualifiedRoles = new HashSet<>();
         System.out.println("\n--- Add Qualified Roles ---");
         System.out.println("Roles: " + roleController.getAllRoles());
         boolean stop = false;
@@ -188,7 +195,7 @@ public class AddUpdateEmployeeView extends View {
             if (roleName.equals("0"))
                 stop = true;
             else if (!roleName.trim().isEmpty()) {
-                Role role = roleController.getRole(roleName);
+                String role = roleController.getRole(roleName);
 
                 if (role != null) {
                     qualifiedRoles.add(role);
@@ -215,7 +222,7 @@ public class AddUpdateEmployeeView extends View {
     private void weeklyRestDay() {
         WeekDay[] day = new WeekDay[1];
         Option.Builder menuBuilder = new Option.Builder("Enter Weekly Rest Day");
-        List<WeekDay> closedDays = new ArrayList<>(); //controller.getClosedDays();
+        List<WeekDay> closedDays = controller.getClosedDays();
         closedDays.forEach(d -> menuBuilder.append(d.day, () -> day[0] = d));
         displayMenu(menuBuilder, "");
 

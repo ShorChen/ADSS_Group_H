@@ -5,7 +5,6 @@ import domain.services.RoleService;
 
 import java.util.List;
 
-/* requirement no. 5 */
 public class RoleController {
     private final RoleService service;
 
@@ -23,7 +22,7 @@ public class RoleController {
         return service.getAllRoles();
     }
 
-    public Role getRole(String tag) {
-        return service.getRole(tag);
+    public String getRole(String tag) {
+        return service.getRole(tag).getTag();
     }
 }

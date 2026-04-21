@@ -2,8 +2,6 @@ package presentation.model;
 
 import domain.entities.Request;
 
-import java.util.Objects;
-
 public class RequestPL {
 
     private ShiftPL shift;
@@ -28,6 +26,11 @@ public class RequestPL {
         this.denied = denied;
     }
 
+    public RequestPL(ShiftPL shift, String prevEmployee, String newEmployee) {
+        this(shift, prevEmployee, newEmployee, null,
+                false, false, false, false);
+    }
+
     public RequestPL(Request request) {
         this(new ShiftPL(request.getShift()),
                 request.getPrevEmployee(),
@@ -40,6 +43,14 @@ public class RequestPL {
         );
     }
 
+    public ShiftPL getShift() {
+        return shift;
+    }
+
+    public String getPrevEmployee() {
+        return prevEmployee;
+    }
+
     public Request toRequest() {
         return new Request(
                 shift.toShift(), prevEmployee, newEmployee, manager,
@@ -47,40 +58,11 @@ public class RequestPL {
         );
     }
 
-    public boolean approve(String id) {
-        if (denied) return false;
-        if (Objects.equals(id, prevEmployee)) {
-            prevApproved = true;
-            return true;
-        }
-        if (Objects.equals(id, newEmployee)) {
-            newApproved = true;
-        }
-        if (Objects.equals(id, manager)) {
-            managerApproved = true;
-        }
-        return false;
-
-
-    }
-
-    public boolean deny(String id) {
-        if (isApproved() || !(Objects.equals(id, prevEmployee) ||
-                              Objects.equals(id, newEmployee) ||
-                              Objects.equals(id, manager))) return false;
-
-        denied = true;
-        return true;
-    }
 
     public boolean isPrevApproved() {
         return prevApproved;
     }
 
-    public boolean isApproved() {
-        return prevApproved && (newApproved || newEmployee == null) &&
-               managerApproved && !denied;
-    }
 
     public boolean isNewApproved() {
         return newApproved;
@@ -97,5 +79,33 @@ public class RequestPL {
     public Request toReplacementRequest() {
         return new Request(shift.toShift(), prevEmployee, newEmployee, manager,
                 prevApproved, newApproved, managerApproved, denied);
+    }
+
+    @Override
+    public String toString() {
+        StringBuilder s = new StringBuilder();
+        s.append("Day: ").append(shift.getDay().day)
+                .append("At: ").append(shift.getShiftType().type).append("\n");
+
+        if (newEmployee != null) {
+            if (manager != null) {
+                String status = managerApproved ? "Approved" : "Denied";
+                s.append(manager).append(" (").append(status).append(") on request: ");
+            }
+            String prevStatus = prevApproved ? "Accepted" : "Denied";
+            String newStatus = newApproved ? "Accepted" : denied ? "Denied" : "Pending";
+
+            s.append(newEmployee).append(" (").append(newStatus).append(") ")
+                    .append("==>")
+                    .append(prevEmployee).append(" (").append(prevStatus).append(") ");
+        } else {
+            String status = managerApproved ? "Approved" : "Denied";
+            String prevStatus = prevApproved ? "Accepted" : "Pending";
+
+            s.append(manager).append(" (").append(status).append(") on request: ")
+                    .append(prevEmployee).append(" (").append(prevStatus).append(") ");
+        }
+
+        return s.toString();
     }
 }

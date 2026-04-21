@@ -1,7 +1,7 @@
 package presentation.ui_employee;
 
 import context.SessionManager;
-import presentation.control.employee.EmployeeShiftController;
+import presentation.control.EmployeeShiftController;
 import presentation.ui_shared.ShiftsView;
 import presentation.ui_shared.View;
 import presentation.util.Option;
@@ -38,12 +38,12 @@ public class EmployeeChooseShiftsUI extends View {
     }
 
     private void viewShifts() {
-        shiftsView.selectDay(shiftsView::displayShift);
+        shiftsView.selectShift(shiftsView::displayShift);
     }
 
     private void markShift() {
-        shiftsView.selectDay(((day, shift) -> {
-            shiftsView.setMarked(day, shift, 'U');
+        shiftsView.selectShift(((day, shift) -> {
+            shiftsView.setUnsaved(day, shift);
             addSelectedShift(selectedShifts, day, shift);
         }));
     }
@@ -54,8 +54,8 @@ public class EmployeeChooseShiftsUI extends View {
                 SessionManager.getCurrentEmployee().getId(),
                 selectedShifts,
                 doubles);
-        System.out.println(selectedShifts);
         System.out.println("Availability Submitted");
+        onDismiss.run();
     }
 
     private void addSelectedShift(Map<Integer, Set<Integer>> map, int key, int value) {

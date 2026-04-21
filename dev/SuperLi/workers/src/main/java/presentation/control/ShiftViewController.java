@@ -1,5 +1,6 @@
-package presentation.control.shared;
+package presentation.control;
 
+import context.SessionManager;
 import domain.entities.Shift;
 import domain.entities.WeekShifts;
 import domain.enums.ShiftType;
@@ -9,7 +10,6 @@ import domain.services.ShiftService;
 import presentation.model.EmployeePL;
 import presentation.model.ShiftPL;
 
-import java.time.LocalDate;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -23,22 +23,25 @@ public class ShiftViewController {
     }
 
     public Map<Integer, Map<Integer, ShiftPL>> getWeek(int weeksAgo) {
-        WeekShifts week = shiftService.getNWeeksAgo(LocalDate.now().minusWeeks(weeksAgo));
+        WeekShifts week = shiftService.getNWeeksAgo(
+                SessionManager.now().minusWeeks(weeksAgo).toLocalDate()
+        );
 
         Map<Integer, Map<Integer, ShiftPL>> map = new HashMap<>();
         for (int i = 0; i < WeekDay.values().length; i++)
             map.put(i, of(week, WeekDay.values()[i]));
 
         return map;
+
     }
 
     private Map<Integer, ShiftPL> of(WeekShifts week, WeekDay day) {
         Map<Integer, ShiftPL> map = new HashMap<>();
         Shift shift = week.getDayShifts().getOrDefault(day, null);
-        map.put(ShiftType.DAY.ordinal(), shift == null? null : new ShiftPL(shift));
+        map.put(ShiftType.DAY.ordinal(), shift == null ? null : new ShiftPL(shift));
 
         shift = week.getNightShifts().getOrDefault(day, null);
-        map.put(ShiftType.EVENING.ordinal(), shift == null? null : new ShiftPL(shift));
+        map.put(ShiftType.EVENING.ordinal(), shift == null ? null : new ShiftPL(shift));
 
         return map;
     }
@@ -46,4 +49,7 @@ public class ShiftViewController {
     public EmployeePL getEmployeeDetails(String id) {
         return new EmployeePL(employeeService.getEmployeeDetails(id));
     }
+
+
+
 }

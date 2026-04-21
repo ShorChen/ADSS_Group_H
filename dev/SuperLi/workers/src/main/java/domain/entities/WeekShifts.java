@@ -25,10 +25,14 @@ public class WeekShifts {
 
     public WeekShifts(WeekShiftsEntity shiftsEntity) {
         this(shiftsEntity.getDate(), new HashMap<>(), new HashMap<>());
-        shiftsEntity.getDayShifts().forEach((day, entity) ->
-                dayShifts.put(WeekDay.valueOf(day), new Shift(entity)));
-        shiftsEntity.getNightShifts().forEach((day, entity) ->
-                nightShifts.put(WeekDay.valueOf(day), new Shift(entity)));
+        shiftsEntity.getDayShifts().forEach((day, entity) -> {
+            Shift shift = entity == null? null : new Shift(entity);
+            dayShifts.put(WeekDay.valueOf(day), shift);
+        });
+        shiftsEntity.getNightShifts().forEach((day, entity) -> {
+            Shift shift = entity == null? null : new Shift(entity);
+            nightShifts.put(WeekDay.valueOf(day), shift);
+        });
     }
 
     public WeekShiftsEntity toEntity() {

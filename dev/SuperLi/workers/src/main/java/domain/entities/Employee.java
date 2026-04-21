@@ -8,6 +8,7 @@ import domain.enums.WeekDay;
 
 import java.time.LocalDateTime;
 import java.util.*;
+import java.util.function.Consumer;
 
 public class Employee {
     private final String id;
@@ -28,7 +29,7 @@ public class Employee {
     public Employee(String id, String name, String bankAccount,
                     double salary, SalaryType salaryType, LocalDateTime dateOfEmployment,
                     JobScope jobScope, List<Role> qualifiedRoles, String constraints,
-                    int yearlyRestDays, WeekDay weeklyRestDay ,boolean workingDoubles,
+                    int yearlyRestDays, WeekDay weeklyRestDay, boolean workingDoubles,
                     Map<WeekDay, Set<ShiftType>> unavailableShifts, boolean active) {
         this.id = id;
         this.name = name;
@@ -65,6 +66,8 @@ public class Employee {
 
         Map<Integer, Set<Integer>> entityUnavailableShifts = entity.getUnavailableShifts();
         this.unavailableShifts = new HashMap<>();
+
+        entity.getQualifiedRoles().forEach(s -> qualifiedRoles.add(new Role(s)));
 
         if (entityUnavailableShifts != null) {
             entityUnavailableShifts.forEach((day, shifts) -> {
@@ -104,10 +107,10 @@ public class Employee {
         });
 
         return new EmployeeEntity(
-            id, name, bankAccount, salary, salaryType.name(), dateOfEmployment,
-            jobScope.name(), roles, constraints, yearlyRestDays, weeklyRestDay.name(),
-            password, workingDoubles,
-            unavailableShiftsEntity, active
+                id, name, bankAccount, salary, salaryType.name(), dateOfEmployment,
+                jobScope.name(), roles, constraints, yearlyRestDays, weeklyRestDay.name(),
+                password, workingDoubles,
+                unavailableShiftsEntity, active
         );
     }
 

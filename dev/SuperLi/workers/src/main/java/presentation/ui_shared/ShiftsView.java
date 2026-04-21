@@ -1,10 +1,15 @@
 package presentation.ui_shared;
 
-import presentation.control.shared.ShiftViewController;
+import domain.enums.ShiftType;
+import domain.enums.WeekDay;
+import presentation.control.ShiftViewController;
 import presentation.model.EmployeePL;
 import presentation.model.ShiftPL;
+import presentation.util.Option;
 
 import java.util.Map;
+import java.util.Objects;
+import java.util.function.Function;
 
 public class ShiftsView extends View {
     private static final int INDEX_SUN_DAY = 116;
@@ -13,7 +18,8 @@ public class ShiftsView extends View {
     public static Character NO_SHIFT = 'X';
     public static Character PARTIAL_SHIFT = 'P';
     private final ShiftViewController controller;
-    private final Map<Integer, Map<Integer, ShiftPL>> weekShifts;
+    private Map<Integer, Map<Integer, ShiftPL>> weekShifts;
+    private final Function<ShiftPL, Boolean> predicate;
     private final StringBuilder calendar = new StringBuilder(
             """
                     +-----+---+---+---+---+---+---+---+
@@ -29,28 +35,88 @@ public class ShiftsView extends View {
     public ShiftsView(int weeksAgo) {
         super(null);
         controller = new ShiftViewController();
+        predicate = Objects::nonNull;
+        init(weeksAgo);
+    }
+
+    public ShiftsView(int weeksAgo, Function<ShiftPL, Boolean> predicate) {
+        super(null);
+        controller = new ShiftViewController();
+        this.predicate = predicate;
+        init(weeksAgo);
+    }
+
+
+    private void init(int weeksAgo) {
         weekShifts = controller.getWeek(weeksAgo);
         weekShifts.forEach((day, shifts) -> {
+
+            ShiftPL s = shifts.get(0);
             setMarked(day, 0,
-                    shifts.get(0) == null ? NO_SHIFT : ' ');
+                    predicate.apply(s) ? ' ' : 'X');
+            //s == null ? NO_SHIFT : predicate.apply(s) ? 'V' : ' ');
+
+            s = shifts.get(1);
             setMarked(day, 1,
-                    shifts.get(1) == null ? NO_SHIFT : ' ');
+                    predicate.apply(s) ? ' ' : 'X');
+            //s == null ? NO_SHIFT : predicate.apply(s) ? 'V' : ' ');
         });
     }
 
-    public void selectDay(OnShiftSelect onSelect) {
-        int day = getNextInteger("Enter day (0=SUN, 1=MON, 2=TUE, 3=WED, 4=THU, 5=FRI, 6=SAT):");
-        int shift = getNextInteger("Enter shift (0=DAY, 1=NIGHT):");
+    private void selectShift(Function<ShiftPL, Boolean> pred,
+                             OnShiftSelect onSelect) {
+        int[] day = new int[1];
+        int[] type = new int[1];
 
-        if (day >= 0 && day <= 6 && shift >= 0 && shift <= 1) {
-            char mark = getMark(day, shift);
-            if (mark == ShiftsView.NO_SHIFT)
-                System.out.println("The Store Is Closed For This Shift");
-            else if (onSelect != null) onSelect.run(day, shift);
-        } else {
-            System.out.println("Invalid selection.");
+        final Option.Builder builderDays = new Option.Builder("Enter Shift's Week Day");
+        weekShifts.forEach((weekDayOrdinal, shifts) -> {
+            boolean[] foundShift = {false};
+            shifts.forEach((_, shiftPL) -> {
+                if (pred.apply(shiftPL)) foundShift[0] = true;
+            });
+
+            if (foundShift[0])
+                builderDays.append(WeekDay.values()[weekDayOrdinal].day, () ->
+                        day[0] = weekDayOrdinal);
+
+        });
+        if (builderDays.size() == 0) {
+            System.out.println("Found no matching shifts for this week");
+            return;
         }
+
+        displayMenu(builderDays, "");
+
+        final Option.Builder builderShifts = new Option.Builder("Enter Shift's Type");
+        weekShifts.get(day[0]).forEach((shiftTypeOrdinal, shiftPL) -> {
+            if (pred.apply(shiftPL)) {
+                builderShifts.append(ShiftType.values()[shiftTypeOrdinal].type, () ->
+                        type[0] = shiftTypeOrdinal);
+            }
+        });
+
+        if (builderShifts.size() == 0) {
+            System.out.println("Found no matching shifts for this day");
+            return;
+        }
+
+        displayMenu(builderShifts, "");
+        if (onSelect != null) onSelect.run(day[0], type[0]);
     }
+
+
+    public void selectShiftOfPredicate(OnShiftSelect onSelect) {
+        selectShift(predicate, onSelect);
+    }
+
+    public void selectShift(OnShiftSelect onSelect) {
+        selectShift(Objects::nonNull, onSelect);
+    }
+
+    public void selectClosedShifts(OnShiftSelect onSelect) {
+        selectShift(Objects::isNull, onSelect);
+    }
+
 
     public void displayShift(int day, int type) {
         Map<Integer, ShiftPL> shiftsOfDay = weekShifts.getOrDefault(day, null);
@@ -69,6 +135,9 @@ public class ShiftsView extends View {
                 .append("Shift Type: ").append(shift.getShiftType().type).append("\n");
 
 
+        if (!shift.getEmployees().isEmpty())
+            stringBuilder.append("---Employees---\n");
+
         shift.getEmployees().forEach((role, workers) -> {
             workers.forEach(employee -> {
                 EmployeePL employeePL = controller.getEmployeeDetails(employee);
@@ -80,12 +149,9 @@ public class ShiftsView extends View {
         System.out.println(stringBuilder);
     }
 
-    public void closeShift(int day, int type) {
-        setMarked(day, type, NO_SHIFT);
-    }
 
-    public void openShift(int day, int type) {
-        setMarked(day, type, ' ');
+    public void setUnsaved(int day, int shift) {
+        setMarked(day, shift, 'U');
     }
 
 
@@ -98,7 +164,7 @@ public class ShiftsView extends View {
                (INDEX_SUN_NIGHT - INDEX_SUN_DAY) * type;
     }
 
-    public void setMarked(int day, int type, char c) {
+    private void setMarked(int day, int type, char c) {
         calendar.setCharAt(getIndexOf(day, type), c);
     }
 

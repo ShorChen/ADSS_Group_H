@@ -1,4 +1,4 @@
-package presentation.control.employee;
+package presentation.control;
 
 import domain.entities.Request;
 import domain.entities.Shift;
@@ -13,7 +13,6 @@ import java.util.Set;
 import java.util.HashMap;
 import java.util.HashSet;
 
-/* requirement no. 4, 21 22 24 26 27 28*/
 public class EmployeeShiftController {
     private ShiftService service;
     private EmployeeService employeeService;
@@ -38,9 +37,6 @@ public class EmployeeShiftController {
             });
         }
         employeeService.updateAvailability(employeeId, domainShifts, canWorkDoubleShifts);
-    }
-    public void setPreferredRestDay(String day){
-        // todo: implement
     }
 
     public void requestReplacement(Request request){

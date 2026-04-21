@@ -3,8 +3,10 @@ package data_access.entities;
 import util.BoundedSet;
 
 import java.time.LocalDateTime;
-import java.util.*;
-import java.util.function.BiConsumer;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Set;
 
 public class ShiftEntity {
     private final LocalDateTime startDate;

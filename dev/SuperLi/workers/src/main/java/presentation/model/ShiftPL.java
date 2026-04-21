@@ -9,8 +9,12 @@ import util.BoundedSet;
 import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Set;
+import java.util.function.BiConsumer;
+import java.util.function.Consumer;
 
 public class ShiftPL {
+
 
     private final LocalDateTime startDate;
     private final WeekDay day;
@@ -36,6 +40,7 @@ public class ShiftPL {
                 shiftEmployees, additionalHours
         );
     }
+
 
     public ShiftPL(Shift shift) {
         this(shift.getStartDate(), shift.getDay(), shift.getShiftType(),
@@ -63,5 +68,12 @@ public class ShiftPL {
 
     public Map<String, Float> getAdditionalHours() {
         return additionalHours;
+    }
+
+    public String find(String id) {
+        for (Map.Entry<String, BoundedSet<String>> e : employees.entrySet()) {
+            if (e.getValue().contains(id)) return e.getKey();
+        }
+        return null;
     }
 }

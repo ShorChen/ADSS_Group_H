@@ -23,7 +23,8 @@ public class EmployeeHomeUI extends View {
                             .append("Logout", onDismiss)
                             .append("Change Password", this::changePassword)
                             .append("View Schedule & Submit Availability", this::chooseShifts)
-                            .append("Request Shift Replacement", this::requestReplacement),
+                            .append("Request Shift Replacement",
+                                    this::requestReplacement),
                     "");
         }
     }

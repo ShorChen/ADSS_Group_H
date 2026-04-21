@@ -18,7 +18,7 @@ public class EmployeePL {
     private SalaryType salaryType;
     private LocalDateTime dateOfEmployment;
     private JobScope jobScope;
-    private final List<Role> qualifiedRoles;
+    private final List<String> qualifiedRoles;
     private String constraints;
     private int yearlyRestDays;
     private WeekDay weeklyRestDay;
@@ -28,7 +28,7 @@ public class EmployeePL {
 
     public EmployeePL(String id, String name, String bankAccount,
                       double salary, SalaryType salaryType, LocalDateTime dateOfEmployment,
-                      JobScope jobScope, List<Role> qualifiedRoles, String constraints,
+                      JobScope jobScope, List<String> qualifiedRoles, String constraints,
                       int yearlyRestDays, WeekDay weeklyRestDay, boolean workingDoubles, Map<WeekDay, Set<ShiftType>> unavailableShifts) {
         this.id = id;
         this.name = name;
@@ -50,10 +50,13 @@ public class EmployeePL {
                 employee.getId(), employee.getName(), employee.getBankAccount(),
                 employee.getSalary(), employee.getSalaryType(),
                 employee.getDateOfEmployment(), employee.getJobScope(),
-                employee.getQualifiedRoles(), employee.getConstraints(),
+                new ArrayList<>(), employee.getConstraints(),
                 employee.getYearlyRestDays(), employee.getWeeklyRestDay(), employee.isWorkingDoubles(),
                 employee.getUnavailableShifts()
         );
+        employee.getQualifiedRoles().forEach(role -> {
+            setQualifiedRoles(role.getTag());
+        });
         this.active = employee.isActive();
     }
 
@@ -66,7 +69,7 @@ public class EmployeePL {
         private SalaryType salaryType;
         private LocalDateTime dateOfEmployment;
         private JobScope jobScope;
-        private List<Role> qualifiedRoles;
+        private List<String> qualifiedRoles;
         private String constraints;
         private int yearlyRestDays;
         private WeekDay weeklyRestDay;
@@ -110,12 +113,12 @@ public class EmployeePL {
             return this;
         }
 
-        public Builder qualifiedRoles(List<Role> qualifiedRoles) {
+        public Builder qualifiedRoles(List<String> qualifiedRoles) {
             this.qualifiedRoles = qualifiedRoles != null ? qualifiedRoles : new ArrayList<>();
             return this;
         }
 
-        public Builder addQualifiedRole(Role role) {
+        public Builder addQualifiedRole(String role) {
             if (!this.qualifiedRoles.contains(role)) {
                 this.qualifiedRoles.add(role);
             }
@@ -165,12 +168,12 @@ public class EmployeePL {
         return id;
     }
 
-    public List<Role> getQualifiedRoles() {
+    public List<String> getQualifiedRoles() {
         return qualifiedRoles;
     }
 
-    public void setQualifiedRoles(Role... qualifiedRoles) {
-        for (Role qualifiedRole : qualifiedRoles) {
+    public void setQualifiedRoles(String... qualifiedRoles) {
+        for (String qualifiedRole : qualifiedRoles) {
             if (!this.qualifiedRoles.contains(qualifiedRole))
                 this.qualifiedRoles.add(qualifiedRole);
         }
@@ -178,9 +181,11 @@ public class EmployeePL {
     }
 
     public Employee toEmployee() {
+        List<Role> roles = new ArrayList<>();
+        qualifiedRoles.forEach(r -> roles.add(new Role(r)));
         return new Employee(
                 id, name, bankAccount, salary, salaryType, dateOfEmployment,
-                jobScope, new ArrayList<>(qualifiedRoles), constraints, yearlyRestDays,
+                jobScope, roles, constraints, yearlyRestDays,
                 weeklyRestDay , workingDoubles, unavailableShifts, active
         );
     }

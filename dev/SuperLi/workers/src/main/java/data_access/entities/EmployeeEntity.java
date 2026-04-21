@@ -1,5 +1,7 @@
 package data_access.entities;
 
+import context.SessionManager;
+
 import java.time.LocalDateTime;
 import java.util.*;
 
@@ -26,7 +28,7 @@ public class EmployeeEntity {
      */
     public EmployeeEntity(String id, String password) {
         this(id, "temp-name", "0000-0000-0000-0000", 100.0, "HOURLY",
-                LocalDateTime.now(),
+                SessionManager.now(),
                 "FULL_TIME", new ArrayList<>(),
                 "not free on weekends", 24,
                 "SATURDAY", password, false, new HashMap<>(),

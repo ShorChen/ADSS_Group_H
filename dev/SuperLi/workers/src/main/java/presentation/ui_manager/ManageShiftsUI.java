@@ -1,10 +1,14 @@
 package presentation.ui_manager;
 
+import domain.services.RoleService;
 import presentation.control.HRManagerShiftController;
+import presentation.model.EmployeePL;
 import presentation.ui_employee.RequestReplacementUI;
 import presentation.ui_shared.ShiftsView;
 import presentation.ui_shared.View;
 import presentation.util.Option;
+
+import java.util.List;
 
 public class ManageShiftsUI extends View {
     private final HRManagerShiftController controller;
@@ -23,26 +27,33 @@ public class ManageShiftsUI extends View {
             shiftsView = new ShiftsView(0);
             shiftsView.display();
             displayMenu(new Option.Builder("--- Manage Shifts ---")
-                    .append("Back", onDismiss)
-                    .append("Open Shift", this::openShift)
-                    .append("Close Shift", this::close)
-                    .append("Place Employee", this::placeEmployees)
-                    .append("Set Submission Deadline", this::setDeadline)
-                    .append("Handle Replacement Requests", this::handleReplacements)
+                            .append("Back", onDismiss)
+                            .append("Open Shift", this::openShift)
+                            .append("Close Shift", this::closeShift)
+                            .append("Place Employee", this::placeEmployees)
+                            .append("Set Submission Deadline", this::setDeadline)
+                            .append("Handle Replacement Requests", this::handleReplacements)
                     //.append("Create Shift Template (Not Implemented)", this::createTemplate)
                     //.append("Set Default Template (Not Implemented)", this::setDefaultTemplate)
                     //.append("Issue HR Report (Not Implemented)", this::issueReport)
-                    ,""
+                    , ""
             );
         }
     }
 
     private void openShift() {
-        shiftsView.selectDay(shiftsView::openShift);
+        shiftsView.selectClosedShifts(((day, type) -> {
+            String id = getNextLine("Enter Shift Manager: ");
+            try {
+                controller.openShift(day, type, id);
+            } catch (IllegalArgumentException e) {
+                System.out.println(e.getMessage());
+            }
+        }));
     }
 
-    private void closeShift(){
-        shiftsView.selectDay(shiftsView::closeShift);
+    private void closeShift() {
+        shiftsView.selectShift(controller::closeShift);
     }
 
     private void createTemplate() {
@@ -58,20 +69,9 @@ public class ManageShiftsUI extends View {
     }
 
     private void placeEmployees() {
-        System.out.println("Implement");
-
-        /*
-        * get open days
-        * choose day
-        * get open shifts
-        * choose shift
-        *
-        * get roles - choose role
-        * get available employee's
-        * choose employee
-        *
-        * controller.assignToShift(day, shift, employee)
-        * */
+        PlaceEmployeesUI placeEmployeesUI = new PlaceEmployeesUI(this::display);
+        close();
+        placeEmployeesUI.display();
 
     }
 

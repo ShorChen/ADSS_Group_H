@@ -1,10 +1,9 @@
 package data_access.entities;
 
-import domain.entities.Shift;
+import java.util.Objects;
 
 public class RequestEntity {
-    private long id;
-    private Shift shift;
+    private ShiftEntity shift;
     private String prevEmployee;
     private String newEmployee;
     private String manager;
@@ -13,11 +12,10 @@ public class RequestEntity {
     private boolean managerApproved;
     private boolean denied;
 
-    public RequestEntity(long id, Shift shift, String prevEmployee,
+    public RequestEntity(ShiftEntity shift, String prevEmployee,
                          String newEmployee, String manager, boolean prevApproved,
                          boolean newApproved, boolean managerApproved,
                          boolean denied) {
-        this.id = id;
         this.shift = shift;
         this.prevEmployee = prevEmployee;
         this.newEmployee = newEmployee;
@@ -28,11 +26,7 @@ public class RequestEntity {
         this.denied = denied;
     }
 
-    public long getId() {
-        return id;
-    }
-
-    public Shift getShift() {
+    public ShiftEntity getShift() {
         return shift;
     }
 
@@ -63,4 +57,5 @@ public class RequestEntity {
     public boolean isDenied() {
         return denied;
     }
+
 }
