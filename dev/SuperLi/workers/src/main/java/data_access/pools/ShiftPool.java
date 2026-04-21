@@ -87,6 +87,15 @@ public class ShiftPool {
 
     }
 
+    public void clear() {
+        if (this.weeks != null) {
+            this.weeks.clear();
+        }
+        if (this.closedDays != null) {
+            this.closedDays.clear();
+        }
+    }
+
     public boolean update(ShiftEntity shift) {
         return shift.update(shift);
     }

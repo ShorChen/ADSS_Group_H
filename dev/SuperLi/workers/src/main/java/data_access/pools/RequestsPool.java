@@ -45,4 +45,10 @@ public class RequestsPool {
     public void updateRequest(RequestEntity entity) {
         requests.put(entity.getShift().getStartDate(), entity);
     }
+
+    public void clear() {
+        if (this.requests != null) {
+            this.requests.clear();
+        }
+    }
 }

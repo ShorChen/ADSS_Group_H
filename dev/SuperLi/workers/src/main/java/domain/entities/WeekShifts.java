@@ -88,9 +88,11 @@ public class WeekShifts {
 
     public Shift getShift(WeekDay day, ShiftType shiftType) {
         if (dayShifts.containsKey(day) &&
+            dayShifts.get(day) != null &&
             dayShifts.get(day).getShiftType().equals(shiftType))
             return dayShifts.get(day);
         if (nightShifts.containsKey(day) &&
+            nightShifts.get(day) != null &&
             nightShifts.get(day).getShiftType().equals(shiftType))
             return nightShifts.get(day);
         return null;

@@ -75,4 +75,12 @@ public class EmployeePool {
         if (!exists(id)) return false;
         return employees.get(id).getQualifiedRoles().contains(role);
     }
+
+    public void clear() {
+        if (this.employees != null) {
+            this.employees.clear();
+        }
+    }
+
+
 }
