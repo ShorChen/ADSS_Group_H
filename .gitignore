@@ -40,3 +40,6 @@ bin/
 
 ### Windows ###
 Thumbs.db
+
+### Project Specific ###
+!release/
