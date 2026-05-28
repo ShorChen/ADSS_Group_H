@@ -302,7 +302,6 @@ public class SqlSupplierDAO implements SupplierDAO {
         }
     }
 
-    // --- Manufacturers ---
     @Override
     public void addManufacturerToDb(String businessNumber, String manufacturer) {
         String sql = "INSERT INTO Manufacturers(businessNumber, name) VALUES(?,?)";
