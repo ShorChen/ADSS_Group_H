@@ -1,12 +1,6 @@
 package Suppliers.Domain.Entities;
 
-import java.io.Serial;
-import java.io.Serializable;
-
-public class ProductLineDL implements Serializable {
-    @Serial
-    private static final long serialVersionUID = 1L;
-
+public class ProductLineDL {
     private final int supplierCatalogId;
     private final String name;
     private double basePrice;

@@ -4,8 +4,6 @@ import Suppliers.Domain.ValueObjects.DeliveryTermsDL;
 import Suppliers.Domain.ValueObjects.DiscountBracketDL;
 import Suppliers.Domain.ValueObjects.DiscountPolicyDL;
 
-import java.io.Serial;
-import java.io.Serializable;
 import java.time.DayOfWeek;
 import java.time.LocalDate;
 import java.util.ArrayList;
@@ -13,30 +11,21 @@ import java.util.Collections;
 import java.util.List;
 import java.util.NoSuchElementException;
 
-public class AgreementDL implements Serializable {
-    @Serial
-    private static final long serialVersionUID = 1L;
-
-    private static int idCounter = 0;
-
+public class AgreementDL {
     private final int agreementId;
     private final LocalDate startDate;
     private final DeliveryTermsDL deliveryTerms;
     private final List<ProductLineDL> productLines;
     private final DiscountPolicyDL discountPolicy;
 
-    AgreementDL(List<DayOfWeek> fixedDeliveryDays, boolean supplierTransports) {
-        agreementId = ++idCounter;
-        startDate = LocalDate.now();
-        deliveryTerms = new DeliveryTermsDL(fixedDeliveryDays, supplierTransports);
-        productLines = new ArrayList<>();
-        discountPolicy = new DiscountPolicyDL();
+    public AgreementDL(int agreementId, List<DayOfWeek> fixedDeliveryDays, boolean supplierTransports) {
+        this.agreementId = agreementId;
+        this.startDate = LocalDate.now();
+        this.deliveryTerms = new DeliveryTermsDL(fixedDeliveryDays, supplierTransports);
+        this.productLines = new ArrayList<>();
+        this.discountPolicy = new DiscountPolicyDL();
     }
 
-    public static void updateIdCounter(int maxId) {
-        if (maxId > idCounter)
-            idCounter = maxId;
-    }
 
     public ProductLineDL addProductLine(int supplierCatalogId, String name, double basePrice, int quantity) {
         if (basePrice < 0) throw new IllegalArgumentException("Price cannot be negative");

@@ -1,7 +1,6 @@
 package Suppliers.Domain.Facades;
 
 import Suppliers.DataAccess.SupplierDAO;
-import Suppliers.Domain.DataSeeder;
 import Suppliers.Domain.Entities.AgreementDL;
 import Suppliers.Domain.Entities.ContactPersonDL;
 import Suppliers.Domain.Entities.ProductLineDL;
@@ -21,12 +20,6 @@ public class SupplierFacade {
     public SupplierFacade(SupplierDAO supplierDAO) {
         this.supplierDAO = supplierDAO;
         this.suppliers = supplierDAO.getAllSuppliers();
-        int maxAgreementId = 0;
-        for (SupplierDL supplier : suppliers.values())
-            for (AgreementDL agreement : supplier.getAgreements())
-                if (agreement.getAgreementId() > maxAgreementId)
-                    maxAgreementId = agreement.getAgreementId();
-        AgreementDL.updateIdCounter(maxAgreementId);
     }
 
     public SupplierDL addSupplier(String name, String businessNumber, String address, String iban, String paymentTerms) {
@@ -37,16 +30,17 @@ public class SupplierFacade {
         stringValidation(paymentTerms, "paymentTerms");
         if (suppliers.containsKey(businessNumber))
             throw new IllegalArgumentException("A supplier with this business number already exists");
+
         SupplierDL supplierDL = new SupplierDL(name, businessNumber, address, new PaymentDetails(iban, paymentTerms));
-        suppliers.put(businessNumber, supplierDL);
         supplierDAO.addSupplier(supplierDL);
+        suppliers.put(businessNumber, supplierDL);
         return supplierDL;
     }
 
     public boolean deleteSupplier(String businessNumber) {
         getSupplierOrThrow(businessNumber);
-        suppliers.remove(businessNumber);
         supplierDAO.deleteSupplier(businessNumber);
+        suppliers.remove(businessNumber);
         return true;
     }
 
@@ -56,93 +50,90 @@ public class SupplierFacade {
         ValidationUtils.validatePhone(phone);
         ValidationUtils.validateEmail(email);
         SupplierDL supplier = getSupplierOrThrow(businessNumber);
-        ContactPersonDL cp = supplier.addContactPerson(cpName, phone, email);
-        supplierDAO.updateSupplier(supplier);
-        return cp;
+
+        supplierDAO.addContactPersonToDb(businessNumber, cpName, phone, email);
+        return supplier.addContactPerson(cpName, phone, email);
     }
 
     public boolean removeContactPerson(String businessNumber, String phone) {
         SupplierDL supplier = getSupplierOrThrow(businessNumber);
+        supplierDAO.removeContactPersonFromDb(phone);
         supplier.removeContactPerson(phone);
-        supplierDAO.updateSupplier(supplier);
         return true;
     }
 
     public AgreementDL addAgreement(String businessNumber, List<DayOfWeek> fixedDeliveryDays, boolean supplierTransports) {
         SupplierDL supplier = getSupplierOrThrow(businessNumber);
-        AgreementDL agreement = supplier.addAgreement(fixedDeliveryDays, supplierTransports);
-        supplierDAO.updateSupplier(supplier);
-        return agreement;
+        int newId = supplierDAO.addAgreementToDb(businessNumber, fixedDeliveryDays, supplierTransports);
+        return supplier.addAgreement(newId, fixedDeliveryDays, supplierTransports);
     }
 
     public boolean removeAgreement(String businessNumber, int agreementId) {
         SupplierDL supplier = getSupplierOrThrow(businessNumber);
+        supplierDAO.removeAgreementFromDb(agreementId);
         supplier.removeAgreement(agreementId);
-        supplierDAO.updateSupplier(supplier);
         return true;
     }
 
     public ProductLineDL addProductLine(String businessNumber, int agreementId, int supplierCatalogId, String name, double basePrice, int quantity) {
-        stringValidation(name, "Product Name");
         SupplierDL supplier = getSupplierOrThrow(businessNumber);
-        ProductLineDL pl = supplier.getAgreementOrThrow(agreementId).addProductLine(supplierCatalogId, name, basePrice, quantity);
-        supplierDAO.updateSupplier(supplier);
-        return pl;
+        AgreementDL agreement = supplier.getAgreementOrThrow(agreementId);
+        supplierDAO.addProductLineToDb(agreementId, supplierCatalogId, name, basePrice, quantity);
+        return agreement.addProductLine(supplierCatalogId, name, basePrice, quantity);
     }
 
     public boolean removeProductLine(String businessNumber, int agreementId, int supplierCatalogId) {
         SupplierDL supplier = getSupplierOrThrow(businessNumber);
+        supplier.getAgreementOrThrow(agreementId); // validation
+        supplierDAO.removeProductLineFromDb(agreementId, supplierCatalogId);
         supplier.getAgreementOrThrow(agreementId).removeProductLine(supplierCatalogId);
-        supplierDAO.updateSupplier(supplier);
         return true;
     }
 
     public ProductLineDL updateProductLineBasePrice(String businessNumber, int agreementId, int supplierCatalogId, double newBasePrice) {
         SupplierDL supplier = getSupplierOrThrow(businessNumber);
-        ProductLineDL pl = supplier.getAgreementOrThrow(agreementId).updateProductLineBasePrice(supplierCatalogId, newBasePrice);
-        supplierDAO.updateSupplier(supplier);
-        return pl;
+        supplierDAO.updateProductLineBasePriceInDb(agreementId, supplierCatalogId, newBasePrice);
+        return supplier.getAgreementOrThrow(agreementId).updateProductLineBasePrice(supplierCatalogId, newBasePrice);
     }
 
     public ProductLineDL updateProductLineQuantity(String businessNumber, int agreementId, int supplierCatalogId, int newQuantity) {
         SupplierDL supplier = getSupplierOrThrow(businessNumber);
-        ProductLineDL pl = supplier.getAgreementOrThrow(agreementId).updateProductLineQuantity(supplierCatalogId, newQuantity);
-        supplierDAO.updateSupplier(supplier);
-        return pl;
+        supplierDAO.updateProductLineQuantityInDb(agreementId, supplierCatalogId, newQuantity);
+        return supplier.getAgreementOrThrow(agreementId).updateProductLineQuantity(supplierCatalogId, newQuantity);
     }
 
     public boolean addDiscount(String businessNumber, int agreementId, int supplierCatalogId, int minQuantity, double discountPercentage) {
         SupplierDL supplier = getSupplierOrThrow(businessNumber);
+        supplierDAO.addDiscountToDb(agreementId, supplierCatalogId, minQuantity, discountPercentage);
         supplier.getAgreementOrThrow(agreementId).addDiscount(supplierCatalogId, minQuantity, discountPercentage);
-        supplierDAO.updateSupplier(supplier);
         return true;
     }
 
     public boolean removeDiscount(String businessNumber, int agreementId, int supplierCatalogId, int minQuantity) {
         SupplierDL supplier = getSupplierOrThrow(businessNumber);
+        supplierDAO.removeDiscountFromDb(agreementId, supplierCatalogId, minQuantity);
         supplier.getAgreementOrThrow(agreementId).removeDiscount(supplierCatalogId, minQuantity);
-        supplierDAO.updateSupplier(supplier);
         return true;
     }
 
     public boolean updateDiscount(String businessNumber, int agreementId, int supplierCatalogId, int minQuantity, double newDiscountPercentage) {
         SupplierDL supplier = getSupplierOrThrow(businessNumber);
+        supplierDAO.updateDiscountInDb(agreementId, supplierCatalogId, minQuantity, newDiscountPercentage);
         supplier.getAgreementOrThrow(agreementId).updateDiscount(supplierCatalogId, minQuantity, newDiscountPercentage);
-        supplierDAO.updateSupplier(supplier);
         return true;
     }
 
     public boolean updateFixedDeliveryDays(String businessNumber, int agreementId, List<DayOfWeek> fixedDeliveryDays) {
         SupplierDL supplier = getSupplierOrThrow(businessNumber);
+        supplierDAO.updateAgreementDaysInDb(agreementId, fixedDeliveryDays);
         supplier.getAgreementOrThrow(agreementId).updateFixedDeliveryDays(fixedDeliveryDays);
-        supplierDAO.updateSupplier(supplier);
         return true;
     }
 
     public boolean updateSupplierTransports(String businessNumber, int agreementId, boolean supplierTransports) {
         SupplierDL supplier = getSupplierOrThrow(businessNumber);
+        supplierDAO.updateAgreementTransportsInDb(agreementId, supplierTransports);
         supplier.getAgreementOrThrow(agreementId).updateSupplierTransports(supplierTransports);
-        supplierDAO.updateSupplier(supplier);
         return true;
     }
 
@@ -173,67 +164,46 @@ public class SupplierFacade {
     public boolean addManufacturer(String businessNumber, String manufacturer) {
         stringValidation(manufacturer, "Manufacturer");
         SupplierDL supplier = getSupplierOrThrow(businessNumber);
+        supplierDAO.addManufacturerToDb(businessNumber, manufacturer);
         supplier.addManufacturer(manufacturer);
-        supplierDAO.updateSupplier(supplier);
         return true;
     }
 
     public boolean removeManufacturer(String businessNumber, String manufacturer) {
         SupplierDL supplier = getSupplierOrThrow(businessNumber);
+        supplierDAO.removeManufacturerFromDb(businessNumber, manufacturer);
         supplier.removeManufacturer(manufacturer);
-        supplierDAO.updateSupplier(supplier);
         return true;
     }
 
     public ContactPersonDL updateContactName(String businessNumber, String phone, String newName) {
         stringValidation(newName, "New Name");
         SupplierDL supplier = getSupplierOrThrow(businessNumber);
-        ContactPersonDL cp = supplier.updateContactName(phone, newName);
-        supplierDAO.updateSupplier(supplier);
-        return cp;
+        supplierDAO.updateContactNameInDb(phone, newName);
+        return supplier.updateContactName(phone, newName);
     }
 
     public ContactPersonDL updateContactPhone(String businessNumber, String oldPhone, String newPhone) {
         stringValidation(newPhone, "New Phone");
         ValidationUtils.validatePhone(newPhone);
         SupplierDL supplier = getSupplierOrThrow(businessNumber);
-        ContactPersonDL cp = supplier.updateContactPhone(oldPhone, newPhone);
-        supplierDAO.updateSupplier(supplier);
-        return cp;
+        supplierDAO.updateContactPhoneInDb(oldPhone, newPhone);
+        return supplier.updateContactPhone(oldPhone, newPhone);
     }
 
     public ContactPersonDL updateContactEmail(String businessNumber, String phone, String newEmail) {
         stringValidation(newEmail, "New Email");
         ValidationUtils.validateEmail(newEmail);
         SupplierDL supplier = getSupplierOrThrow(businessNumber);
-        ContactPersonDL cp = supplier.updateContactEmail(phone, newEmail);
-        supplierDAO.updateSupplier(supplier);
-        return cp;
-    }
-
-    public SupplierDL getSupplier(String businessNumber) {
-        return getSupplierOrThrow(businessNumber);
+        supplierDAO.updateContactEmailInDb(phone, newEmail);
+        return supplier.updateContactEmail(phone, newEmail);
     }
 
     public List<SupplierDL> getAllSuppliers() {
         return List.copyOf(suppliers.values());
     }
 
-    public void loadExampleSuppliers() {
-        DataSeeder.loadExampleSuppliers(this);
-    }
-
-    /*
-    Max said we should be able to make an order from everyone but this was the trivial approach
-        public List<SupplierDL> getOnDemandSuppliers() {
-        List<SupplierDL> onDemand = new ArrayList<>();
-        for (SupplierDL supplier : suppliers.values())
-            if (!supplier.getOnDemandAgreements().isEmpty()) onDemand.add(supplier);
-        return onDemand;
-    }
-     */
-
-    private SupplierDL getSupplierOrThrow(String businessNumber) {
+    public SupplierDL getSupplierOrThrow(String businessNumber) {
         businessNumberValidation(businessNumber);
         SupplierDL supplierDL = suppliers.get(businessNumber);
         if (supplierDL == null) throw new NoSuchElementException("This supplier does not exist.");

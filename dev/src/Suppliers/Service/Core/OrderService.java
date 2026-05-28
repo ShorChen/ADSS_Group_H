@@ -9,6 +9,8 @@ import Suppliers.Domain.Facades.OrderFacade;
 import Suppliers.Domain.Facades.SupplierFacade;
 import Suppliers.Service.Response;
 import Suppliers.Service.DTO.SupplierSL;
+import Suppliers.Service.DTO.OrderSL;
+import Suppliers.Service.DTO.OrderItemSL;
 
 import java.time.DayOfWeek;
 import java.time.LocalDate;
@@ -26,45 +28,31 @@ public class OrderService {
         this.orderFacade = orderFacade;
     }
 
-    /*
-    This is the trivial solution, as written in the description of the module. But Max said that for
-    suppliers with fixed days agreements, we should allow to make an order in other days too, if it is urgent
-        public Response<List<SupplierSL>> getOnDemandSuppliers() {
+    public Response<List<SupplierSL>> getAllSuppliers() {
         try {
-            List<SupplierSL> onDemandSuppliers = new ArrayList<>();
-            for (SupplierDL dl : supplierFacade.getOnDemandSuppliers()) {
-                List<AgreementSL> onDemandAgreements = new ArrayList<>();
-                for (AgreementDL agr : dl.getOnDemandAgreements()) onDemandAgreements.add(new AgreementSL(agr));
-                onDemandSuppliers.add(new SupplierSL(dl, onDemandAgreements));
-            }
-            return new Response<>(onDemandSuppliers);
-        } catch (Exception ex) {
-            return new Response<>(ex.getMessage());
-        }
-    }
-     */
-
-    public Response<List<SupplierSL>> getOnDemandSuppliers() {
-        try {
-            List<SupplierSL> onDemandSuppliers = new ArrayList<>();
+            List<SupplierSL> allSuppliers = new ArrayList<>();
             for (SupplierDL dl : supplierFacade.getAllSuppliers())
-                onDemandSuppliers.add(new SupplierSL(dl));
-            return new Response<>(onDemandSuppliers);
+                allSuppliers.add(new SupplierSL(dl));
+            return new Response<>(allSuppliers);
         } catch (Exception ex) {
             return new Response<>(ex.getMessage());
         }
     }
 
-    public Response<Integer> placeOrder(String businessNumber, List<Integer> catalogIds, List<String> productNames,
-                                        List<Integer> quantities, List<Double> listPrices, List<Double> discounts, List<Double> finalPrices) {
+    public Response<Integer> placeOrder(String businessNumber, List<OrderItemSL> items) {
         try {
-            SupplierDL supplier = supplierFacade.getSupplier(businessNumber);
+            SupplierDL supplier = supplierFacade.getSupplierOrThrow(businessNumber);
             String address = supplier.getAddress();
             String phones = supplier.getContactPersonnel().isEmpty() ? "N/A" :
                     supplier.getContactPersonnel().stream().map(cp -> cp.getName() + " (" + cp.getPhone() + ")").collect(Collectors.joining(", "));
-            List<OrderItemDL> itemsDL = new ArrayList<>();
-            for (int i = 0; i < catalogIds.size(); i++)
-                itemsDL.add(new OrderItemDL(catalogIds.get(i), productNames.get(i), quantities.get(i), listPrices.get(i), discounts.get(i), finalPrices.get(i)));
+            List<OrderItemDL> itemsDL = items.stream().map(sl -> new OrderItemDL(
+                    sl.catalogId(),
+                    sl.productName(),
+                    sl.quantity(),
+                    sl.priceBeforeDiscount(),
+                    sl.priceBeforeDiscount() - sl.finalPrice(),
+                    sl.finalPrice()
+            )).collect(Collectors.toList());
             OrderDL order = orderFacade.createOrder(businessNumber, supplier.getName(), address, phones, itemsDL);
             return new Response<>(order.getOrderId());
         } catch (Exception ex) {
@@ -101,10 +89,27 @@ public class OrderService {
         }
     }
 
-    public Response<Boolean> loadExampleOrders() {
+    public Response<List<OrderSL>> getOrderHistory() {
         try {
-            orderFacade.loadExampleOrders();
-            return new Response<>(true);
+            List<OrderDL> historyDL = orderFacade.getOrderHistory();
+            List<OrderSL> historySL = historyDL.stream().map(dl -> new OrderSL(
+                    dl.getOrderId(),
+                    dl.getSupplierBusinessNumber(),
+                    dl.getSupplierName(),
+                    dl.getAddress(),
+                    dl.getContactPhone(),
+                    dl.getOrderDate(),
+                    dl.getItems().stream().map(itemDL -> new OrderItemSL(
+                            itemDL.productName(),
+                            dl.getSupplierBusinessNumber(),
+                            dl.getSupplierName(),
+                            itemDL.catalogId(),
+                            itemDL.quantity(),
+                            itemDL.listPrice(),
+                            itemDL.finalPrice()
+                    )).collect(Collectors.toList())
+            )).collect(Collectors.toList());
+            return new Response<>(historySL);
         } catch (Exception e) {
             return new Response<>(e.getMessage());
         }

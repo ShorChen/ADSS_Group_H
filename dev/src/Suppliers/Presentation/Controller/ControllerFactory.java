@@ -1,9 +1,9 @@
 package Suppliers.Presentation.Controller;
 
 import Suppliers.DataAccess.*;
-import Suppliers.DataAccess.FileImpl.FileAuthDAO;
-import Suppliers.DataAccess.FileImpl.FileOrderDAO;
-import Suppliers.DataAccess.FileImpl.FileSupplierDAO;
+import Suppliers.DataAccess.SqlImpl.SqlAuthDAO;
+import Suppliers.DataAccess.SqlImpl.SqlOrderDAO;
+import Suppliers.DataAccess.SqlImpl.SqlSupplierDAO;
 import Suppliers.Domain.Facades.AuthFacade;
 import Suppliers.Domain.Facades.OrderFacade;
 import Suppliers.Domain.Facades.SupplierFacade;
@@ -18,9 +18,9 @@ public class ControllerFactory {
     private final AuthController authController;
 
     private ControllerFactory() {
-        SupplierDAO supplierDAO = new FileSupplierDAO("dev/src/Suppliers/Table/suppliers.dat");
-        AuthDAO authDAO = new FileAuthDAO("dev/src/Suppliers/Table/auth.dat");
-        OrderDAO orderDAO = new FileOrderDAO("dev/src/Suppliers/Table/orders.dat");
+        SupplierDAO supplierDAO = new SqlSupplierDAO();
+        AuthDAO authDAO = new SqlAuthDAO();
+        OrderDAO orderDAO = new SqlOrderDAO();
         SupplierFacade supplierFacade = new SupplierFacade(supplierDAO);
         AuthFacade authFacade = new AuthFacade(authDAO);
         OrderFacade orderFacade = new OrderFacade(orderDAO);

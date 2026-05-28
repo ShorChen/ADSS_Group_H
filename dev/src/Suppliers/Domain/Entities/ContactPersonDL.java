@@ -1,12 +1,6 @@
 package Suppliers.Domain.Entities;
 
-import java.io.Serial;
-import java.io.Serializable;
-
-public class ContactPersonDL implements Serializable {
-    @Serial
-    private static final long serialVersionUID = 1L;
-
+public class ContactPersonDL {
     private String name;
     private String phone;
     private String email;

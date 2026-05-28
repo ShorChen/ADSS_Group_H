@@ -2,15 +2,10 @@ package Suppliers.Domain.Entities;
 
 import Suppliers.Domain.ValueObjects.PaymentDetails;
 
-import java.io.Serial;
-import java.io.Serializable;
 import java.time.DayOfWeek;
 import java.util.*;
 
-public class SupplierDL implements Serializable {
-    @Serial
-    private static final long serialVersionUID = 1L;
-
+public class SupplierDL {
     private final String businessNumber;
     private final String name;
     private String address;
@@ -40,8 +35,8 @@ public class SupplierDL implements Serializable {
         if (!removed) throw new IllegalArgumentException("Contact person not found.");
     }
 
-    public AgreementDL addAgreement(List<DayOfWeek> fixedDeliveryDays, boolean supplierTransports) {
-        AgreementDL agreement = new AgreementDL(fixedDeliveryDays, supplierTransports);
+    public AgreementDL addAgreement(int agreementId, List<DayOfWeek> fixedDeliveryDays, boolean supplierTransports) {
+        AgreementDL agreement = new AgreementDL(agreementId, fixedDeliveryDays, supplierTransports);
         agreements.add(agreement);
         return agreement;
     }

@@ -167,7 +167,7 @@ class SupplierDashboard {
         emailCol.setCellValueFactory(cellData -> new SimpleStringProperty(cellData.getValue().email()));
 
         contactsTable.getColumns().addAll(List.of(nameCol, phoneCol, emailCol));
-        contactsTable.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY_ALL_COLUMNS);
+        contactsTable.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY);
         contactsTable.getItems().setAll(supplier.contactPersonnel());
 
         Button addContactBtn = new Button("+ Add Contact");
@@ -405,7 +405,7 @@ class SupplierDashboard {
                 showAlert("Info", "No manufacturers to remove.");
                 return;
             }
-            ChoiceDialog<String> dialog = new ChoiceDialog<>(supplier.manufacturers().getFirst(), supplier.manufacturers());
+            ChoiceDialog<String> dialog = new ChoiceDialog<>(supplier.manufacturers().get(0), supplier.manufacturers());
             dialog.setTitle("Remove Manufacturer");
             dialog.setHeaderText("Select a manufacturer to remove:");
             dialog.showAndWait().ifPresent(selected -> {

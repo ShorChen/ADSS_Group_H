@@ -7,6 +7,7 @@ import Suppliers.Presentation.DTO.AgreementPL;
 import Suppliers.Presentation.DTO.ProductLinePL;
 import Suppliers.Presentation.DTO.DiscountBracketPL;
 import Suppliers.Presentation.DTO.OrderItemPL;
+import Suppliers.Presentation.DTO.OrderPL;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.geometry.Insets;
@@ -33,31 +34,40 @@ class OrderDashboard {
         currentOrder = new ArrayList<>();
         availableProducts = new HashSet<>();
         onDemandSuppliers = new ArrayList<>();
+
         Button logoutBtn = new Button("Logout");
         logoutBtn.setOnAction(e -> logout());
+
+        Button historyBtn = new Button("Order History");
+        historyBtn.setOnAction(e -> showOrderHistoryDialog());
+
         abortBtn = new Button("Abort Order");
         abortBtn.setStyle("-fx-background-color: #f44336; -fx-text-fill: white; font-weight: bold;");
         abortBtn.setVisible(false);
         abortBtn.setOnAction(e -> resetToStart());
+
         Region spacer = new Region();
         HBox.setHgrow(spacer, Priority.ALWAYS);
-        HBox topBar = new HBox(15, abortBtn, spacer, logoutBtn);
+        HBox topBar = new HBox(15, abortBtn, spacer, historyBtn, logoutBtn);
         topBar.setPadding(new Insets(10));
         topBar.setStyle("-fx-background-color: #333333;");
+
         centerPane = new VBox(20);
         centerPane.setAlignment(Pos.CENTER);
         centerPane.setPadding(new Insets(40));
+
         BorderPane mainLayout = new BorderPane();
         mainLayout.setTop(topBar);
         mainLayout.setCenter(centerPane);
         scene = new Scene(mainLayout, 900, 600);
+
         resetToStart();
     }
 
     private void loadOnDemandCatalog() {
         availableProducts.clear();
         try {
-            onDemandSuppliers = orderController.getOnDemandSuppliers();
+            onDemandSuppliers = orderController.getAllSuppliers();
             for (SupplierPL sup : onDemandSuppliers)
                 for (AgreementPL agr : sup.agreements())
                     for (ProductLinePL prod : agr.productLines())
@@ -336,7 +346,7 @@ class OrderDashboard {
             finalCol.setCellValueFactory(data -> new SimpleStringProperty(String.format("NIS %.2f", data.getValue().totalPrice())));
 
             table.getColumns().addAll(List.of(catCol, prodCol, qtyCol, listCol, discCol, finalCol));
-            table.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY_ALL_COLUMNS);
+            table.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY);
             table.getItems().setAll(items);
             allTables.add(table);
             table.getSelectionModel().selectedItemProperty().addListener((obs, oldVal, newVal) -> {
@@ -430,7 +440,7 @@ class OrderDashboard {
                     i.catalogId(), i.quantity(), i.priceBeforeDiscount(), i.totalPrice()
             )).collect(Collectors.toList());
 
-            Map<String, Integer> placedOrders = orderController.placeOnDemandOrders(plItems);
+            Map<String, Integer> placedOrders = orderController.placeOrders(plItems);
 
             abortBtn.setVisible(false);
             centerPane.getChildren().clear();
@@ -488,8 +498,107 @@ class OrderDashboard {
         alert.showAndWait();
     }
 
+    private void showOrderHistoryDialog() {
+        try {
+            List<OrderPL> history = ControllerFactory.getInstance().getOrderController().getOrderHistory();
+
+            ListView<OrderPL> historyListView = new ListView<>();
+            historyListView.getItems().addAll(history);
+
+            historyListView.setTooltip(new Tooltip("Double-click an order to view its specific products."));
+
+            historyListView.setCellFactory(lv -> {
+                ListCell<OrderPL> cell = new ListCell<>() {
+                    @Override
+                    protected void updateItem(OrderPL order, boolean empty) {
+                        super.updateItem(order, empty);
+                        if (empty || order == null) {
+                            setText(null);
+                        } else {
+                            setText(String.format("Order #%d | Date: %s | Supplier: %s (%s)",
+                                    order.orderId(),
+                                    order.orderDate().toString(),
+                                    order.supplierName(),
+                                    order.supplierBusinessNumber()));
+                        }
+                    }
+                };
+
+                cell.setOnMouseClicked(event -> {
+                    if (event.getClickCount() == 2 && (!cell.isEmpty())) {
+                        showOrderDetails(cell.getItem());
+                    }
+                });
+
+                return cell;
+            });
+
+            VBox layout = new VBox(10, new Label("Order History (Double-click to expand)"), historyListView);
+            layout.setPadding(new Insets(15));
+            Scene dialogScene = new Scene(layout, 500, 400);
+            javafx.stage.Stage stage = new javafx.stage.Stage();
+            stage.setTitle("Historical Orders");
+            stage.initOwner(scene.getWindow());
+            stage.setScene(dialogScene);
+            stage.show();
+
+        } catch (Exception e) {
+            showAlert("Error", "Failed to load history: " + e.getMessage());
+        }
+    }
+
+    private void showOrderDetails(OrderPL order) {
+        Alert alert = new Alert(Alert.AlertType.INFORMATION);
+        alert.setTitle("Order Details");
+        alert.setHeaderText("Order #" + order.orderId() + " - " + order.supplierName());
+
+        StringBuilder sb = new StringBuilder();
+
+        try {
+            sb.append(String.format("%-15s %s\n", "Supplier No:", order.supplierBusinessNumber()));
+            sb.append(String.format("%-15s %s\n", "Address:", order.address()));
+            sb.append(String.format("%-15s %s\n", "Contact Phone:", order.contactPhone()));
+            sb.append(String.format("%-15s %s\n", "Order Date:", order.orderDate().toString()));
+        } catch (Exception e) {
+            sb.append("Could not load contact details: ").append(e.getMessage()).append("\n");
+        }
+        sb.append("\n");
+
+        sb.append(String.format("%-12s | %-20s | %-8s | %-10s | %-10s\n",
+                "Catalog ID", "Product Name", "Quantity", "Discount", "Final Price"));
+        sb.append("-".repeat(75)).append("\n");
+
+        try {
+            for (OrderItemPL item : order.items()) {
+                sb.append(String.format("%-12d | %-20s | %-8d | %-10.2f | %-10.2f\n",
+                        item.catalogId(),
+                        item.productName(),
+                        item.quantity(),
+                        item.priceBeforeDiscount() - item.finalPrice(),
+                        item.finalPrice()));
+            }
+
+            double total = order.items().stream().mapToDouble(OrderItemPL::finalPrice).sum();
+            sb.append("-".repeat(75)).append("\n");
+            sb.append(String.format("%-46s Total: NIS %.2f\n", "", total));
+
+        } catch (Exception e) {
+            sb.append("Could not load products: ").append(e.getMessage());
+        }
+
+        TextArea textArea = new TextArea(sb.toString());
+        textArea.setEditable(false);
+        textArea.setWrapText(false);
+        textArea.setFont(javafx.scene.text.Font.font("Consolas", 14));
+        textArea.setPrefHeight(350);
+        textArea.setPrefWidth(600);
+
+        alert.getDialogPane().setContent(textArea);
+        alert.showAndWait();
+    }
+
     public record OrderItem(String productName, String supplierBusinessNumber, String supplierName,
-                                   int catalogId, int agreementId, int quantity, double priceBeforeDiscount,
-                                   double totalPrice, boolean supplierTransports) {
+                            int catalogId, int agreementId, int quantity, double priceBeforeDiscount,
+                            double totalPrice, boolean supplierTransports) {
     }
 }

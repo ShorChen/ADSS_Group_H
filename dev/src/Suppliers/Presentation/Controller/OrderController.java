@@ -5,6 +5,8 @@ import Suppliers.Domain.Security.SessionManager;
 import Suppliers.Presentation.DTO.*;
 import Suppliers.Service.Core.OrderService;
 import Suppliers.Service.DTO.AgreementSL;
+import Suppliers.Service.DTO.OrderSL;
+import Suppliers.Service.DTO.OrderItemSL;
 import Suppliers.Service.Response;
 import Suppliers.Service.DTO.SupplierSL;
 
@@ -22,9 +24,10 @@ public class OrderController {
         this.orderService = orderService;
     }
 
-    public List<SupplierPL> getOnDemandSuppliers() throws Exception {
+    // RENAMED: Accurately reflects fetching all suppliers
+    public List<SupplierPL> getAllSuppliers() throws Exception {
         SessionManager.getInstance().requireRole(Role.ORDER_MANAGER);
-        Response<List<SupplierSL>> response = orderService.getOnDemandSuppliers();
+        Response<List<SupplierSL>> response = orderService.getAllSuppliers();
         if (response.isSuccess()) return response.getData().stream().map(sl -> {
             List<ContactPersonPL> contacts = sl.contactPersonnel().stream().map(cp -> new ContactPersonPL(cp.name(), cp.phone(), cp.email())).collect(Collectors.toList());
             List<AgreementPL> agreements = sl.agreements().stream().map(this::convertAgreementSLToPL).collect(Collectors.toList());
@@ -34,30 +37,27 @@ public class OrderController {
         throw new Exception(response.getErrorMessage());
     }
 
-    public Map<String, Integer> placeOnDemandOrders(List<OrderItemPL> currentOrder) throws Exception {
+    // RENAMED & REFACTORED: Passes a mapped list of DTOs instead of 6 parallel arrays
+    public Map<String, Integer> placeOrders(List<OrderItemPL> currentOrder) throws Exception {
         SessionManager.getInstance().requireRole(Role.ORDER_MANAGER);
+
+        // Group the big cart by supplier
         Map<String, List<OrderItemPL>> grouped = currentOrder.stream().collect(Collectors.groupingBy(OrderItemPL::supplierBusinessNumber));
         Map<String, Integer> generatedOrderIds = new HashMap<>();
+
         for (Map.Entry<String, List<OrderItemPL>> entry : grouped.entrySet()) {
             String businessNumber = entry.getKey();
-            String supplierName = entry.getValue().getFirst().supplierName();
-            List<Integer> catalogIds = new ArrayList<>();
-            List<String> productNames = new ArrayList<>();
-            List<Integer> quantities = new ArrayList<>();
-            List<Double> listPrices = new ArrayList<>();
-            List<Double> discounts = new ArrayList<>();
-            List<Double> finalPrices = new ArrayList<>();
-            for (OrderItemPL item : entry.getValue()) {
-                catalogIds.add(item.catalogId());
-                productNames.add(item.productName());
-                quantities.add(item.quantity());
-                listPrices.add(item.priceBeforeDiscount());
-                discounts.add(item.priceBeforeDiscount() - item.totalPrice());
-                finalPrices.add(item.totalPrice());
-            }
-            Response<Integer> response = orderService.placeOrder(
-                    businessNumber, catalogIds, productNames, quantities, listPrices, discounts, finalPrices
-            );
+            String supplierName = entry.getValue().get(0).supplierName();
+
+            // Map Presentation Layer items to Service Layer items
+            List<OrderItemSL> slItems = entry.getValue().stream().map(pl -> new OrderItemSL(
+                    pl.productName(), pl.supplierBusinessNumber(), pl.supplierName(),
+                    pl.catalogId(), pl.quantity(), pl.priceBeforeDiscount(), pl.finalPrice() // Assumes your record uses 'finalPrice' or 'totalPrice'
+            )).collect(Collectors.toList());
+
+            // Send the clean list to the service layer
+            Response<Integer> response = orderService.placeOrder(businessNumber, slItems);
+
             if (!response.isSuccess()) throw new Exception(response.getErrorMessage());
             generatedOrderIds.put(supplierName, response.getData());
         }
@@ -71,17 +71,30 @@ public class OrderController {
         throw new Exception(response.getErrorMessage());
     }
 
-    @SuppressWarnings("UnusedReturnValue")
-    public boolean loadExampleOrders() throws Exception {
-        Response<Boolean> response = orderService.loadExampleOrders();
-        if (response.isSuccess()) return response.getData();
-        throw new Exception(response.getErrorMessage());
-    }
-
     private AgreementPL convertAgreementSLToPL(AgreementSL data) {
         DeliveryTermsPL deliveryTermsPL = new DeliveryTermsPL(data.deliveryTerms().fixedDeliveryDays(), data.deliveryTerms().supplierTransports());
         List<ProductLinePL> productLinesPL = data.productLines().stream().map(pl -> new ProductLinePL(pl.supplierCatalogId(), pl.name(), pl.basePrice(), pl.quantity())).collect(Collectors.toList());
         Map<Integer, List<DiscountBracketPL>> discountPolicyPL = data.discountPolicy().entrySet().stream().collect(Collectors.toMap(Map.Entry::getKey, e -> e.getValue().stream().map(db -> new DiscountBracketPL(db.minQuantity(), db.discountPercentage())).collect(Collectors.toList())));
         return new AgreementPL(data.agreementId(), data.startDate(), deliveryTermsPL, productLinesPL, discountPolicyPL);
+    }
+
+    // FIX: Safely reads Service Objects and converts them to Presentation Objects for the GUI
+    public List<OrderPL> getOrderHistory() throws Exception {
+        SessionManager.getInstance().requireRole(Role.ORDER_MANAGER);
+        Response<List<OrderSL>> response = orderService.getOrderHistory();
+        if (!response.isSuccess()) throw new Exception(response.getErrorMessage());
+
+        return response.getData().stream().map(sl -> new OrderPL(
+                sl.orderId(),
+                sl.supplierBusinessNumber(),
+                sl.supplierName(),
+                sl.address(),
+                sl.contactPhone(),
+                sl.orderDate(),
+                sl.items().stream().map(itemSL -> new OrderItemPL(
+                        itemSL.productName(), itemSL.supplierBusinessNumber(), itemSL.supplierName(),
+                        itemSL.catalogId(), itemSL.quantity(), itemSL.priceBeforeDiscount(), itemSL.finalPrice()
+                )).collect(Collectors.toList())
+        )).collect(Collectors.toList());
     }
 }

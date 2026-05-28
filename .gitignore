@@ -34,12 +34,8 @@ bin/
 ### General Java ###
 *.class
 *.log
-*.jar
 *.war
 *.ear
 
 ### Windows ###
 Thumbs.db
-
-### Project Specific ###
-!release/

@@ -190,10 +190,6 @@ public class SupplierController {
         throw new Exception(response.getErrorMessage());
     }
 
-    public boolean loadExampleSuppliers() throws Exception {
-        return extractBooleanOrThrow(supplierService.loadExampleSuppliers());
-    }
-
     private AgreementPL convertAgreementSLToPL(AgreementSL data) {
         DeliveryTermsPL deliveryTermsPL = new DeliveryTermsPL(data.deliveryTerms().fixedDeliveryDays(), data.deliveryTerms().supplierTransports());
         List<ProductLinePL> productLinesPL = data.productLines().stream()

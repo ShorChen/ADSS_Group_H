@@ -59,7 +59,7 @@ public class SequentialDomainTests {
     @Order(5)
     void step05_addAgreementToSupplier() {
         List<DayOfWeek> days = new ArrayList<>(List.of(DayOfWeek.SUNDAY, DayOfWeek.WEDNESDAY));
-        currentAgreement = currentSupplier.addAgreement(days, true);
+        currentAgreement = currentSupplier.addAgreement(1, days, true);
         assertEquals(1, currentSupplier.getAgreements().size());
         assertTrue(currentAgreement.getDeliveryTerms().isSupplierTransports());
     }
