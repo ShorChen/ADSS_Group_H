@@ -6,6 +6,7 @@ import domain.entities.Request;
 import domain.entities.Shift;
 import domain.enums.ShiftType;
 import domain.enums.WeekDay;
+import org.jetbrains.annotations.NotNull;
 
 import java.time.DayOfWeek;
 import java.time.LocalDate;
@@ -23,12 +24,12 @@ public class RequestReplacementService {
 
     }
 
-    public Shift getShift(LocalDate date, WeekDay day, ShiftType type) {
+    public Shift getShift(@NotNull LocalDate date, @NotNull WeekDay day, @NotNull ShiftType type) {
         LocalDate weekDate = date.with(TemporalAdjusters.previousOrSame(DayOfWeek.SUNDAY));
         return new Shift(shiftPool.getShift(weekDate, day.name(), type.name()));
     }
 
-    public boolean requestReplacement(Request request) {
+    public boolean requestReplacement(@NotNull Request request) {
         return requestsPool.addRequest(request.toEntity());
     }
 
@@ -40,13 +41,13 @@ public class RequestReplacementService {
         return pending;
     }
 
-    public boolean approve(Request request, String id) {
-        request.approve(id);
+    public boolean approve(@NotNull Request request, String id) {
+        boolean statusChanged = request.approve(id);
         requestsPool.updateRequest(request.toEntity());
-        return request.isApproved();
+        return statusChanged;
     }
 
-    public boolean deny(Request request, String id) {
+    public boolean deny(@NotNull Request request, String id) {
         if (!request.deny(id)) return false;
         requestsPool.updateRequest(request.toEntity());
         return true;
@@ -56,5 +57,9 @@ public class RequestReplacementService {
         List<Request> list = new ArrayList<>();
         requestsPool.getAll().forEach(r -> list.add(new Request(r)));
         return list;
+    }
+
+    public boolean doAllSidesApprove(@NotNull Request request) {
+        return request.isApproved();
     }
 }

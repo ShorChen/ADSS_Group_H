@@ -5,6 +5,7 @@ import domain.enums.WeekDay;
 import domain.services.ShiftService;
 import presentation.model.EmployeePL;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class AddUpdateEmployeeController {
@@ -34,7 +35,7 @@ public class AddUpdateEmployeeController {
         return employeeController.updateEmployee(employee, password);
     }
 
-    public List<Role> getAllRoles() {
+    public List<String> getAllRoles() {
         return roleController.getAllRoles();
     }
 

@@ -12,7 +12,7 @@ public class EmployeeChooseShiftsUI extends View {
     private final ShiftsView shiftsView = new ShiftsView(0);
     private boolean open = false;
     private final EmployeeShiftController controller;
-    Map<Integer, Set<Integer>> selectedShifts;
+    private Map<Integer, Set<Integer>> selectedShifts;
 
     public EmployeeChooseShiftsUI(Runnable onDismiss) {
         super(onDismiss);
@@ -33,7 +33,7 @@ public class EmployeeChooseShiftsUI extends View {
                     .append("Back (Cancels Changes)", onDismiss)
                     .append("Mark Shift as Unavailable", this::markShift)
                     .append("View Placement", this::viewShifts)
-                    .append("Submit Availability", this::submit), "");
+                    .append("Submit Availability", this::submit));
         }
     }
 
@@ -44,22 +44,21 @@ public class EmployeeChooseShiftsUI extends View {
     private void markShift() {
         shiftsView.selectShift(((day, shift) -> {
             shiftsView.setUnsaved(day, shift);
-            addSelectedShift(selectedShifts, day, shift);
+            addSelectedShift(day, shift);
         }));
     }
 
     private void submit() {
-        boolean doubles = getNextBoolean("Are you willing to work double shifts? (y/n)");
-        controller.setAvailability(
-                SessionManager.getCurrentEmployee().getId(),
-                selectedShifts,
-                doubles);
+        boolean isWorkingDoubles = getNextBoolean("Are you willing to work double shifts? (y/n)");
+        controller.setCurrentEmployeeShiftsAsUnavailable(selectedShifts, isWorkingDoubles);
         System.out.println("Availability Submitted");
+        System.out.println("You can re-submit your availability again until the deadline: "
+                           + SessionManager.getDeadline());
         onDismiss.run();
     }
 
-    private void addSelectedShift(Map<Integer, Set<Integer>> map, int key, int value) {
-        map.computeIfAbsent(key, _ -> new HashSet<>()).add(value);
+    private void addSelectedShift(int day, int shift) {
+        selectedShifts.computeIfAbsent(day, _ -> new HashSet<>()).add(shift);
     }
 
     @Override

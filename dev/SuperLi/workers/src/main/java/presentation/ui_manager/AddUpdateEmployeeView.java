@@ -12,19 +12,17 @@ import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 public class AddUpdateEmployeeView extends View {
 
 
     private final AddUpdateEmployeeController controller;
-    private boolean addEmployee;
-
     private EmployeePL.Builder builder;
     private boolean open;
     private final String employeeId;
+    private boolean isNewEmployee;
 
     public AddUpdateEmployeeView(String employeeId) {
         super(null);
@@ -36,37 +34,43 @@ public class AddUpdateEmployeeView extends View {
     public void display() {
         open = true;
 
-        EmployeePL e = controller.getEmployeeDetails(employeeId);
-        if (employeeId == null) {
-            buildEmployee("\n--- Add New Employee ---");
-            addEmployee = true;
-        } else if (e == null) {
-            buildEmployee("Could not find employee... Adding New Employee");
-            addEmployee = true;
-        } else {
+        EmployeePL employee = controller.getEmployeeDetails(employeeId);
+        isNewEmployee = employeeId == null || employee == null;
+
+        if (!isNewEmployee) {
             System.out.println("\n--- Update Existing Employee ---");
-            addEmployee = false;
-            builder = new EmployeePL.Builder(employeeId);
-        }
+            builder = new EmployeePL.Builder(employee);
+        } else buildNewEmployee();
 
         while (open) {
-            EmployeePL employee = builder.build();
-            printSummary(employee);
+            printSummary();
 
             displayMenu(new Option.Builder("--- Options ---")
-                    .append("Cancel", this::close)
-                    .append("Update a Field", this::updateFieldMenu)
-                    .append("Save Changes", () -> {
-                        if (employeeId == null || e == null) registerEmployee(employee);
-                        else updateEmployee(employee);
-                    }), ""
+                            .append("Cancel", this::close)
+                            .append("Update a Field", this::updateFieldMenu)
+                            .append("Save Changes", this::saveChanges)
             );
 
         }
     }
 
-    private void buildEmployee(String message) {
-        System.out.println(message);
+    private void buildNewEmployee() {
+        if (employeeId == null) {
+            System.out.println("\n--- Add New Employee ---");
+            buildEmployee();
+        } else {
+            System.out.println("Could not find employee... Adding New Employee");
+            buildEmployee();
+        }
+    }
+
+    private void saveChanges() {
+        EmployeePL employee = builder.build();
+        if (isNewEmployee) registerEmployee(employee);
+        else updateEmployee(employee);
+    }
+
+    private void buildEmployee() {
         id();
         name();
         bankAccount();
@@ -75,12 +79,14 @@ public class AddUpdateEmployeeView extends View {
         jobScope();
         roles();
         constraints();
-        if (addEmployee)
-            yearlyRestDays();
-        weeklyRestDay();
+        yearlyRestDays();
+        if (isNewEmployee)
+            weeklyRestDay();
     }
 
-    private void printSummary(EmployeePL employee) {
+    private void printSummary() {
+        EmployeePL employee = builder.build();
+
         System.out.println("\n--- Employee Details ---");
         System.out.println("ID: " + employee.getId());
         System.out.println("Name: " + employee.getName());
@@ -104,9 +110,8 @@ public class AddUpdateEmployeeView extends View {
     }
 
     private void updateFieldMenu() {
-        displayMenu(new Option.Builder("---Update Field ---")
-                .append("Back to Summary", () -> {
-                })
+        Option.Builder menuBuilder = new Option.Builder("---Update Field ---")
+                .append("Back to Summary", null)
                 .append("Name", this::name)
                 .append("Bank Account", this::bankAccount)
                 .append("Salary & Salary Type", this::salary)
@@ -114,8 +119,11 @@ public class AddUpdateEmployeeView extends View {
                 .append("Job Scope", this::jobScope)
                 .append("Roles", this::roles)
                 .append("Constraints", this::constraints)
-                .append("Yearly Rest Days", this::yearlyRestDays), ""
-        );
+                .append("Yearly Rest Days", this::yearlyRestDays);
+        if (isNewEmployee) menuBuilder.append("Weekly Rest Day", this::weeklyRestDay);
+
+
+        displayMenu(menuBuilder);
     }
 
     private void registerEmployee(EmployeePL employee) {
@@ -130,7 +138,7 @@ public class AddUpdateEmployeeView extends View {
 
     private void updateEmployee(EmployeePL employee) {
 
-        String password = getNextLine("To save changes, please enter password");
+        String password = getNextLine("To save changes, please enter employee password");
         boolean updated = controller.updateEmployee(employee, password);
         if (!updated) System.out.println("Could not update. Incorrect password");
         close();
@@ -155,7 +163,7 @@ public class AddUpdateEmployeeView extends View {
     private void salary() {
         displayMenu(new Option.Builder("Enter Salary Type")
                 .append("Hourly", () -> builder.salaryType(SalaryType.HOURLY))
-                .append("Globally", () -> builder.salaryType(SalaryType.GLOBALLY)), ""
+                .append("Globally", () -> builder.salaryType(SalaryType.GLOBALLY))
         );
 
         double salary = getNextDouble("Enter Employee's Salary:");
@@ -181,29 +189,31 @@ public class AddUpdateEmployeeView extends View {
     private void jobScope() {
         displayMenu(new Option.Builder("Enter Job Scope")
                 .append("Full Time", () -> builder.jobScope(JobScope.FULL_TIME))
-                .append("Partial", () -> builder.jobScope(JobScope.PARTIAL)), ""
+                .append("Partial", () -> builder.jobScope(JobScope.PARTIAL))
         );
     }
 
     private void roles() {
-        Set<String> qualifiedRoles = new HashSet<>();
-        System.out.println("\n--- Add Qualified Roles ---");
-        System.out.println("Roles: " + controller.getAllRoles());
-        boolean stop = false;
-        while (!stop) {
-            String roleName = getNextLine("Enter a qualified role name (or type '0' to finish):");
-            if (roleName.equals("0"))
-                stop = true;
-            else if (!roleName.trim().isEmpty()) {
-                String role = controller.getRole(roleName);
+        AtomicBoolean stop = new AtomicBoolean(false);
+        List<String> qualifiedRoles = builder.getQualifiedRoles();
+        while (!stop.get()) {
+            Option.Builder rolesMenu = new Option.Builder("--- Select Qualified Roles ---")
+                    .append("done", () -> stop.set(true));
 
-                if (role != null) {
-                    qualifiedRoles.add(role);
-                    System.out.println("Role '" + roleName + "' added successfully.");
-                } else {
-                    System.out.println("Error: Role '" + roleName + "' does not exist in the system.");
-                }
-            }
+            controller.getAllRoles().forEach(role -> {
+                boolean hasRole = qualifiedRoles.contains(role);
+                rolesMenu.append(role + (hasRole ? " (Select to Delete) " : ""), () -> {
+                    if (hasRole) {
+                        qualifiedRoles.remove(role);
+                        System.out.println("Role '" + role + "' removed.");
+                    } else {
+                        qualifiedRoles.add(role);
+                        System.out.println("Role '" + role + "' added successfully.");
+                    }
+                });
+            });
+            rolesMenu.setEndMessage("Enter 0 to stop selection");
+            displayMenu(rolesMenu);
         }
 
         builder.qualifiedRoles(new ArrayList<>(qualifiedRoles));
@@ -225,7 +235,7 @@ public class AddUpdateEmployeeView extends View {
         Option.Builder menuBuilder = new Option.Builder("Enter Weekly Rest Day");
         List<WeekDay> closedDays = controller.getClosedDays();
         closedDays.forEach(d -> menuBuilder.append(d.day, () -> day[0] = d));
-        displayMenu(menuBuilder, "");
+        displayMenu(menuBuilder);
 
         builder.weeklyRestDay(day[0]);
     }

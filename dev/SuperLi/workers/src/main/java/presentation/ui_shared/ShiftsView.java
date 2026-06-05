@@ -80,12 +80,12 @@ public class ShiftsView extends View {
                         day[0] = weekDayOrdinal);
 
         });
-        if (builderDays.size() == 0) {
+        if (builderDays.isEmpty()) {
             System.out.println("Found no matching shifts for this week");
             return;
         }
 
-        displayMenu(builderDays, "");
+        displayMenu(builderDays);
 
         final Option.Builder builderShifts = new Option.Builder("Enter Shift's Type");
         weekShifts.get(day[0]).forEach((shiftTypeOrdinal, shiftPL) -> {
@@ -95,12 +95,12 @@ public class ShiftsView extends View {
             }
         });
 
-        if (builderShifts.size() == 0) {
+        if (builderShifts.isEmpty()) {
             System.out.println("Found no matching shifts for this day");
             return;
         }
 
-        displayMenu(builderShifts, "");
+        displayMenu(builderShifts);
         if (onSelect != null) onSelect.run(day[0], type[0]);
     }
 

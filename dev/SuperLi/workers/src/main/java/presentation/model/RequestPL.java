@@ -4,14 +4,14 @@ import domain.entities.Request;
 
 public class RequestPL {
 
-    private ShiftPL shift;
-    private String prevEmployee;
-    private String newEmployee;
-    private String manager;
-    private boolean prevApproved;
-    private boolean newApproved;
-    private boolean managerApproved;
-    private boolean denied;
+    private final ShiftPL shift;
+    private final String prevEmployee;
+    private final String newEmployee;
+    private final String manager;
+    private final boolean prevApproved;
+    private final boolean newApproved;
+    private final boolean managerApproved;
+    private final boolean denied;
 
     public RequestPL(ShiftPL shift, String prevEmployee, String newEmployee,
                      String manager, boolean prevApproved, boolean newApproved,
@@ -47,33 +47,11 @@ public class RequestPL {
         return shift;
     }
 
-    public String getPrevEmployee() {
-        return prevEmployee;
-    }
-
     public Request toRequest() {
         return new Request(
                 shift.toShift(), prevEmployee, newEmployee, manager,
                 prevApproved, newApproved, managerApproved, denied
         );
-    }
-
-
-    public boolean isPrevApproved() {
-        return prevApproved;
-    }
-
-
-    public boolean isNewApproved() {
-        return newApproved;
-    }
-
-    public boolean isManagerApproved() {
-        return managerApproved;
-    }
-
-    public boolean isDenied() {
-        return denied;
     }
 
     public Request toReplacementRequest() {
@@ -89,18 +67,6 @@ public class RequestPL {
 
         if (newEmployee != null) {
 
-            boolean managerDenied = manager != null && !managerApproved;
-            String status = managerApproved ? "Approved" :
-                    managerDenied? "Denied" : "Pending";
-            s.append("\t").append(manager == null? "" : manager).append(" (")
-                    .append(status).append(") on request: ");
-
-            String prevStatus = prevApproved ? "Accepted" : "Denied";
-            String newStatus = newApproved ? "Accepted" : denied ? "Denied" : "Pending";
-
-            s.append(newEmployee).append(" (").append(newStatus).append(") ")
-                    .append("==> ")
-                    .append(prevEmployee).append(" (").append(prevStatus).append(") ");
         } else {
             String status = managerApproved ? "Approved" : "Denied";
             String prevStatus = prevApproved ? "Accepted" : "Pending";

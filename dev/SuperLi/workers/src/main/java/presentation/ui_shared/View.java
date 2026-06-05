@@ -4,7 +4,10 @@ import context.SessionManager;
 import presentation.util.Option;
 
 import java.util.InputMismatchException;
+import java.util.List;
 import java.util.Scanner;
+import java.util.concurrent.atomic.AtomicReference;
+import java.util.function.Function;
 
 public abstract class View {
     protected static Scanner reader = new Scanner(System.in);
@@ -34,8 +37,8 @@ public abstract class View {
 
     public int getNextInteger(String message) {
         while (true) {
+            System.out.println(message);
             try {
-                System.out.println(message);
                 int result = reader.nextInt();
                 reader.nextLine();
                 return result;
@@ -49,8 +52,8 @@ public abstract class View {
 
     public double getNextDouble(String message) {
         while (true) {
+            System.out.println(message);
             try {
-                System.out.println(message);
                 double result = reader.nextDouble();
                 reader.nextLine();
                 return result;
@@ -73,9 +76,9 @@ public abstract class View {
         }
     }
 
-    protected void displayMenu(Option.Builder options, String endMessage) {
+    protected void displayMenu(Option.Builder options) {
         if (SessionManager.isDebugMode()) debug(options);
-        if (options == null || options.size() == 0)
+        if (options == null || options.isEmpty())
             throw new IllegalArgumentException("Menu should have at least 1 option");
         System.out.println(options.getMessage());
         StringBuilder s = new StringBuilder();
@@ -85,8 +88,7 @@ public abstract class View {
                 s.append(i).append(". ").append(options.get(i).getName()).append("\n");
         }
         System.out.print(s);
-        if (!endMessage.isEmpty())
-            System.out.println(endMessage);
+        System.out.println(options.getEndMessage());
         int selection = getNextInteger("Select Option (number): ");
         while (selection >= options.size() || selection < 0) {
             System.out.println("An Option With Index " + selection + " Does Not Exist. try again");
@@ -96,6 +98,18 @@ public abstract class View {
             options.get(selection).getAction().run();
     }
 
+    public <T> T selectionMenuOf(String message, List<T> options, Function<T, String> repr) {
+        AtomicReference<T> t = new AtomicReference<>();
+        Option.Builder builder = new Option.Builder(message);
+        options.forEach(o -> builder.append(repr.apply(o), () -> t.set(o)));
+        displayMenu(builder);
+
+        return t.get();
+    }
+
+    public <T> T selectionMenuOf(String message, List<T> options) {
+        return selectionMenuOf(message, options, Object::toString);
+    }
 
     private void debug(Option.Builder options) {
         options.append("Move time (DEBUGGING)", () -> {
@@ -104,5 +118,4 @@ public abstract class View {
             System.out.println("Set time to " + SessionManager.now());
         });
     }
-
 }

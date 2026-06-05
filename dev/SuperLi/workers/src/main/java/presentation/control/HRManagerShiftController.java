@@ -8,8 +8,8 @@ import domain.enums.ShiftType;
 import domain.enums.WeekDay;
 import domain.services.EmployeeService;
 import domain.services.HRManagerShiftService;
-import domain.services.RoleService;
 import domain.services.ShiftService;
+import presentation.model.EmployeePL;
 
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
@@ -67,15 +67,11 @@ public class HRManagerShiftController {
         return null;
     }
 
-    public void openShift(int day, int type, String id) {
+    public void openShift(int day, int type, EmployeePL shiftManager) {
         WeekDay weekDay = WeekDay.values()[day];
         ShiftType shiftType = ShiftType.values()[type];
-        Employee employee = employeeService.getEmployeeDetails(id);
-        if (employee == null) throw new IllegalArgumentException("Employee does not exist");
-        if (employee.getQualifiedRoles().contains(Role.ShiftManager))
-            service.updateShift(SessionManager.now().toLocalDate(), weekDay,
-                    shiftType, new Shift(weekDay, shiftType, id));
-        else throw new IllegalArgumentException("Employee is not a shift manager");
+        service.updateShift(SessionManager.now().toLocalDate(), weekDay,
+                shiftType, new Shift(weekDay, shiftType, shiftManager.getId()));
     }
 
     public void closeShift(int day, int type) {
@@ -83,5 +79,13 @@ public class HRManagerShiftController {
         ShiftType shiftType = ShiftType.values()[type];
         service.updateShift(SessionManager.now().toLocalDate(), weekDay,
                 shiftType, null);
+    }
+
+    public EmployeePL getShiftManager(String id) {
+        Employee employee = employeeService.getEmployeeDetails(id);
+        if (employee == null) throw new IllegalArgumentException("Employee does not exist");
+        if (!employee.getQualifiedRoles().contains(Role.ShiftManager))
+            throw new IllegalArgumentException("Employee is not a shift manager");
+        return new EmployeePL(employee);
     }
 }

@@ -23,7 +23,7 @@ public class ManageEmployeesUI extends View {
                     .append("Add Employee", this::addEmployee)
                     .append("Deactivate Employee", this::deactivateEmployee)
                     .append("View Employee Details", this::getEmployeeDetails)
-                    .append("Update Employee", this::updateEmployeeDetails), ""
+                    .append("Update Employee", this::updateEmployeeDetails)
             );
         }
     }

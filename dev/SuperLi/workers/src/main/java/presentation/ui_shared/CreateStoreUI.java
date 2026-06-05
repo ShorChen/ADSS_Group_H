@@ -28,7 +28,7 @@ public class CreateStoreUI extends View {
                     .append("Register Store Manager", this::registerManager)
                     .append("Set Closed Days", this::setClosedDays)
                     .append("Load Data", this::loadData)
-                    .append("Debug Mode", this::isDebugMode), "");
+                    .append("Debug Mode", this::isDebugMode));
         }
 
     }
@@ -56,7 +56,7 @@ public class CreateStoreUI extends View {
             days.forEach(day ->
                     builder.append(day.day, () -> closeDays.add(day)));
 
-            displayMenu(builder, "Closed Days: " + closeDays);
+            displayMenu(builder.setEndMessage("Closed Days: " + closeDays));
             controller.setClosedDays(closeDays);
             if (closeDays.size() == 6) set[0] = false;
         }
@@ -79,7 +79,7 @@ public class CreateStoreUI extends View {
         Option.Builder builder = new Option.Builder("Select Rest Day");
         closeDays.forEach(day -> builder.append(day.day, () ->
                 restDay[0] = day.name()));
-        displayMenu(builder, "");
+        displayMenu(builder);
 
 
         System.out.println("Your password: " +

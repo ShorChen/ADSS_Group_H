@@ -2,12 +2,12 @@ package presentation.ui_manager;
 
 import context.SessionManager;
 import presentation.control.HRManagerShiftController;
+import presentation.model.EmployeePL;
 import presentation.ui_employee.RequestReplacementUI;
 import presentation.ui_shared.ShiftsView;
 import presentation.ui_shared.View;
 import presentation.util.Option;
 
-import java.time.Duration;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 
@@ -37,7 +37,7 @@ public class ManageShiftsUI extends View {
                     //.append("Create Shift Template (Not Implemented)", this::createTemplate)
                     //.append("Set Default Template (Not Implemented)", this::setDefaultTemplate)
                     //.append("Issue HR Report (Not Implemented)", this::issueReport)
-                    , ""
+
             );
         }
     }
@@ -46,7 +46,8 @@ public class ManageShiftsUI extends View {
         shiftsView.selectClosedShifts(((day, type) -> {
             String id = getNextLine("Enter Shift Manager: ");
             try {
-                controller.openShift(day, type, id);
+                EmployeePL shiftManager = controller.getShiftManager(id);
+                controller.openShift(day, type, shiftManager);
             } catch (IllegalArgumentException e) {
                 System.out.println(e.getMessage());
             }

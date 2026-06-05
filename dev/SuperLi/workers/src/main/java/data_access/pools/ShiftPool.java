@@ -2,12 +2,12 @@ package data_access.pools;
 
 import data_access.entities.ShiftEntity;
 import data_access.entities.WeekShiftsEntity;
-import util.BoundedSet;
 
-import java.time.DayOfWeek;
 import java.time.LocalDate;
-import java.time.temporal.TemporalAdjusters;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 public class ShiftPool {
     private final Map<LocalDate, WeekShiftsEntity> weeks;
@@ -55,7 +55,9 @@ public class ShiftPool {
     public WeekShiftsEntity getWeek(LocalDate weekDate) {
         if (weeks.containsKey(weekDate))
             return weeks.get(weekDate);
-        return null;
+        WeekShiftsEntity entity = new WeekShiftsEntity(weekDate, new HashMap<>(), new HashMap<>());
+        weeks.put(weekDate, entity);
+        return entity;
     }
 
     // returns true if @pre(weeks.containsKey(@param(week.getDate)) == true)

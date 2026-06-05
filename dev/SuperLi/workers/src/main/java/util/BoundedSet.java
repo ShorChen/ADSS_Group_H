@@ -7,6 +7,7 @@ import java.util.*;
 // bounding it to not accept more employees of this role.
 // so for now we won't have an upper bound on this class
 // in short. treat BoundedSet as a normal HashSet
+@Deprecated
 public class BoundedSet<T> implements Set<T> {
     private final Set<T> data;
     private int maximumCapacity;

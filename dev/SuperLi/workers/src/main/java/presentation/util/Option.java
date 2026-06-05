@@ -32,10 +32,12 @@ public class Option {
     public static class Builder {
         private String message;
         private final List<Option> options;
+        private String endMessage;
 
         public Builder(String message) {
             options = new ArrayList<>();
             this.message = message;
+            endMessage = "";
         }
 
         public Builder append(String name, Runnable action) {
@@ -59,8 +61,21 @@ public class Option {
             return options.size();
         }
 
-        public Option get(int i){
+        public boolean isEmpty() {
+            return options.isEmpty();
+        }
+
+        public Option get(int i) {
             return options.get(i);
+        }
+
+        public Option.Builder setEndMessage(String endMessage) {
+            this.endMessage = endMessage;
+            return this;
+        }
+
+        public String getEndMessage() {
+            return endMessage;
         }
     }
 

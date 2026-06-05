@@ -1,5 +1,6 @@
 package presentation.control;
 
+import context.SessionManager;
 import domain.enums.ShiftType;
 import domain.enums.WeekDay;
 import domain.services.EmployeeService;
@@ -15,8 +16,8 @@ public class EmployeeShiftController {
     public EmployeeShiftController(){
         this.employeeService = new EmployeeService();
     }
-    public void setAvailability(String employeeId, Map<Integer, Set<Integer>> shifts,
-                                boolean canWorkDoubleShifts){
+    public void setCurrentEmployeeShiftsAsUnavailable(Map<Integer, Set<Integer>> shifts,
+                                                      boolean canWorkDoubleShifts){
         Map<WeekDay, Set<ShiftType>> domainShifts = new HashMap<>();
         if (shifts != null) {
             shifts.forEach((dayInt, shiftInts) -> {
@@ -30,7 +31,8 @@ public class EmployeeShiftController {
                 domainShifts.put(day, types);
             });
         }
-        employeeService.updateAvailability(employeeId, domainShifts, canWorkDoubleShifts);
+        employeeService.updateAvailability(SessionManager.getCurrentEmployee().getId(),
+                domainShifts, canWorkDoubleShifts);
     }
 
 }

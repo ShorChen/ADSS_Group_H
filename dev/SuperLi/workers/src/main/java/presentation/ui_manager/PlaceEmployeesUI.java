@@ -21,46 +21,39 @@ public class PlaceEmployeesUI extends View {
     @Override
     public void display() {
         ShiftsView shiftsView = new ShiftsView(0);
-        shiftsView.selectShift((day, type) -> {
-            List<String> roles = controller.getRoles();
-            Option.Builder builder = new Option.Builder("Roles");
-            String[] selectedRole = new String[1];
-            roles.forEach(role -> builder.append(role, () -> selectedRole[0] = role));
-            displayMenu(builder, "");
-
-            List<EmployeePL> employees = controller.getAvailableEmployees(day, type, selectedRole[0]);
-            checkNoAvailableEmpty(employees);
-
-            Option.Builder employeeMenu = new Option.Builder("---Available Employees---");
-            EmployeePL[] selectedEmployee = new EmployeePL[1];
-            employees.forEach(employeePL ->
-                    employeeMenu.append(employeePL.getId(), () ->
-                            selectedEmployee[0] = employeePL));
-
-            try {
-                displayMenu(employeeMenu, "");
-                controller.assignToShift(day, type, selectedEmployee[0], selectedRole[0]);
-            } catch (UnsupportedOperationException e) {
-                System.out.println(e.getMessage());
-            } catch (Exception _) {
-
-            }
-
-
-        });
+        shiftsView.selectShift(this::placeEmployeeFlow);
         onDismiss.run();
 
     }
 
+    private void placeEmployeeFlow(int day, int type) {
 
-    private void checkNoAvailableEmpty(List<EmployeePL> employees) {
-        if (employees.isEmpty()) {
-            displayMenu(new Option.Builder("No available employee. Request Exceptional Placement?")
-                            .append("Yes", this::requestReplacements)
-                            .append("No", () -> {
-                            })
-                    , "");
+        String selectedRole = selectionMenuOf("Roles", controller.getRoles());
+        EmployeePL selectedEmployee = selectEmployeeFromMenu(day, type, selectedRole);
+
+        try {
+            if (selectedEmployee == null) displayOnEmptyMenu();
+            else controller.assignToShift(day, type, selectedEmployee, selectedRole);
+        } catch (UnsupportedOperationException e) {
+            System.out.println(e.getMessage());
+        } catch (Exception _) {
+
         }
+    }
+
+    private EmployeePL selectEmployeeFromMenu(int day, int type, String role) {
+        List<EmployeePL> employees = controller.getAvailableEmployees(day, type, role);
+        if (employees.isEmpty()) return null;
+        return selectionMenuOf("---Available Employees---",
+                employees, EmployeePL::getId);
+    }
+
+    private void displayOnEmptyMenu() {
+        displayMenu(new Option.Builder("No available employee. Request Exceptional Placement?")
+                        .append("Yes", this::requestReplacements)
+                        .append("No", () -> {
+                        })
+        );
     }
 
     private void requestReplacements() {

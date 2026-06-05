@@ -70,7 +70,7 @@ class RequestReplacementServiceTest {
 
     @Test
     void requestReplacement_NullRequest_ThrowsException() {
-        assertThrows(NullPointerException.class, () -> {
+        assertThrows(IllegalArgumentException.class, () -> {
             service.requestReplacement(null);
         });
     }
@@ -138,9 +138,7 @@ class RequestReplacementServiceTest {
 
     @Test
     void approve_NullRequest_ThrowsException() {
-        assertThrows(NullPointerException.class, () -> {
-            service.approve(null, "emp1");
-        });
+        assertThrows(IllegalArgumentException.class, () -> service.approve(null, "emp1"));
     }
 
     // ========
@@ -180,7 +178,7 @@ class RequestReplacementServiceTest {
 
     @Test
     void deny_NullRequest_ThrowsException() {
-        assertThrows(NullPointerException.class, () -> {
+        assertThrows(IllegalArgumentException.class, () -> {
             service.deny(null, "emp1");
         });
     }
@@ -199,9 +197,11 @@ class RequestReplacementServiceTest {
     @Test
     void approve_RequestWithNullNewEmployee_IsApproved() {
         Shift shift = new Shift(WeekDay.THURSDAY, ShiftType.DAY, "manager808");
-        Request request = new Request(shift, "emp1", null, "manager808", true, true, true, false);
 
-        boolean result = service.approve(request, "manager808");
+        Request request = new Request(shift, "emp1", null);
+        request.approve("manager808");
+
+        boolean result = service.doAllSidesApprove(request);
 
         assertTrue(result);
         assertTrue(request.isApproved());

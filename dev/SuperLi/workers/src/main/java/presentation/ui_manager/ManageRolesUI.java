@@ -20,7 +20,8 @@ public class ManageRolesUI extends View {
         while (open) {
             displayMenu(new Option.Builder("Managing Roles")
                     .append("Back", onDismiss)
-                    .append("Create Role", this::createRole), "Roles: " + controller.getAllRoles()
+                    .append("Create Role", this::createRole)
+                    .setEndMessage("Roles: " + controller.getAllRoles())
             );
         }
     }

@@ -3,6 +3,7 @@ package presentation.control;
 import domain.entities.Role;
 import domain.services.RoleService;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class RoleController {
@@ -18,8 +19,10 @@ public class RoleController {
         return service.createRole(tag);
     }
 
-    public List<Role> getAllRoles() {
-        return service.getAllRoles();
+    public List<String> getAllRoles() {
+        List<String> roles = new ArrayList<>();
+        service.getAllRoles().forEach(role -> roles.add(role.getTag()));
+        return roles;
     }
 
     public String getRole(String tag) {

@@ -1,6 +1,5 @@
 package presentation.ui_manager;
 
-import context.SessionManager;
 import presentation.control.AuthController;
 import presentation.ui_shared.View;
 import presentation.util.Option;
@@ -24,7 +23,7 @@ public class ManagerHomeUI extends View {
                     .append("View Shift History", this::viewShiftHistory)
                     .append("Manage shifts", this::manageShifts)
                     .append("Manage Employees", this::manageEmployees)
-                    .append("Manage Roles", this::manageRoles), ""
+                    .append("Manage Roles", this::manageRoles)
             );
 
         }
@@ -34,8 +33,7 @@ public class ManagerHomeUI extends View {
         String oldPassword = getNextLine("Enter Old Password");
         String password = getNextLine("Enter New Password");
         try {
-            boolean passChanged = controller.changePassword(SessionManager
-                    .getCurrentEmployee().getId(), oldPassword, password);
+            boolean passChanged = controller.changeCurrentEmployeePassword(oldPassword, password);
             if (passChanged)
                 System.out.println("Password Changed");
             else System.out.println("The two passwords do not match");

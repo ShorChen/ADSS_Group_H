@@ -5,8 +5,6 @@ import domain.entities.Employee;
 import domain.services.AuthService;
 import presentation.model.EmployeePL;
 
-import java.util.InputMismatchException;
-
 public class AuthController {
     private final AuthService service;
 
@@ -26,8 +24,8 @@ public class AuthController {
         SessionManager.logout();
     }
 
-    public boolean changePassword(String id, String oldPass, String newPass) {
-        return service.changePassword(id, oldPass, newPass);
+    public boolean changeCurrentEmployeePassword(String oldPass, String newPass) {
+        return service.changePassword(SessionManager.getCurrentEmployee().getId(), oldPass, newPass);
     }
 
     public boolean isManager(String id){

@@ -18,7 +18,7 @@ public class ViewShiftHistoryUI extends View {
     public void display() {
         open = true;
         while (open) {
-            System.out.println("\n--- Viewing Shift History: \" + weeksAgo + \" Week(s) Ago ---)");
+            System.out.println("\n--- Viewing Shift History: " + weeksAgo + " Week(s) Ago ---)");
             shiftsView = new ShiftsView(weeksAgo);
             shiftsView.display();
             System.out.println("X - Store Was Closed");
@@ -27,7 +27,7 @@ public class ViewShiftHistoryUI extends View {
                     .append("Back", onDismiss)
                     .append("View Previous Week", this::loadPreviousWeek)
                     .append("View Next Week", this::loadNextWeek)
-                    .append("View Shift", this::viewShift), ""
+                    .append("View Shift", this::viewShift)
             );
         }
     }
