@@ -1,11 +1,11 @@
 package Suppliers.Presentation.Controller;
 
-import Suppliers.Domain.Security.Role;
+import Core.Domain.Role;
 import Suppliers.Domain.Security.SessionManager;
 import Suppliers.Presentation.DTO.*;
 import Suppliers.Service.Core.SupplierService;
 import Suppliers.Service.DTO.*;
-import Suppliers.Service.Response;
+import Core.Service.Response;
 
 import java.time.DayOfWeek;
 import java.util.ArrayList;
@@ -17,7 +17,7 @@ import java.util.stream.Collectors;
 public class SupplierController {
     private final SupplierService supplierService;
 
-    SupplierController(SupplierService supplierService) {
+    public SupplierController(SupplierService supplierService) {
         this.supplierService = supplierService;
     }
 

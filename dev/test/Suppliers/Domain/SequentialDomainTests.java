@@ -1,5 +1,6 @@
 package Suppliers.Domain;
 
+import Core.Domain.Role;
 import Suppliers.Domain.Entities.*;
 import Suppliers.Domain.Security.*;
 import Suppliers.Domain.ValueObjects.*;

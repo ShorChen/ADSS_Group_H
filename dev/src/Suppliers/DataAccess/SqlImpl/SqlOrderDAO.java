@@ -1,6 +1,6 @@
 package Suppliers.DataAccess.SqlImpl;
 
-import Shared.DatabaseManager;
+import Core.DataAccess.DatabaseManager;
 import Suppliers.DataAccess.OrderDAO;
 import Suppliers.Domain.Entities.OrderDL;
 import Suppliers.Domain.ValueObjects.OrderItemDL;

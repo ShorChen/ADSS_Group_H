@@ -3,7 +3,7 @@ package Suppliers.Service.Core;
 import Suppliers.Domain.Entities.SupplierDL;
 import Suppliers.Domain.Facades.SupplierFacade;
 import Suppliers.Service.DTO.*;
-import Suppliers.Service.Response;
+import Core.Service.Response;
 
 import java.time.DayOfWeek;
 import java.util.List;

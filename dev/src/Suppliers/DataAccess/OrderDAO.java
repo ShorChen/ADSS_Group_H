@@ -7,6 +7,7 @@ import java.util.Map;
 
 public interface OrderDAO {
     OrderDL createAndSaveOrder(String businessNumber, String supplierName, String address, String phone, List<OrderItemDL> items);
+    @SuppressWarnings("unused")
     OrderDL getOrder(int orderId);
     Map<Integer, OrderDL> getAllOrders();
 }

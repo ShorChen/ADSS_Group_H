@@ -1,6 +1,7 @@
 package Suppliers.Presentation.GUI;
 
-import Suppliers.Presentation.Controller.ControllerFactory;
+import Core.App.MainApp;
+import Core.Controller.ControllerFactory;
 import Suppliers.Presentation.Controller.SupplierController;
 import Suppliers.Presentation.DTO.SupplierPL;
 import Suppliers.Presentation.DTO.ContactPersonPL;
@@ -19,7 +20,7 @@ import java.time.DayOfWeek;
 import java.util.ArrayList;
 import java.util.List;
 
-class SupplierDashboard {
+public class SupplierDashboard {
     private final Scene scene;
     private final SupplierController supplierController;
     private final ListView<SupplierPL> supplierListView;
@@ -30,7 +31,7 @@ class SupplierDashboard {
     private Integer activeProductId = null;
     private boolean isRebuilding = false;
 
-    SupplierDashboard() {
+    public SupplierDashboard() {
         supplierController = ControllerFactory.getInstance().getSupplierController();
         Button logoutBtn = new Button("Logout");
         logoutBtn.setOnAction(e -> logout());

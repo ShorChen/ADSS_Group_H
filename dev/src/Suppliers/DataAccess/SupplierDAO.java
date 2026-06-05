@@ -9,6 +9,7 @@ public interface SupplierDAO {
     void addSupplier(SupplierDL supplier);
     void updateSupplier(SupplierDL supplier);
     void deleteSupplier(String businessNumber);
+    @SuppressWarnings("unused")
     SupplierDL getSupplier(String businessNumber);
     Map<String, SupplierDL> getAllSuppliers();
 

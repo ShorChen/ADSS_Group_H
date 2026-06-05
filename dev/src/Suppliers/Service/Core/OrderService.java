@@ -7,7 +7,7 @@ import Suppliers.Domain.Entities.ProductLineDL;
 import Suppliers.Domain.Entities.SupplierDL;
 import Suppliers.Domain.Facades.OrderFacade;
 import Suppliers.Domain.Facades.SupplierFacade;
-import Suppliers.Service.Response;
+import Core.Service.Response;
 import Suppliers.Service.DTO.SupplierSL;
 import Suppliers.Service.DTO.OrderSL;
 import Suppliers.Service.DTO.OrderItemSL;

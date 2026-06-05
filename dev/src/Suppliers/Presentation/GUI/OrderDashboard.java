@@ -1,6 +1,7 @@
 package Suppliers.Presentation.GUI;
 
-import Suppliers.Presentation.Controller.ControllerFactory;
+import Core.App.MainApp;
+import Core.Controller.ControllerFactory;
 import Suppliers.Presentation.Controller.OrderController;
 import Suppliers.Presentation.DTO.SupplierPL;
 import Suppliers.Presentation.DTO.AgreementPL;
@@ -19,7 +20,7 @@ import javafx.scene.layout.*;
 import java.util.*;
 import java.util.stream.Collectors;
 
-class OrderDashboard {
+public class OrderDashboard {
     private final Scene scene;
     private final OrderController orderController;
     private final VBox centerPane;
@@ -29,7 +30,7 @@ class OrderDashboard {
     private final List<OrderItem> currentOrder;
     private String selectedProductName;
 
-    OrderDashboard() {
+    public OrderDashboard() {
         orderController = ControllerFactory.getInstance().getOrderController();
         currentOrder = new ArrayList<>();
         availableProducts = new HashSet<>();

@@ -1,13 +1,13 @@
 package Suppliers.Presentation.Controller;
 
-import Suppliers.Domain.Security.Role;
+import Core.Domain.Role;
 import Suppliers.Domain.Security.SessionManager;
 import Suppliers.Presentation.DTO.*;
 import Suppliers.Service.Core.OrderService;
 import Suppliers.Service.DTO.AgreementSL;
 import Suppliers.Service.DTO.OrderSL;
 import Suppliers.Service.DTO.OrderItemSL;
-import Suppliers.Service.Response;
+import Core.Service.Response;
 import Suppliers.Service.DTO.SupplierSL;
 
 import java.util.ArrayList;
@@ -20,7 +20,7 @@ import java.util.stream.Collectors;
 public class OrderController {
     private final OrderService orderService;
 
-    OrderController(OrderService orderService) {
+    public OrderController(OrderService orderService) {
         this.orderService = orderService;
     }
 

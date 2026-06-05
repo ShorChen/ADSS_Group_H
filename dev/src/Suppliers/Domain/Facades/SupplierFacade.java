@@ -13,6 +13,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.NoSuchElementException;
 
+@SuppressWarnings("SameReturnValue")
 public class SupplierFacade {
     private final Map<String, SupplierDL> suppliers;
     private final SupplierDAO supplierDAO;

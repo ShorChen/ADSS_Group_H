@@ -1,0 +1,2 @@
+package Inventory.Presentation.DTO;
+public record ProductPL(String barcode, String name, String manufacturer, int categoryId, double costPrice, double sellingPrice, int minQuantity, int shelfQuantity, int warehouseQuantity, String aisle, int position) {}

@@ -1,5 +1,7 @@
 package Suppliers.Domain.Security;
 
+import Core.Domain.Role;
+
 public class SessionManager {
     private static SessionManager instance;
     private Role currentRole;
