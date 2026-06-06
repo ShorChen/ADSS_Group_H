@@ -1,7 +1,7 @@
 package Suppliers.Presentation.GUI;
 
-import Core.App.MainApp;
 import Core.Controller.ControllerFactory;
+import Core.Navigation.AppNavigator;
 import Suppliers.Presentation.Controller.OrderController;
 import Suppliers.Presentation.DTO.SupplierPL;
 import Suppliers.Presentation.DTO.AgreementPL;
@@ -29,8 +29,10 @@ public class OrderDashboard {
     private final Set<String> availableProducts;
     private final List<OrderItem> currentOrder;
     private String selectedProductName;
+    private final AppNavigator appNavigator;
 
-    public OrderDashboard() {
+    public OrderDashboard(AppNavigator appNavigator) {
+        this.appNavigator = appNavigator;
         orderController = ControllerFactory.getInstance().getOrderController();
         currentOrder = new ArrayList<>();
         availableProducts = new HashSet<>();
@@ -481,7 +483,7 @@ public class OrderDashboard {
     private void logout() {
         try {
             ControllerFactory.getInstance().getAuthController().logout();
-            MainApp.showLoginScreen();
+            appNavigator.showLoginScreen();
         } catch (Exception ex) {
             showAlert("Logout Error", "An error occurred during logout: " + ex.getMessage());
         }

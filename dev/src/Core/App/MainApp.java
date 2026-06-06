@@ -1,22 +1,22 @@
 package Core.App;
 
+import Core.Navigation.AppNavigator;
 import Inventory.Presentation.GUI.InventoryDashboard;
-import Core.DataAccess.DatabaseManager;
-import Core.Controller.ControllerFactory;
 import Suppliers.Presentation.GUI.OrderDashboard;
 import Suppliers.Presentation.GUI.SupplierDashboard;
+import Transportation.Presentation.GUI.TransportDashboard;
+import Core.Controller.ControllerFactory;
 import javafx.application.Application;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.layout.Pane;
 import javafx.stage.Stage;
 
-public class MainApp extends Application {
+public class MainApp extends Application implements AppNavigator {
     private static Stage primaryStage;
 
     @Override
     public void start(Stage stage) {
-        DatabaseManager.createTables();
         primaryStage = stage;
         primaryStage.setTitle("Super-Lee Management System");
         primaryStage.setOnCloseRequest(event -> {
@@ -28,24 +28,34 @@ public class MainApp extends Application {
         primaryStage.show();
     }
 
-    public static void showLoginScreen() {
-        LoginScreen login = new LoginScreen();
+    @Override
+    public void showLoginScreen() {
+        LoginScreen login = new LoginScreen(this);
         switchScene(login.getScene());
     }
 
-    public static void showSupplierManagerDashboard() {
-        SupplierDashboard dashboard = new SupplierDashboard();
+    @Override
+    public void showSupplierManagerDashboard() {
+        SupplierDashboard dashboard = new SupplierDashboard(this);
         switchScene(dashboard.getScene());
     }
 
-    public static void showOrderManagerDashboard() {
-        OrderDashboard dashboard = new OrderDashboard();
+    @Override
+    public void showOrderManagerDashboard() {
+        OrderDashboard dashboard = new OrderDashboard(this);
         switchScene(dashboard.getScene());
     }
 
-    public static void showInventoryManagerDashboard() {
-        InventoryDashboard id = new InventoryDashboard();
+    @Override
+    public void showInventoryManagerDashboard() {
+        InventoryDashboard id = new InventoryDashboard(this);
         switchScene(id.getScene());
+    }
+
+    @Override
+    public void showTransportManagerDashboard() {
+        TransportDashboard td = new TransportDashboard(this);
+        switchScene(td.getScene());
     }
 
     public static void switchScene(Scene newScene) {

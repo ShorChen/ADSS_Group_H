@@ -4,7 +4,7 @@ import Core.Domain.Role;
 import Core.Service.AuthService;
 import Core.Service.Response;
 
-@SuppressWarnings("ClassCanBeRecord")
+@SuppressWarnings({"ClassCanBeRecord", "unused"})
 public class AuthController {
     private final AuthService authService;
 

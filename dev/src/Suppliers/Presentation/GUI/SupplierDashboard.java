@@ -1,7 +1,7 @@
 package Suppliers.Presentation.GUI;
 
-import Core.App.MainApp;
 import Core.Controller.ControllerFactory;
+import Core.Navigation.AppNavigator;
 import Suppliers.Presentation.Controller.SupplierController;
 import Suppliers.Presentation.DTO.SupplierPL;
 import Suppliers.Presentation.DTO.ContactPersonPL;
@@ -30,8 +30,10 @@ public class SupplierDashboard {
     private Integer activeAgreementId = null;
     private Integer activeProductId = null;
     private boolean isRebuilding = false;
+    private final AppNavigator appNavigator;
 
-    public SupplierDashboard() {
+    public SupplierDashboard(AppNavigator appNavigator) {
+        this.appNavigator = appNavigator;
         supplierController = ControllerFactory.getInstance().getSupplierController();
         Button logoutBtn = new Button("Logout");
         logoutBtn.setOnAction(e -> logout());
@@ -775,7 +777,7 @@ public class SupplierDashboard {
     private void logout() {
         try {
             ControllerFactory.getInstance().getAuthController().logout();
-            MainApp.showLoginScreen();
+            appNavigator.showLoginScreen();
         } catch (Exception ex) {
             showAlert("Logout Error", "An error occurred during logout: " + ex.getMessage());
         }
