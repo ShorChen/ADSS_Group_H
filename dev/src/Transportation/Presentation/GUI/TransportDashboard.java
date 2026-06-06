@@ -67,7 +67,6 @@ public class TransportDashboard {
         TextField maxField = new TextField(); maxField.setPromptText("Max Weight");
         CheckBox refCheck = new CheckBox("Refrigerated");
         Button addTruckBtn = new Button("Add Truck");
-
         addTruckBtn.setOnAction(e -> {
             try {
                 transportController.addTruck(licField.getText(), modField.getText(), Double.parseDouble(netField.getText()), Double.parseDouble(maxField.getText()), refCheck.isSelected());
@@ -75,14 +74,12 @@ public class TransportDashboard {
             } catch (Exception ex) { showAlert("Error", ex.getMessage()); }
         });
         truckBox.getChildren().addAll(licField, modField, netField, maxField, refCheck, addTruckBtn);
-
         HBox driverBox = new HBox(10);
         TextField idField = new TextField(); idField.setPromptText("Driver ID");
         TextField nameField = new TextField(); nameField.setPromptText("Name");
         ComboBox<String> typeBox = new ComboBox<>(); typeBox.getItems().addAll("STANDARD", "HEAVY");
         DatePicker expPicker = new DatePicker(); expPicker.setPromptText("License Expiry");
         Button addDriverBtn = new Button("Add Driver");
-
         addDriverBtn.setOnAction(e -> {
             try {
                 transportController.addDriver(idField.getText(), nameField.getText(), typeBox.getValue(), expPicker.getValue());
@@ -90,7 +87,6 @@ public class TransportDashboard {
             } catch (Exception ex) { showAlert("Error", ex.getMessage()); }
         });
         driverBox.getChildren().addAll(idField, nameField, typeBox, expPicker, addDriverBtn);
-
         layout.getChildren().addAll(new Label("Manage Trucks"), truckBox, truckList, new Label("Manage Drivers"), driverBox, driverList);
         return layout;
     }
@@ -104,7 +100,6 @@ public class TransportDashboard {
         TextField contactField = new TextField(); contactField.setPromptText("Contact Person");
         TextField phoneField = new TextField(); phoneField.setPromptText("Phone");
         Button addBtn = new Button("Add Site");
-
         addBtn.setOnAction(e -> {
             try {
                 transportController.addSite(nameField.getText(), addrField.getText(), contactField.getText(), phoneField.getText());
@@ -126,7 +121,6 @@ public class TransportDashboard {
         TextField truckField = new TextField(); truckField.setPromptText("Truck License");
         TextField driverField = new TextField(); driverField.setPromptText("Driver ID");
         topBox.getChildren().addAll(datePicker, timeField, originField, truckField, driverField);
-
         HBox destBox = new HBox(10);
         TextField destField = new TextField(); destField.setPromptText("Destination Site Name");
         Button addDestBtn = new Button("Add Empty Destination");
@@ -136,7 +130,6 @@ public class TransportDashboard {
             refreshDraftList(draftList);
         });
         destBox.getChildren().addAll(destField, addDestBtn);
-
         HBox cargoBox = new HBox(10);
         ComboBox<String> destCombo = new ComboBox<>();
         destCombo.setOnMouseClicked(e -> destCombo.getItems().setAll(draftDestinations.stream().map(DestinationPL::destinationSite).toList()));
@@ -153,7 +146,6 @@ public class TransportDashboard {
             } catch (Exception ex) { showAlert("Error", ex.getMessage()); }
         });
         cargoBox.getChildren().addAll(destCombo, itemField, weightField, qtyField, addCargoBtn);
-
         HBox authBox = new HBox(10);
         TextField managerField = new TextField(); managerField.setPromptText("Authorizing Manager ID");
         Button createBtn = new Button("Finalize & Create Delivery");
@@ -169,7 +161,6 @@ public class TransportDashboard {
             } catch (Exception ex) { showAlert("Error", ex.getMessage()); }
         });
         authBox.getChildren().addAll(managerField, createBtn);
-
         HBox actionBox = new HBox(10);
         TextField modifyIdField = new TextField(); modifyIdField.setPromptText("Delivery ID");
         TextField newTruckField = new TextField(); newTruckField.setPromptText("New Truck");
@@ -184,7 +175,6 @@ public class TransportDashboard {
             } catch (Exception ex) { showAlert("Error", ex.getMessage()); }
         });
         actionBox.getChildren().addAll(modifyIdField, newTruckField, newDriverField, replanBtn, cancelBtn);
-
         layout.getChildren().addAll(new Label("1. Setup Route"), topBox, new Label("2. Build Destinations"), destBox, new Label("3. Load Cargo"), cargoBox, draftList, authBox, new Label("Manage Active/Historical"), actionBox, deliveryListView);
         return layout;
     }

@@ -5,7 +5,6 @@ import Suppliers.Domain.Entities.*;
 import Suppliers.Domain.Security.*;
 import Suppliers.Domain.ValueObjects.*;
 import org.junit.jupiter.api.*;
-
 import java.time.DayOfWeek;
 import java.util.ArrayList;
 import java.util.List;
@@ -15,7 +14,6 @@ import static org.junit.jupiter.api.Assertions.*;
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 public class SequentialDomainTests {
-
     private SupplierDL currentSupplier;
     private AgreementDL currentAgreement;
     private ProductLineDL currentProduct;

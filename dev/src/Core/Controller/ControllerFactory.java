@@ -34,19 +34,16 @@ public class ControllerFactory {
         SqlOrderDAO orderDAO = new SqlOrderDAO();
         SqlInventoryDAO inventoryDAO = new SqlInventoryDAO();
         SqlTransportDAO transportDAO = new SqlTransportDAO();
-
         AuthFacade authFacade = new AuthFacade(authDAO);
         SupplierFacade supplierFacade = new SupplierFacade(supplierDAO);
         OrderFacade orderFacade = new OrderFacade(orderDAO);
         InventoryFacade inventoryFacade = new InventoryFacade(inventoryDAO);
         TransportFacade transportFacade = new TransportFacade(transportDAO);
-
         AuthService authService = new AuthService(authFacade);
         SupplierService supplierService = new SupplierService(supplierFacade);
         OrderService orderService = new OrderService(supplierFacade, orderFacade);
         InventoryService inventoryService = new InventoryService(inventoryFacade);
         TransportService transportService = new TransportService(transportFacade);
-
         this.authController = new AuthController(authService);
         this.supplierController = new SupplierController(supplierService);
         this.orderController = new OrderController(orderService);

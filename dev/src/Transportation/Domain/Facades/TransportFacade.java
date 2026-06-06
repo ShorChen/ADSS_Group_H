@@ -30,18 +30,14 @@ public class TransportFacade {
         if (truck == null) throw new IllegalArgumentException("Truck not found.");
         DriverDL driver = transportDAO.getDriver(driverId);
         if (driver == null) throw new IllegalArgumentException("Driver not found.");
-        if (driver.getLicenseType().equals("STANDARD") && truck.getMaxWeight() > 12000) {
+        if (driver.getLicenseType().equals("STANDARD") && truck.getMaxWeight() > 12000)
             throw new IllegalArgumentException("Driver license does not authorize this truck.");
-        }
         double totalCargoWeight = 0;
-        for (DestinationDL dest : destinations) {
-            for (CargoItemDL item : dest.getItems()) {
+        for (DestinationDL dest : destinations)
+            for (CargoItemDL item : dest.getItems())
                 totalCargoWeight += (item.getWeight() * item.getQuantity());
-            }
-        }
-        if (truck.isOverweight(totalCargoWeight)) {
+        if (truck.isOverweight(totalCargoWeight))
             throw new IllegalArgumentException("Total cargo weight exceeds truck capacity.");
-        }
         DeliveryDL delivery = new DeliveryDL(0, date, departureTime, "PENDING", truckLicense, driverId, originSite, destinations);
         TransportationManager manager = new TransportationManager(managerId, "System Manager");
         manager.authorizeDelivery(delivery);
@@ -55,18 +51,14 @@ public class TransportFacade {
         if (truck == null) throw new IllegalArgumentException("New truck not found.");
         DriverDL driver = transportDAO.getDriver(newDriverId);
         if (driver == null) throw new IllegalArgumentException("New driver not found.");
-        if (driver.getLicenseType().equals("STANDARD") && truck.getMaxWeight() > 12000) {
+        if (driver.getLicenseType().equals("STANDARD") && truck.getMaxWeight() > 12000)
             throw new IllegalArgumentException("Driver license does not authorize this truck.");
-        }
         double totalCargoWeight = 0;
-        for (DestinationDL dest : delivery.getDestinations()) {
-            for (CargoItemDL item : dest.getItems()) {
+        for (DestinationDL dest : delivery.getDestinations())
+            for (CargoItemDL item : dest.getItems())
                 totalCargoWeight += (item.getWeight() * item.getQuantity());
-            }
-        }
-        if (truck.isOverweight(totalCargoWeight)) {
+        if (truck.isOverweight(totalCargoWeight))
             throw new IllegalArgumentException("New truck cannot hold existing cargo weight.");
-        }
         delivery.setTruckLicense(newTruckLicense);
         delivery.setDriverId(newDriverId);
         delivery.setStatus("REPLANNED");

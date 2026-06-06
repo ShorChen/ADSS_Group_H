@@ -20,16 +20,12 @@ public class LoginScreen {
         layout.setPadding(new Insets(20));
         Label titleLabel = new Label("Super-Lee Management System");
         titleLabel.setStyle("-fx-font-size: 24px; -fx-font-weight: bold;");
-
-        // FIX: PasswordField hides the text visually
         PasswordField codeField = new PasswordField();
         codeField.setPromptText("Enter Access Code");
         codeField.setMaxWidth(200);
-
         Button loginBtn = new Button("Login");
         Label errorLabel = new Label();
         errorLabel.setStyle("-fx-text-fill: red;");
-
         loginBtn.setOnAction(e -> {
             try {
                 Role role = ControllerFactory.getInstance().getAuthController().login(codeField.getText());
@@ -38,7 +34,6 @@ public class LoginScreen {
                 errorLabel.setText(ex.getMessage());
             }
         });
-
         layout.getChildren().addAll(titleLabel, codeField, loginBtn, errorLabel);
         scene = new Scene(layout, 400, 300);
     }
