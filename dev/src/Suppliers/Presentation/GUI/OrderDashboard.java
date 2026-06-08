@@ -1,0 +1,607 @@
+package Suppliers.Presentation.GUI;
+
+import Core.Controller.ControllerFactory;
+import Core.Navigation.AppNavigator;
+import Suppliers.Presentation.Controller.OrderController;
+import Suppliers.Presentation.DTO.SupplierPL;
+import Suppliers.Presentation.DTO.AgreementPL;
+import Suppliers.Presentation.DTO.ProductLinePL;
+import Suppliers.Presentation.DTO.DiscountBracketPL;
+import Suppliers.Presentation.DTO.OrderItemPL;
+import Suppliers.Presentation.DTO.OrderPL;
+import javafx.beans.property.SimpleObjectProperty;
+import javafx.beans.property.SimpleStringProperty;
+import javafx.geometry.Insets;
+import javafx.geometry.Pos;
+import javafx.scene.Scene;
+import javafx.scene.control.*;
+import javafx.scene.layout.*;
+
+import java.util.*;
+import java.util.stream.Collectors;
+
+public class OrderDashboard {
+    private final Scene scene;
+    private final OrderController orderController;
+    private final VBox centerPane;
+    private final Button abortBtn;
+    private List<SupplierPL> onDemandSuppliers;
+    private final Set<String> availableProducts;
+    private final List<OrderItem> currentOrder;
+    private String selectedProductName;
+    private final AppNavigator appNavigator;
+
+    public OrderDashboard(AppNavigator appNavigator) {
+        this.appNavigator = appNavigator;
+        orderController = ControllerFactory.getInstance().getOrderController();
+        currentOrder = new ArrayList<>();
+        availableProducts = new HashSet<>();
+        onDemandSuppliers = new ArrayList<>();
+
+        Button logoutBtn = new Button("Logout");
+        logoutBtn.setOnAction(e -> logout());
+
+        Button historyBtn = new Button("Order History");
+        historyBtn.setOnAction(e -> showOrderHistoryDialog());
+
+        abortBtn = new Button("Abort Order");
+        abortBtn.setStyle("-fx-background-color: #f44336; -fx-text-fill: white; font-weight: bold;");
+        abortBtn.setVisible(false);
+        abortBtn.setOnAction(e -> resetToStart());
+
+        Region spacer = new Region();
+        HBox.setHgrow(spacer, Priority.ALWAYS);
+        HBox topBar = new HBox(15, abortBtn, spacer, historyBtn, logoutBtn);
+        topBar.setPadding(new Insets(10));
+        topBar.setStyle("-fx-background-color: #333333;");
+
+        centerPane = new VBox(20);
+        centerPane.setAlignment(Pos.CENTER);
+        centerPane.setPadding(new Insets(40));
+
+        BorderPane mainLayout = new BorderPane();
+        mainLayout.setTop(topBar);
+        mainLayout.setCenter(centerPane);
+        scene = new Scene(mainLayout, 900, 600);
+
+        resetToStart();
+    }
+
+    private void loadOnDemandCatalog() {
+        availableProducts.clear();
+        try {
+            onDemandSuppliers = orderController.getAllSuppliers();
+            for (SupplierPL sup : onDemandSuppliers)
+                for (AgreementPL agr : sup.agreements())
+                    for (ProductLinePL prod : agr.productLines())
+                        availableProducts.add(prod.name());
+        } catch (Exception e) {
+            showAlert("Error", "Could not load catalog: " + e.getMessage());
+        }
+    }
+
+    private void resetToStart() {
+        currentOrder.clear();
+        selectedProductName = null;
+        abortBtn.setVisible(false);
+        centerPane.getChildren().clear();
+        Label welcome = new Label("Order Management System");
+        welcome.setStyle("-fx-font-size: 28px; -fx-font-weight: bold;");
+        Button startBtn = new Button("Start Order");
+        startBtn.setStyle("-fx-font-size: 18px; -fx-background-color: #4CAF50; -fx-text-fill: white; -fx-padding: 10 30;");
+        startBtn.setOnAction(e -> {
+            loadOnDemandCatalog();
+            showSearchPhase();
+        });
+        centerPane.getChildren().addAll(welcome, startBtn);
+    }
+
+    private void showSearchPhase() {
+        abortBtn.setVisible(true);
+        centerPane.getChildren().clear();
+        Label prompt = new Label("What item do you seek to buy?");
+        prompt.setStyle("-fx-font-size: 20px;");
+        TextField searchBar = new TextField();
+        searchBar.setPromptText("Type product name...");
+        searchBar.setMaxWidth(400);
+        searchBar.setStyle("-fx-font-size: 16px;");
+        ListView<String> resultsList = new ListView<>();
+        resultsList.setMaxWidth(400);
+        resultsList.setPrefHeight(200);
+        Label errorLabel = new Label("No matching products found in on-demand agreements.");
+        errorLabel.setStyle("-fx-text-fill: red; -fx-font-size: 14px;");
+        errorLabel.setVisible(false);
+        searchBar.textProperty().addListener((obs, oldVal, newVal) -> {
+            if (newVal == null || newVal.trim().isEmpty()) {
+                resultsList.getItems().clear();
+                errorLabel.setVisible(false);
+            } else {
+                List<String> matches = availableProducts.stream().filter(p -> p.toLowerCase().contains(newVal.toLowerCase())).collect(Collectors.toList());
+                resultsList.getItems().setAll(matches);
+                errorLabel.setVisible(matches.isEmpty());
+            }
+        });
+        resultsList.setOnMouseClicked(e -> {
+            String selected = resultsList.getSelectionModel().getSelectedItem();
+            if (selected != null) {
+                selectedProductName = selected;
+                showQuantityPhase();
+            }
+        });
+        centerPane.getChildren().addAll(prompt, searchBar, errorLabel, resultsList);
+        if (!currentOrder.isEmpty()) {
+            Button returnSummaryBtn = new Button("Return to Order Summary");
+            returnSummaryBtn.setStyle("-fx-font-size: 16px; -fx-background-color: #FF9800; -fx-text-fill: white;");
+            returnSummaryBtn.setOnAction(e -> showSummaryPhase());
+            centerPane.getChildren().add(returnSummaryBtn);
+        }
+    }
+
+    private void showQuantityPhase() {
+        centerPane.getChildren().clear();
+        Label prompt = new Label("How many units of '" + selectedProductName + "' do you need?");
+        prompt.setStyle("-fx-font-size: 20px;");
+        TextField qtyField = new TextField();
+        qtyField.setPromptText("Enter quantity...");
+        qtyField.setMaxWidth(200);
+        qtyField.setStyle("-fx-font-size: 16px;");
+        Button calcBtn = getButton(qtyField);
+        Button backBtn = new Button("Go Back");
+        backBtn.setStyle("-fx-font-size: 16px; -fx-background-color: #9e9e9e; -fx-text-fill: white;");
+        backBtn.setOnAction(e -> showSearchPhase());
+        HBox actionBox = new HBox(15, calcBtn, backBtn);
+        actionBox.setAlignment(Pos.CENTER);
+        centerPane.getChildren().addAll(prompt, qtyField, actionBox);
+    }
+
+    private Button getButton(TextField qtyField) {
+        Button calcBtn = new Button("Find Cheapest Supplier");
+        calcBtn.setStyle("-fx-font-size: 16px; -fx-background-color: #2196F3; -fx-text-fill: white;");
+        calcBtn.setOnAction(e -> {
+            try {
+                int qty = Integer.parseInt(qtyField.getText());
+                if (qty <= 0) throw new NumberFormatException();
+                calculateCheapestAndShowResult(qty);
+            } catch (NumberFormatException ex) {
+                showAlert("Invalid Input", "Please enter a valid positive number.");
+            }
+        });
+        return calcBtn;
+    }
+
+    private OrderItem findCheapestItem(String productName, int quantity) throws IllegalArgumentException {
+        OrderItem bestItem = null;
+        double minPrice = Double.MAX_VALUE;
+        int maxAvailable = 0;
+        for (SupplierPL sup : onDemandSuppliers)
+            for (AgreementPL agr : sup.agreements())
+                for (ProductLinePL prod : agr.productLines())
+                    if (prod.name().equals(productName)) {
+                        if (prod.quantity() > maxAvailable) maxAvailable = prod.quantity();
+                        if (quantity <= prod.quantity()) {
+                            double priceBefore = prod.basePrice() * quantity;
+                            double bestDiscountPct = 0.0;
+                            List<DiscountBracketPL> discounts = agr.discountPolicy().get(prod.supplierCatalogId());
+                            if (discounts != null) {
+                                for (DiscountBracketPL d : discounts)
+                                    if (quantity >= d.minQuantity() && d.discountPercentage() > bestDiscountPct)
+                                        bestDiscountPct = d.discountPercentage();
+                            }
+                            double currentPrice = priceBefore * (1.0 - (bestDiscountPct / 100.0));
+                            if (currentPrice < minPrice) {
+                                minPrice = currentPrice;
+                                bestItem = new OrderItem(productName, sup.businessNumber(), sup.name(), prod.supplierCatalogId(), agr.agreementId(), quantity, priceBefore, currentPrice, agr.deliveryTerms().supplierTransports());
+                            }
+                        }
+                    }
+        if (bestItem == null) {
+            if (maxAvailable > 0 && quantity > maxAvailable)
+                throw new IllegalArgumentException("The maximum quantity any supplier can provide for this item is " + maxAvailable + ".");
+            throw new IllegalArgumentException("Could not calculate price for this product.");
+        }
+        return bestItem;
+    }
+
+    private void calculateCheapestAndShowResult(int quantity) {
+        try {
+            OrderItem bestItem = findCheapestItem(selectedProductName, quantity);
+            currentOrder.add(bestItem);
+            centerPane.getChildren().clear();
+            Label success = new Label("Item Added Successfully!");
+            success.setStyle("-fx-font-size: 24px; -fx-font-weight: bold; -fx-text-fill: green;");
+            VBox detailsBox = new VBox(10);
+            detailsBox.setAlignment(Pos.CENTER);
+            detailsBox.setStyle("-fx-border-color: #ccc; -fx-border-width: 2; -fx-padding: 20; -fx-background-color: #f9f9f9;");
+            detailsBox.setMaxWidth(500);
+            detailsBox.getChildren().addAll(
+                    new Label("Product: " + bestItem.productName()),
+                    new Label("Cheapest Supplier: " + bestItem.supplierName()),
+                    new Label("Agreement ID: " + bestItem.agreementId()),
+                    new Label("Supplier Catalog ID: " + bestItem.catalogId()),
+                    new Label("Quantity: " + bestItem.quantity()),
+                    new Label(String.format("Price Before Discount: NIS %.2f", bestItem.priceBeforeDiscount())),
+                    new Label(String.format("Final Price: NIS %.2f", bestItem.totalPrice()))
+            );
+            for (javafx.scene.Node node : detailsBox.getChildren()) node.setStyle("-fx-font-size: 16px;");
+            HBox actionBox = new HBox(20);
+            actionBox.setAlignment(Pos.CENTER);
+            Button addAnotherBtn = new Button("Add Another Product");
+            addAnotherBtn.setStyle("-fx-font-size: 16px;");
+            addAnotherBtn.setOnAction(e -> showSearchPhase());
+            Button finishBtn = new Button("Finish Order");
+            finishBtn.setStyle("-fx-font-size: 16px; -fx-background-color: #FF9800; -fx-text-fill: white;");
+            finishBtn.setOnAction(e -> showSummaryPhase());
+            actionBox.getChildren().addAll(addAnotherBtn, finishBtn);
+            centerPane.getChildren().addAll(success, detailsBox, actionBox);
+        } catch (IllegalArgumentException ex) {
+            showAlert("Error", ex.getMessage());
+        }
+    }
+
+    private void showSummaryPhase() {
+        centerPane.getChildren().clear();
+        Label title = new Label("Order Summary");
+        title.setStyle("-fx-font-size: 24px; -fx-font-weight: bold;");
+        if (currentOrder.isEmpty()) {
+            Label emptyMsg = new Label("No items in the current order.");
+            emptyMsg.setStyle("-fx-font-size: 18px; -fx-text-fill: gray;");
+            HBox actionBox = new HBox(20);
+            actionBox.setAlignment(Pos.CENTER);
+            Button returnBtn = new Button("Return / Add More");
+            returnBtn.setStyle("-fx-font-size: 16px;");
+            returnBtn.setOnAction(e -> showSearchPhase());
+            actionBox.getChildren().add(returnBtn);
+            centerPane.getChildren().addAll(title, emptyMsg, actionBox);
+            return;
+        }
+        VBox tablesContainer = new VBox(30);
+        tablesContainer.setAlignment(Pos.CENTER);
+        tablesContainer.setPadding(new Insets(10));
+        List<TableView<OrderItem>> allTables = new ArrayList<>();
+        Map<String, List<OrderItem>> groupedOrder = currentOrder.stream().collect(Collectors.groupingBy(OrderItem::supplierName));
+        for (Map.Entry<String, List<OrderItem>> entry : groupedOrder.entrySet()) {
+            String supplierName = entry.getKey();
+            List<OrderItem> items = entry.getValue();
+            SupplierPL supData = onDemandSuppliers.stream().filter(s -> s.name().equals(supplierName)).findFirst().orElse(null);
+
+            VBox orderBlock = new VBox();
+            orderBlock.setMaxWidth(850);
+            GridPane grid = new GridPane();
+            grid.setHgap(1);
+            grid.setVgap(1);
+            grid.setStyle("-fx-background-color: black; -fx-border-color: black; -fx-border-width: 1;");
+            ColumnConstraints cc = new ColumnConstraints();
+            cc.setPercentWidth(16.66);
+            grid.getColumnConstraints().addAll(cc, cc, cc, cc, cc, cc);
+
+            Label titleLbl = new Label("Order Details");
+            titleLbl.setMaxWidth(Double.MAX_VALUE);
+            titleLbl.setAlignment(Pos.CENTER);
+            titleLbl.setStyle("-fx-background-color: #c0c0c0; -fx-padding: 5; -fx-font-weight: bold;");
+            grid.add(titleLbl, 0, 0, 6, 1);
+            String hStyle = "-fx-background-color: #c0c0c0; -fx-padding: 5; -fx-font-weight: bold;";
+            String vStyle = "-fx-background-color: white; -fx-padding: 5;";
+
+            Label snH = new Label("Supplier Name:");
+            snH.setMaxWidth(Double.MAX_VALUE);
+            snH.setStyle(hStyle);
+            Label snV = new Label(supplierName);
+            snV.setMaxWidth(Double.MAX_VALUE);
+            snV.setStyle(vStyle);
+
+            Label adH = new Label("Address:");
+            adH.setMaxWidth(Double.MAX_VALUE);
+            adH.setStyle(hStyle);
+            Label adV = new Label(supData != null ? supData.address() : "N/A");
+            adV.setMaxWidth(Double.MAX_VALUE);
+            adV.setStyle(vStyle);
+
+            Label cpH = new Label("Contact Phone:");
+            cpH.setMaxWidth(Double.MAX_VALUE);
+            cpH.setStyle(hStyle);
+            String phones = "N/A";
+            if (supData != null && !supData.contactPersonnel().isEmpty())
+                phones = supData.contactPersonnel().stream().map(cp -> cp.name() + " (" + cp.phone() + ")").collect(Collectors.joining(", "));
+            Label cpV = new Label(phones);
+            cpV.setMaxWidth(Double.MAX_VALUE);
+            cpV.setStyle(vStyle);
+            cpV.setWrapText(true);
+
+            grid.add(snH, 0, 1);
+            grid.add(snV, 1, 1);
+            grid.add(adH, 2, 1);
+            grid.add(adV, 3, 1);
+            grid.add(cpH, 4, 1);
+            grid.add(cpV, 5, 1);
+
+            Label snoH = new Label("Supplier No:");
+            snoH.setMaxWidth(Double.MAX_VALUE);
+            snoH.setStyle(hStyle);
+            Label snoV = new Label(supData != null ? supData.businessNumber() : "N/A");
+            snoV.setMaxWidth(Double.MAX_VALUE);
+            snoV.setStyle(vStyle);
+
+            Label odH = new Label("Order Date:");
+            odH.setMaxWidth(Double.MAX_VALUE);
+            odH.setStyle(hStyle);
+            Label odV = new Label(java.time.LocalDate.now().toString());
+            odV.setMaxWidth(Double.MAX_VALUE);
+            odV.setStyle(vStyle);
+
+            grid.add(snoH, 0, 2);
+            grid.add(snoV, 1, 2);
+            grid.add(odH, 2, 2);
+            grid.add(odV, 3, 2);
+
+            TableView<OrderItem> table = new TableView<>();
+            table.setPrefHeight(items.size() * 25 + 30);
+            TableColumn<OrderItem, Integer> catCol = new TableColumn<>("Catalog ID");
+            catCol.setCellValueFactory(data -> new SimpleObjectProperty<>(data.getValue().catalogId()));
+            TableColumn<OrderItem, String> prodCol = new TableColumn<>("Product Name");
+            prodCol.setCellValueFactory(data -> new SimpleStringProperty(data.getValue().productName()));
+            TableColumn<OrderItem, Integer> qtyCol = new TableColumn<>("Quantity");
+            qtyCol.setCellValueFactory(data -> new SimpleObjectProperty<>(data.getValue().quantity()));
+            TableColumn<OrderItem, String> listCol = new TableColumn<>("List Price");
+            listCol.setCellValueFactory(data -> new SimpleStringProperty(String.format("NIS %.2f", data.getValue().priceBeforeDiscount())));
+            TableColumn<OrderItem, String> discCol = new TableColumn<>("Discount");
+            discCol.setCellValueFactory(data -> new SimpleStringProperty(String.format("NIS %.2f", data.getValue().priceBeforeDiscount() - data.getValue().totalPrice())));
+            TableColumn<OrderItem, String> finalCol = new TableColumn<>("Final Price");
+            finalCol.setCellValueFactory(data -> new SimpleStringProperty(String.format("NIS %.2f", data.getValue().totalPrice())));
+
+            table.getColumns().addAll(List.of(catCol, prodCol, qtyCol, listCol, discCol, finalCol));
+            table.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY);
+            table.getItems().setAll(items);
+            allTables.add(table);
+            table.getSelectionModel().selectedItemProperty().addListener((obs, oldVal, newVal) -> {
+                if (newVal != null)
+                    for (TableView<OrderItem> t : allTables) if (t != table) t.getSelectionModel().clearSelection();
+            });
+            orderBlock.getChildren().addAll(grid, table);
+            tablesContainer.getChildren().add(orderBlock);
+        }
+        ScrollPane scrollPane = new ScrollPane(tablesContainer);
+        scrollPane.setFitToWidth(true);
+        scrollPane.setStyle("-fx-background-color: transparent;");
+        scrollPane.setPrefViewportHeight(300);
+        HBox editBox = new HBox(15);
+        editBox.setAlignment(Pos.CENTER);
+        Button modifyBtn = getButton(allTables);
+        Button deleteBtn = getDeleteBtn(allTables);
+        editBox.getChildren().addAll(modifyBtn, deleteBtn);
+        double grandTotal = currentOrder.stream().mapToDouble(OrderItem::totalPrice).sum();
+        Label totalLabel = new Label(String.format("Grand Total: NIS %.2f", grandTotal));
+        totalLabel.setStyle("-fx-font-size: 20px; -fx-font-weight: bold;");
+        HBox actionBox = new HBox(20);
+        actionBox.setAlignment(Pos.CENTER);
+        Button returnBtn = new Button("Return / Add More");
+        returnBtn.setStyle("-fx-font-size: 16px;");
+        returnBtn.setOnAction(e -> showSearchPhase());
+        Button finalizeBtn = new Button("Make Order Final");
+        finalizeBtn.setStyle("-fx-font-size: 16px; -fx-background-color: #4CAF50; -fx-text-fill: white;");
+        finalizeBtn.setDisable(currentOrder.isEmpty());
+        finalizeBtn.setOnAction(e -> showConfirmationPhase());
+        actionBox.getChildren().addAll(returnBtn, finalizeBtn);
+        centerPane.getChildren().addAll(title, scrollPane, editBox, totalLabel, actionBox);
+    }
+
+    private Button getDeleteBtn(List<TableView<OrderItem>> allTables) {
+        Button deleteBtn = new Button("Delete Item");
+        deleteBtn.setStyle("-fx-font-size: 14px; -fx-background-color: #f44336; -fx-text-fill: white;");
+        deleteBtn.setOnAction(e -> {
+            OrderItem selected = null;
+            for (TableView<OrderItem> t : allTables)
+                if (t.getSelectionModel().getSelectedItem() != null) {
+                    selected = t.getSelectionModel().getSelectedItem();
+                    break;
+                }
+            if (selected != null) {
+                currentOrder.remove(selected);
+                showSummaryPhase();
+            } else showAlert("Warning", "Select an item to delete.");
+        });
+        return deleteBtn;
+    }
+
+    private Button getButton(List<TableView<OrderItem>> allTables) {
+        Button modifyBtn = new Button("Modify Quantity");
+        modifyBtn.setStyle("-fx-font-size: 14px; -fx-background-color: #2196F3; -fx-text-fill: white;");
+        modifyBtn.setOnAction(e -> {
+            OrderItem selected = null;
+            for (TableView<OrderItem> t : allTables)
+                if (t.getSelectionModel().getSelectedItem() != null) {
+                    selected = t.getSelectionModel().getSelectedItem();
+                    break;
+                }
+            if (selected != null) {
+                OrderItem finalSelected = selected;
+                TextInputDialog dialog = new TextInputDialog(String.valueOf(selected.quantity()));
+                dialog.setTitle("Modify Quantity");
+                dialog.setHeaderText("New quantity for " + selected.productName() + ":");
+                dialog.showAndWait().ifPresent(val -> {
+                    try {
+                        int newQty = Integer.parseInt(val);
+                        if (newQty <= 0) throw new NumberFormatException();
+                        OrderItem newItem = findCheapestItem(finalSelected.productName(), newQty);
+                        currentOrder.remove(finalSelected);
+                        currentOrder.add(newItem);
+                        showSummaryPhase();
+                    } catch (NumberFormatException ex) {
+                        showAlert("Invalid Input", "Please enter a valid positive number.");
+                    } catch (IllegalArgumentException ex) {
+                        showAlert("Error", ex.getMessage());
+                    }
+                });
+            } else showAlert("Warning", "Select an item to modify.");
+        });
+        return modifyBtn;
+    }
+
+    private void showConfirmationPhase() {
+        try {
+            List<OrderItemPL> plItems = currentOrder.stream().map(i -> new OrderItemPL(
+                    i.productName(), i.supplierBusinessNumber(), i.supplierName(),
+                    i.catalogId(), i.quantity(), i.priceBeforeDiscount(), i.totalPrice()
+            )).collect(Collectors.toList());
+
+            Map<String, Integer> placedOrders = orderController.placeOrders(plItems);
+
+            abortBtn.setVisible(false);
+            centerPane.getChildren().clear();
+            Label confirm = new Label("Order saved and placed successfully!");
+            confirm.setStyle("-fx-font-size: 32px; -fx-font-weight: bold; -fx-text-fill: green;");
+            VBox messagesBox = new VBox(10);
+            messagesBox.setAlignment(Pos.CENTER);
+            Set<String> processedSuppliers = new HashSet<>();
+
+            for (OrderItem item : currentOrder)
+                if (!processedSuppliers.contains(item.supplierName())) {
+                    processedSuppliers.add(item.supplierName());
+                    SupplierPL supData = onDemandSuppliers.stream().filter(s -> s.name().equals(item.supplierName())).findFirst().orElse(null);
+                    String address = supData != null ? supData.address() : "their address";
+
+                    int orderId = placedOrders.get(item.supplierName());
+
+                    String msg = "Order #" + orderId + " - Supplier '" + item.supplierName() + "': A manager will call shortly before the order is ready. ";
+                    if (item.supplierTransports()) msg += "They will deliver it to us.";
+                    else msg += "We need to send a delivery guy to " + address + ".";
+
+                    Label lbl = new Label(msg);
+                    lbl.setStyle("-fx-font-size: 16px; -fx-font-weight: bold;");
+                    messagesBox.getChildren().add(lbl);
+                }
+
+            Button newOrderBtn = new Button("Start New Order");
+            newOrderBtn.setStyle("-fx-font-size: 18px; -fx-padding: 10 30;");
+            newOrderBtn.setOnAction(e -> resetToStart());
+            centerPane.getChildren().addAll(confirm, messagesBox, newOrderBtn);
+
+        } catch (Exception ex) {
+            showAlert("Error", "Failed to save order: " + ex.getMessage());
+        }
+    }
+
+    private void logout() {
+        try {
+            ControllerFactory.getInstance().getAuthController().logout();
+            appNavigator.showLoginScreen();
+        } catch (Exception ex) {
+            showAlert("Logout Error", "An error occurred during logout: " + ex.getMessage());
+        }
+    }
+
+    public Scene getScene() {
+        return scene;
+    }
+
+    private void showAlert(String title, String message) {
+        Alert alert = new Alert(Alert.AlertType.INFORMATION);
+        alert.setTitle(title);
+        alert.setHeaderText(null);
+        alert.setContentText(message);
+        alert.showAndWait();
+    }
+
+    private void showOrderHistoryDialog() {
+        try {
+            List<OrderPL> history = ControllerFactory.getInstance().getOrderController().getOrderHistory();
+
+            ListView<OrderPL> historyListView = new ListView<>();
+            historyListView.getItems().addAll(history);
+
+            historyListView.setTooltip(new Tooltip("Double-click an order to view its specific products."));
+
+            historyListView.setCellFactory(lv -> {
+                ListCell<OrderPL> cell = new ListCell<>() {
+                    @Override
+                    protected void updateItem(OrderPL order, boolean empty) {
+                        super.updateItem(order, empty);
+                        if (empty || order == null) {
+                            setText(null);
+                        } else {
+                            setText(String.format("Order #%d | Date: %s | Supplier: %s (%s)",
+                                    order.orderId(),
+                                    order.orderDate().toString(),
+                                    order.supplierName(),
+                                    order.supplierBusinessNumber()));
+                        }
+                    }
+                };
+
+                cell.setOnMouseClicked(event -> {
+                    if (event.getClickCount() == 2 && (!cell.isEmpty())) {
+                        showOrderDetails(cell.getItem());
+                    }
+                });
+
+                return cell;
+            });
+
+            VBox layout = new VBox(10, new Label("Order History (Double-click to expand)"), historyListView);
+            layout.setPadding(new Insets(15));
+            Scene dialogScene = new Scene(layout, 500, 400);
+            javafx.stage.Stage stage = new javafx.stage.Stage();
+            stage.setTitle("Historical Orders");
+            stage.initOwner(scene.getWindow());
+            stage.setScene(dialogScene);
+            stage.show();
+
+        } catch (Exception e) {
+            showAlert("Error", "Failed to load history: " + e.getMessage());
+        }
+    }
+
+    private void showOrderDetails(OrderPL order) {
+        Alert alert = new Alert(Alert.AlertType.INFORMATION);
+        alert.setTitle("Order Details");
+        alert.setHeaderText("Order #" + order.orderId() + " - " + order.supplierName());
+
+        StringBuilder sb = new StringBuilder();
+
+        try {
+            sb.append(String.format("%-15s %s\n", "Supplier No:", order.supplierBusinessNumber()));
+            sb.append(String.format("%-15s %s\n", "Address:", order.address()));
+            sb.append(String.format("%-15s %s\n", "Contact Phone:", order.contactPhone()));
+            sb.append(String.format("%-15s %s\n", "Order Date:", order.orderDate().toString()));
+        } catch (Exception e) {
+            sb.append("Could not load contact details: ").append(e.getMessage()).append("\n");
+        }
+        sb.append("\n");
+
+        sb.append(String.format("%-12s | %-20s | %-8s | %-10s | %-10s\n",
+                "Catalog ID", "Product Name", "Quantity", "Discount", "Final Price"));
+        sb.append("-".repeat(75)).append("\n");
+
+        try {
+            for (OrderItemPL item : order.items()) {
+                sb.append(String.format("%-12d | %-20s | %-8d | %-10.2f | %-10.2f\n",
+                        item.catalogId(),
+                        item.productName(),
+                        item.quantity(),
+                        item.priceBeforeDiscount() - item.finalPrice(),
+                        item.finalPrice()));
+            }
+
+            double total = order.items().stream().mapToDouble(OrderItemPL::finalPrice).sum();
+            sb.append("-".repeat(75)).append("\n");
+            sb.append(String.format("%-46s Total: NIS %.2f\n", "", total));
+
+        } catch (Exception e) {
+            sb.append("Could not load products: ").append(e.getMessage());
+        }
+
+        TextArea textArea = new TextArea(sb.toString());
+        textArea.setEditable(false);
+        textArea.setWrapText(false);
+        textArea.setFont(javafx.scene.text.Font.font("Consolas", 14));
+        textArea.setPrefHeight(350);
+        textArea.setPrefWidth(600);
+
+        alert.getDialogPane().setContent(textArea);
+        alert.showAndWait();
+    }
+
+    public record OrderItem(String productName, String supplierBusinessNumber, String supplierName,
+                            int catalogId, int agreementId, int quantity, double priceBeforeDiscount,
+                            double totalPrice, boolean supplierTransports) {
+    }
+}
