@@ -20,14 +20,13 @@ public class ManagerHomeUI extends View {
             displayMenu(new Option.Builder("Actions for manager:")
                     .append("Logout", onDismiss)
                     .append("Change Password", this::changePassword)
-                    .append("View Shift History", this::viewShiftHistory)
-                    .append("Manage shifts", this::manageShifts)
-                    .append("Manage Employees", this::manageEmployees)
+                    .append("Manage Branches", this::managerBranches)
                     .append("Manage Roles", this::manageRoles)
             );
 
         }
     }
+
 
     private void changePassword() {
         String oldPassword = getNextLine("Enter Old Password");
@@ -43,28 +42,16 @@ public class ManagerHomeUI extends View {
 
     }
 
+    private void managerBranches() {
+        ManageBranchesUI manageBranchesUI = new ManageBranchesUI(this::display);
+        close();
+        manageBranchesUI.display();
+    }
+
     private void manageRoles() {
         ManageRolesUI manageRolesUI = new ManageRolesUI(this::display);
         close();
         manageRolesUI.display();
-    }
-
-    private void manageEmployees() {
-        ManageEmployeesUI manageEmployeesUI = new ManageEmployeesUI(this::display);
-        close();
-        manageEmployeesUI.display();
-    }
-
-    private void manageShifts() {
-        ManageShiftsUI manageShiftsUI = new ManageShiftsUI(this::display);
-        close();
-        manageShiftsUI.display();
-    }
-
-    private void viewShiftHistory() {
-        ViewShiftHistoryUI historyUI = new ViewShiftHistoryUI(this::display);
-        close();
-        historyUI.display();
     }
 
     @Override

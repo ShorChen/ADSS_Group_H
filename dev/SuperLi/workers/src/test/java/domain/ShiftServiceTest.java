@@ -3,8 +3,8 @@ package domain;
 import data_access.pools.ShiftPool;
 import domain.entities.Shift;
 import domain.entities.WeekShifts;
-import domain.enums.ShiftType;
-import domain.enums.WeekDay;
+import shared.enums.ShiftType;
+import shared.enums.WeekDay;
 import domain.services.ShiftService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -35,7 +35,7 @@ class ShiftServiceTest {
     @Test
     void getNWeeksAgo_WeekExists_ReturnsCorrectWeekShifts() {
         LocalDate tuesday = LocalDate.of(2026, 5, 5);
-        WeekShifts weekToSave = new WeekShifts(tuesday, new java.util.HashMap<>(), new java.util.HashMap<>());
+        WeekShifts weekToSave = new WeekShifts(tuesday, new HashMap<>());
         shiftService.updateWeek(weekToSave);
 
         WeekShifts result = shiftService.getNWeeksAgo(tuesday);
@@ -50,7 +50,7 @@ class ShiftServiceTest {
         WeekShifts result = shiftService.getNWeeksAgo(randomDate);
 
         assertNotNull(result);
-        assertTrue(result.getDayShifts().isEmpty() && result.getNightShifts().isEmpty(), "Expected an empty WeekShifts object");
+        assertTrue(result.isEmpty(), "Expected an empty WeekShifts object");
     }
 
     // ========================
@@ -84,7 +84,7 @@ class ShiftServiceTest {
     @Test
     void updateWeek_ValidWeekShifts_UpdatesSuccessfully() {
         LocalDate sunday = LocalDate.of(2024, 1, 7); // Sunday
-        WeekShifts week = new WeekShifts(sunday, new HashMap<>(), new HashMap<>());
+        WeekShifts week = new WeekShifts(sunday, new HashMap<>());
         shiftService.updateWeek(week);
 
         WeekShifts retrieved = shiftService.getNWeeksAgo(sunday.plusDays(1)); // Monday of that week
@@ -101,7 +101,7 @@ class ShiftServiceTest {
     void updateShift_AddDayShift_UpdatesSuccessfully() {
         LocalDate monday = LocalDate.of(2026, 5, 5); // Monday
         LocalDate weekStart = monday.with(TemporalAdjusters.previousOrSame(DayOfWeek.SUNDAY));
-        WeekShifts emptyWeek = new WeekShifts(weekStart, new HashMap<>(), new HashMap<>());
+        WeekShifts emptyWeek = new WeekShifts(weekStart, new HashMap<>());
         shiftService.updateWeek(emptyWeek);
 
         Shift shift = new Shift(WeekDay.MONDAY, ShiftType.DAY, "manager123");
@@ -119,7 +119,7 @@ class ShiftServiceTest {
     void updateShift_AddNightShift_UpdatesSuccessfully() {
         LocalDate tuesday = LocalDate.of(2026, 5, 6); // Tuesday
         LocalDate weekStart = tuesday.with(TemporalAdjusters.previousOrSame(DayOfWeek.SUNDAY));
-        WeekShifts emptyWeek = new WeekShifts(weekStart, new HashMap<>(), new HashMap<>());
+        WeekShifts emptyWeek = new WeekShifts(weekStart, new HashMap<>());
         shiftService.updateWeek(emptyWeek);
 
         Shift shift = new Shift(WeekDay.TUESDAY, ShiftType.EVENING, "manager456");
@@ -136,14 +136,14 @@ class ShiftServiceTest {
     void updateShift_RemoveShiftBySettingNull_RemovesSuccessfully() {
         LocalDate wednesday = LocalDate.of(2026, 5, 7); // Wednesday
         LocalDate weekStart = wednesday.with(TemporalAdjusters.previousOrSame(DayOfWeek.SUNDAY));
-        WeekShifts emptyWeek = new WeekShifts(weekStart, new HashMap<>(), new HashMap<>());
+        WeekShifts emptyWeek = new WeekShifts(weekStart, new HashMap<>());
         shiftService.updateWeek(emptyWeek);
 
         Shift shift = new Shift(WeekDay.WEDNESDAY, ShiftType.DAY, "manager789");
         shiftService.updateShift(wednesday, WeekDay.WEDNESDAY, ShiftType.DAY, shift);
 
         // Now remove it
-        shiftService.updateShift(wednesday, WeekDay.WEDNESDAY, ShiftType.DAY, null);
+        shiftService.updateShift(wednesday, WeekDay.WEDNESDAY, ShiftType.DAY, Shift.EMPTY_SHIFT);
 
         WeekShifts week = shiftService.getNWeeksAgo(wednesday);
         Shift retrievedShift = week.getShift(WeekDay.WEDNESDAY, ShiftType.DAY);
@@ -156,7 +156,7 @@ class ShiftServiceTest {
     void getNWeeksAgo_DifferentDaysInSameWeek_ReturnsSameWeek() {
         LocalDate sunday = LocalDate.of(2024, 1, 7);
         LocalDate monday = LocalDate.of(2024, 1, 8);
-        WeekShifts weekSun = new WeekShifts(sunday, new HashMap<>(), new HashMap<>());
+        WeekShifts weekSun = new WeekShifts(sunday, new HashMap<>());
         shiftService.updateWeek(weekSun);
 
         WeekShifts weekMon = shiftService.getNWeeksAgo(monday);

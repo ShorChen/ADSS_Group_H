@@ -3,26 +3,23 @@ package domain.services;
 import data_access.entities.EmployeeEntity;
 import data_access.entities.RequestEntity;
 import data_access.entities.ShiftEntity;
-import data_access.entities.WeekShiftsEntity;
+import data_access.entities.keys.BranchWeekKey;
 import data_access.pools.EmployeePool;
 import data_access.pools.RequestsPool;
 import data_access.pools.RolePool;
 import data_access.pools.ShiftPool;
+import shared.enums.RequestStatus;
 
-import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 public class DataService {
 
 
-    private EmployeePool employeePool;
-    private RequestsPool requestsPool;
-    private ShiftPool shiftPool;
-    private RolePool rolePool;
+    private final EmployeePool employeePool;
+    private final RequestsPool requestsPool;
+    private final ShiftPool shiftPool;
+    private final RolePool rolePool;
 
     public DataService() {
         this.employeePool = EmployeePool.Instance();
@@ -46,7 +43,6 @@ public class DataService {
                 empsOfShift(),
                 new HashMap<>()
         );
-
         ShiftEntity m2 = new ShiftEntity(
                 LocalDateTime.of(2026, 4, 20, 14, 0),
                 "MONDAY",
@@ -55,30 +51,14 @@ public class DataService {
                 new HashMap<>()
         );
 
+        shiftPool.addUpdateShift(new BranchWeekKey(1, s1.getYear(), s1.getWeek()), s1);
+        shiftPool.addUpdateShift(new BranchWeekKey(1, s1.getYear(), s1.getWeek()), s1);
+        shiftPool.addUpdateShift(new BranchWeekKey(1, m2.getYear(), m2.getWeek()), m2);
 
-        WeekShiftsEntity w1 = new WeekShiftsEntity(
-                LocalDate.of(2026, 4, 19),
-                new HashMap<>(), new HashMap<>()
-        );
-        w1.addDayShift(s1.getDay(), s1);
-
-        WeekShiftsEntity w2 = new WeekShiftsEntity(
-                LocalDate.of(2026, 4, 12),
-                new HashMap<>(), new HashMap<>()
-        );
-
-        WeekShiftsEntity w3 = new WeekShiftsEntity(
-                LocalDate.of(2026, 3, 29),
-                new HashMap<>(), new HashMap<>()
-        );
-        w3.addNightShift(m2.getDay(), m2);
-
-        shiftPool.updateWeek(w1);
-        shiftPool.updateWeek(w2);
-        shiftPool.updateWeek(w3);
-
-        requestsPool.addRequest(
-                new RequestEntity(s1, "id 1", "id 4"));
+        requestsPool.addUpdateRequest(
+                new RequestEntity(-1, s1, "id 1", "id 4",
+                        null, RequestStatus.ACCEPT.toString(), RequestStatus.PENDING.toString(),
+                        RequestStatus.PENDING.toString(), false));
     }
 
     private Map<String, Set<String>> empsOfShift() {
@@ -95,14 +75,16 @@ public class DataService {
 
 
     private void loadEmployees() {
-        EmployeeEntity[] employeeEntities = new EmployeeEntity[8];
+        int employeeCount = 8;
         String[] roles = {"Cashier", "Shift Manager", "Cleaner", "Security", "Cashier", "Intern"
                 , "Storekeeper", "Storekeeper"};
-        for (int i = 0; i < employeeEntities.length; i++) {
-            StringBuilder pass = new StringBuilder().append(i).append(i).append(i).append(i);
-            employeeEntities[i] = new EmployeeEntity("id " + i, pass.toString());
-            employeeEntities[i].setQualifiedRoles(roles[i]);
-            employeePool.addEmployee(employeeEntities[i]);
+        for (int i = 0; i < employeeCount; i++) {
+            EmployeeEntity e = new EmployeeEntity("id " + i,
+                    String.valueOf(i) + i + i + i);
+
+            List<String> newRoles = e.qualifiedRoles();
+            newRoles.add(roles[i]);
+            employeePool.addUpdateEmployee(e.changeQualifiedRoles(newRoles));
         }
     }
 

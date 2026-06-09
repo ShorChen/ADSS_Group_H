@@ -1,34 +1,28 @@
 package presentation.model;
 
 import domain.entities.Request;
+import shared.enums.RequestStatus;
 
 public class RequestPL {
 
-    private final ShiftPL shift;
-    private final String prevEmployee;
-    private final String newEmployee;
-    private final String manager;
-    private final boolean prevApproved;
-    private final boolean newApproved;
-    private final boolean managerApproved;
-    private final boolean denied;
+    private ShiftPL shift;
+    private String prevEmployee;
+    private String newEmployee;
+    private String manager;
+    private RequestStatus prevStatus;
+    private RequestStatus newStatus;
+    private RequestStatus managerStatus;
 
     public RequestPL(ShiftPL shift, String prevEmployee, String newEmployee,
-                     String manager, boolean prevApproved, boolean newApproved,
-                     boolean managerApproved, boolean denied) {
+                     String manager, RequestStatus prevStatus, RequestStatus newStatus,
+                     RequestStatus managerStatus) {
         this.shift = shift;
         this.prevEmployee = prevEmployee;
         this.newEmployee = newEmployee;
         this.manager = manager;
-        this.prevApproved = prevApproved;
-        this.newApproved = newApproved;
-        this.managerApproved = managerApproved;
-        this.denied = denied;
-    }
-
-    public RequestPL(ShiftPL shift, String prevEmployee, String newEmployee) {
-        this(shift, prevEmployee, newEmployee, null,
-                true, false, false, false);
+        this.prevStatus = prevStatus;
+        this.newStatus = newStatus;
+        this.managerStatus = managerStatus;
     }
 
     public RequestPL(Request request) {
@@ -36,10 +30,9 @@ public class RequestPL {
                 request.getPrevEmployee(),
                 request.getNewEmployee(),
                 request.getManager(),
-                request.isPrevApproved(),
-                request.isNewApproved(),
-                request.isManagerApproved(),
-                request.isDenied()
+                request.getPrevStatus(),
+                request.getNewStatus(),
+                request.getManagerStatus()
         );
     }
 
@@ -48,15 +41,10 @@ public class RequestPL {
     }
 
     public Request toRequest() {
-        return new Request(
+        return new Request(Request.NO_ID,
                 shift.toShift(), prevEmployee, newEmployee, manager,
-                prevApproved, newApproved, managerApproved, denied
+                prevStatus, newStatus, managerStatus
         );
-    }
-
-    public Request toReplacementRequest() {
-        return new Request(shift.toShift(), prevEmployee, newEmployee, manager,
-                prevApproved, newApproved, managerApproved, denied);
     }
 
     @Override
@@ -65,14 +53,16 @@ public class RequestPL {
         s.append("Day: ").append(shift.getDay().day)
                 .append(" At: ").append(shift.getShiftType().type).append("\n");
 
-        if (newEmployee != null) {
-
+        if (managerStatus == RequestStatus.PENDING) {
+            s.append("Pending For Manager Review: ")
+                    .append(prevEmployee).append(" (").append(prevStatus).append(")")
+                    .append(" ==> ")
+                    .append(newEmployee).append(" (").append(newStatus).append(")");
         } else {
-            String status = managerApproved ? "Approved" : "Denied";
-            String prevStatus = prevApproved ? "Accepted" : "Pending";
-
-            s.append(manager).append(" (").append(status).append(") on request: ")
-                    .append(prevEmployee).append(" (").append(prevStatus).append(") ");
+            s.append(manager).append(" ").append(managerStatus).append(" ").append("Request")
+                    .append(prevEmployee).append(" (").append(prevStatus).append(")")
+                    .append(" ==> ")
+                    .append(newEmployee).append(" (").append(newStatus).append(")");
         }
 
         return s.toString();

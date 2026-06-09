@@ -10,9 +10,10 @@ public class LoginUI extends View {
     private boolean open = false;
     AuthController controller = new AuthController();
 
-    public LoginUI() {
-        super(null);
+    public LoginUI(Runnable onDismiss) {
+        super(onDismiss);
     }
+
 
     @Override
     public void display() {

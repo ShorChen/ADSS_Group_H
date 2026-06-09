@@ -3,8 +3,8 @@ package domain;
 import data_access.pools.ShiftPool;
 import domain.entities.Role;
 import domain.entities.Shift;
-import domain.enums.ShiftType;
-import domain.enums.WeekDay;
+import shared.enums.ShiftType;
+import shared.enums.WeekDay;
 import domain.services.HRManagerShiftService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -41,8 +41,8 @@ class HRManagerShiftServiceTest {
 
         assertTrue(shift.getEmployees().containsKey(Role.Cashier), "Cashier role should be added");
         assertTrue(shift.getEmployees().containsKey(Role.Storekeeper), "Storekeeper role should be added");
-        assertEquals(2, shift.getEmployees().get(Role.Cashier).getMaximumCapacity(), "Cashier capacity should be 2");
-        assertEquals(1, shift.getEmployees().get(Role.Storekeeper).getMaximumCapacity(), "Storekeeper capacity should be 1");
+        assertEquals(2, shift.getEmployees().get(Role.Cashier).size(), "Cashier capacity should be 2");
+        assertEquals(1, shift.getEmployees().get(Role.Storekeeper).size(), "Storekeeper capacity should be 1");
     }
 
     @Test
@@ -94,7 +94,7 @@ class HRManagerShiftServiceTest {
 
         hrManagerShiftService.setJobsToShift(shift, updateJobs);
 
-        assertEquals(3, shift.getEmployees().get(Role.Cashier).getMaximumCapacity(), "Capacity should be updated to 3");
+        assertEquals(3, shift.getEmployees().get(Role.Cashier).size(), "Capacity should be updated to 3");
     }
 
     @Test
@@ -106,7 +106,7 @@ class HRManagerShiftServiceTest {
         hrManagerShiftService.setJobsToShift(shift, jobs);
 
         assertTrue(shift.getEmployees().containsKey(Role.Cashier), "Cashier role should be added");
-        assertEquals(0, shift.getEmployees().get(Role.Cashier).getMaximumCapacity(), "Capacity should be 0");
+        assertEquals(0, shift.getEmployees().get(Role.Cashier).size(), "Capacity should be 0");
     }
 
     @Test
@@ -117,7 +117,7 @@ class HRManagerShiftServiceTest {
 
         hrManagerShiftService.setJobsToShift(shift, jobs);
 
-        assertEquals(2, shift.getEmployees().get(Role.ShiftManager).getMaximumCapacity(), "ShiftManager capacity should be updated to 2");
+        assertEquals(2, shift.getEmployees().get(Role.ShiftManager).size(), "ShiftManager capacity should be updated to 2");
     }
 
     @Test
@@ -141,6 +141,6 @@ class HRManagerShiftServiceTest {
             hrManagerShiftService.setJobsToShift(shift, jobs);
         });
 
-        assertEquals(1000, shift.getEmployees().get(Role.Storekeeper).getMaximumCapacity(), "Large capacity should be set");
+        assertEquals(1000, shift.getEmployees().get(Role.Storekeeper).size(), "Large capacity should be set");
     }
 }

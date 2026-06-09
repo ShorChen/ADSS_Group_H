@@ -1,18 +1,19 @@
 package presentation.ui_manager;
 
-import domain.enums.JobScope;
-import domain.enums.SalaryType;
-import domain.enums.WeekDay;
 import presentation.control.AddUpdateEmployeeController;
 import presentation.model.EmployeePL;
 import presentation.ui_shared.View;
 import presentation.util.Option;
+import shared.enums.JobScope;
+import shared.enums.SalaryType;
+import shared.enums.WeekDay;
 
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
-import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 public class AddUpdateEmployeeView extends View {
@@ -195,7 +196,7 @@ public class AddUpdateEmployeeView extends View {
 
     private void roles() {
         AtomicBoolean stop = new AtomicBoolean(false);
-        List<String> qualifiedRoles = builder.getQualifiedRoles();
+        Set<String> qualifiedRoles = builder.getQualifiedRoles();
         while (!stop.get()) {
             Option.Builder rolesMenu = new Option.Builder("--- Select Qualified Roles ---")
                     .append("done", () -> stop.set(true));
@@ -216,7 +217,7 @@ public class AddUpdateEmployeeView extends View {
             displayMenu(rolesMenu);
         }
 
-        builder.qualifiedRoles(new ArrayList<>(qualifiedRoles));
+        builder.qualifiedRoles(new HashSet<>(qualifiedRoles));
     }
 
     private void constraints() {

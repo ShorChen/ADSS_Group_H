@@ -22,16 +22,16 @@ public class RoleService {
     }
 
     public Role getRole(String tag) {
-        String role = pool.getRole(tag);
-        if (role == null) return null;
-        return new Role(role);
+        if (pool.containsRole(tag))
+            return new Role(tag);
+        return null;
     }
 
     public boolean containsRole(String tag) {
-        return pool.getRole(tag) != null;
+        return pool.containsRole(tag);
     }
 
-    public boolean createRole(String s) {
-        return pool.addRole(s);
+    public void createRole(String s) {
+        pool.addRole(s);
     }
 }

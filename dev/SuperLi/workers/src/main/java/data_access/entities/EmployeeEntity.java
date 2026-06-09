@@ -1,37 +1,38 @@
 package data_access.entities;
 
 import context.SessionManager;
+import org.jetbrains.annotations.NotNull;
 
 import java.time.LocalDateTime;
 import java.util.*;
 
-public class EmployeeEntity {
-    private final String id;
-    private String name;
-    private String bankAccount;
-    private double salary;
-    private String salaryType;
-    private LocalDateTime dateOfEmployment;
-    private String jobScope;
-    private List<String> qualifiedRoles;
-    private String constraints;
-    private int yearlyRestDays;
-    private String weeklyRestDay;
-    private String password;
-    private boolean workingDoubles;
-    private Map<Integer, Set<Integer>> unavailableShifts;
-    private boolean active;
-
-
+public record EmployeeEntity(
+        String id,
+        String name,
+        String bankAccount,
+        double salary,
+        String salaryType,
+        LocalDateTime dateOfEmployment,
+        String jobScope,
+        List<String> qualifiedRoles,
+        String constraints,
+        int yearlyRestDays,
+        String weeklyRestDay,
+        String password,
+        boolean workingDoubles,
+        Map<Integer, Set<Integer>> unavailableShifts,
+        boolean active,
+        int branchId
+) {
     public EmployeeEntity(String id, String password) {
-        this(id, "temp-name", "0000-0000-0000-0000", 100.0, "HOURLY",
+        this(id, "temp-name", "0000-0000-0000-0000", 100.0,
+                "HOURLY",
                 SessionManager.now(),
                 "FULL_TIME", new ArrayList<>(),
                 "not free on weekends", 24,
                 "SATURDAY", password, false, new HashMap<>(),
-                true
+                true, 1
         );
-
     }
 
     public EmployeeEntity(String id, String name, String bankAccount, double salary,
@@ -39,7 +40,7 @@ public class EmployeeEntity {
                           String jobScope, List<String> qualifiedRoles,
                           String constraints, int yearlyRestDays,
                           String weeklyRestDay, String password, boolean workingDoubles,
-                          Map<Integer, Set<Integer>> unavailableShifts, boolean active) {
+                          @NotNull Map<Integer, Set<Integer>> unavailableShifts, boolean active, int branchId) {
         this.id = id;
         this.name = name;
         this.bankAccount = bankAccount;
@@ -47,120 +48,69 @@ public class EmployeeEntity {
         this.salaryType = salaryType;
         this.dateOfEmployment = dateOfEmployment;
         this.jobScope = jobScope;
-        this.qualifiedRoles = qualifiedRoles;
+
+        this.qualifiedRoles = new ArrayList<>();
+        this.qualifiedRoles.addAll(qualifiedRoles);
+
         this.constraints = constraints;
         this.yearlyRestDays = yearlyRestDays;
         this.weeklyRestDay = weeklyRestDay;
         this.password = password;
         this.workingDoubles = workingDoubles;
-        this.unavailableShifts = unavailableShifts;
+        this.unavailableShifts = new HashMap<>();
+
+        unavailableShifts.forEach((key, value) ->
+                this.unavailableShifts.put(key, new HashSet<>(value)));
+
         this.active = active;
+        this.branchId = branchId;
     }
 
-    public String getId() {
-        return id;
+    public EmployeeEntity changePassword(String password) {
+        return new EmployeeEntity(id, name, bankAccount, salary, salaryType,
+                dateOfEmployment, jobScope, qualifiedRoles,
+                constraints, yearlyRestDays, weeklyRestDay, password,
+                workingDoubles, unavailableShifts,
+                active, branchId);
     }
 
-    public String getName() {
-        return name;
+    public EmployeeEntity changeActivityStatus(boolean active) {
+        return new EmployeeEntity(id, name, bankAccount, salary, salaryType,
+                dateOfEmployment, jobScope, qualifiedRoles,
+                constraints, yearlyRestDays, weeklyRestDay, password,
+                workingDoubles, unavailableShifts,
+                active, branchId);
     }
 
-    public String getBankAccount() {
-        return bankAccount;
+    public EmployeeEntity changeAvailability(Map<Integer, Set<Integer>> unavailableShifts, boolean workingDoubles) {
+        return new EmployeeEntity(id, name, bankAccount, salary, salaryType,
+                dateOfEmployment, jobScope, qualifiedRoles,
+                constraints, yearlyRestDays, weeklyRestDay, password,
+                workingDoubles, unavailableShifts,
+                active, branchId);
     }
 
-    public double getSalary() {
-        return salary;
+    public EmployeeEntity changeQualifiedRoles(List<String> qualifiedRoles) {
+        return new EmployeeEntity(id, name, bankAccount, salary, salaryType,
+                dateOfEmployment, jobScope, qualifiedRoles,
+                constraints, yearlyRestDays, weeklyRestDay, password,
+                workingDoubles, unavailableShifts,
+                active, branchId);
     }
 
-    public String getSalaryType() {
-        return salaryType;
+    public List<String> qualifiedRoles() {
+        return new ArrayList<>(qualifiedRoles);
     }
 
-    public LocalDateTime getDateOfEmployment() {
-        return dateOfEmployment;
-    }
-
-    public String getJobScope() {
-        return jobScope;
-    }
-
-    public List<String> getQualifiedRoles() {
-        return qualifiedRoles;
-    }
-
-    public String getConstraints() {
-        return constraints;
-    }
-
-    public int getYearlyRestDays() {
-        return yearlyRestDays;
-    }
-
-    public String getWeeklyRestDay() {
-        return weeklyRestDay;
-    }
-
-    public boolean setPassword(String oldPass, String password) {
-        if (this.password.equals(oldPass)) {
-            this.password = password;
-            return true;
-        }
-        return false;
+    public Map<Integer, Set<Integer>> unavailableShifts() {
+        Map<Integer, Set<Integer>> map = new HashMap<>();
+        unavailableShifts.forEach((key, value) ->
+                map.put(key, new HashSet<>(value)));
+        return map;
     }
 
     public boolean checkPassword(String password) {
-        return this.password.equals(password);
+        return Objects.equals(password, this.password);
     }
 
-    public boolean isWorkingDoubles() {
-        return workingDoubles;
-    }
-
-    public Map<Integer, Set<Integer>> getUnavailableShifts() {
-        return unavailableShifts;
-    }
-
-    public void setQualifiedRoles(String... qualifiedRoles) {
-        for (String qualifiedRole : qualifiedRoles) {
-            if (!this.qualifiedRoles.contains(qualifiedRole))
-                this.qualifiedRoles.add(qualifiedRole);
-        }
-
-    }
-
-    public void setWorkingDoubles(boolean workingDoubles) {
-        this.workingDoubles = workingDoubles;
-    }
-
-    public void setUnavailableShifts(Map<Integer, Set<Integer>> unavailableShifts) {
-        this.unavailableShifts = unavailableShifts;
-    }
-
-    public boolean update(EmployeeEntity entity) {
-        if (entity == null || !id.equals(entity.id) || !password.equals(entity.password))
-            return false;
-        name = entity.getName();
-        bankAccount = entity.getBankAccount();
-        salary = entity.getSalary();
-        salaryType = entity.getSalaryType();
-        dateOfEmployment = entity.getDateOfEmployment();
-        jobScope = entity.getJobScope();
-        qualifiedRoles = entity.getQualifiedRoles();
-        constraints = entity.getConstraints();
-        yearlyRestDays = entity.getYearlyRestDays();
-        weeklyRestDay = entity.getWeeklyRestDay();
-        workingDoubles = entity.isWorkingDoubles();
-        unavailableShifts = entity.getUnavailableShifts();
-        active = entity.isActive();
-        return true;
-    }
-
-    public boolean isActive() {
-        return active;
-    }
-
-    public void setActive(boolean active) {
-        this.active = active;
-    }
 }

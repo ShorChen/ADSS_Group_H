@@ -3,10 +3,11 @@ package domain;
 import context.SessionManager;
 import domain.entities.Employee;
 import domain.entities.Role;
-import domain.enums.JobScope;
-import domain.enums.SalaryType;
-import domain.enums.ShiftType;
-import domain.enums.WeekDay;
+import domain.entities.ShiftKey;
+import shared.enums.JobScope;
+import shared.enums.SalaryType;
+import shared.enums.ShiftType;
+import shared.enums.WeekDay;
 import domain.services.EmployeeService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -91,8 +92,8 @@ class EmployeeServiceTest {
     void updateAvailability_ValidEmployee_UpdatesSuccessfully() {
         employeeService.addEmployee(createTestEmployee("333", "Shir", true));
 
-        Map<WeekDay, Set<ShiftType>> unavailable = new HashMap<>();
-        unavailable.put(WeekDay.SUNDAY, Set.of(ShiftType.DAY, ShiftType.EVENING));
+        Set<ShiftKey> unavailable = new HashSet<>();
+        unavailable.add(new ShiftKey(WeekDay.SUNDAY, ShiftType.EVENING));
 
         assertDoesNotThrow(() -> {
             employeeService.updateAvailability("333", unavailable, true);
@@ -106,7 +107,7 @@ class EmployeeServiceTest {
     @Test
     void updateAvailability_NonExistentEmployee_ThrowsException() {
         IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () -> {
-            employeeService.updateAvailability("404", new HashMap<>(), false);
+            employeeService.updateAvailability("404", new HashSet<>(), false);
         });
 
         assertTrue(exception.getMessage().contains("not found"));
@@ -147,7 +148,8 @@ class EmployeeServiceTest {
         Employee updatedEmp = new Employee(
                 "555", "Bob Updated", "123456", 60.0, SalaryType.HOURLY,
                 SessionManager.now(), JobScope.FULL_TIME, new ArrayList<>(),
-                "None", 12, WeekDay.SUNDAY, false, new HashMap<>(), true
+                "None", 12, WeekDay.SUNDAY,
+                false, new HashMap<>(), true, 1
         );
 
         boolean result = employeeService.updateEmployee(updatedEmp, pass);
@@ -174,20 +176,20 @@ class EmployeeServiceTest {
     @Test
     void getAvailableEmployees_EmployeesWithRoles_ReturnsAvailableOnes() {
         // Create employees with roles
-        Employee emp1 = createTestEmployeeWithRoles("777", "David", true, Role.Cashier);
-        Employee emp2 = createTestEmployeeWithRoles("888", "Eve", true, Role.Cashier);
+        Employee emp1 = createTestEmployeeWithRoles("777", "David", Role.Cashier);
+        Employee emp2 = createTestEmployeeWithRoles("888", "Eve", Role.Cashier);
         employeeService.addEmployee(emp1);
         employeeService.addEmployee(emp2);
 
         // Make emp2 unavailable on Sunday for DAY shift
-        Map<WeekDay, Set<ShiftType>> unavailable = new HashMap<>();
-        unavailable.put(WeekDay.SUNDAY, Set.of(ShiftType.DAY));
+        Set<ShiftKey> unavailable = new HashSet<>();
+        unavailable.add(new ShiftKey(WeekDay.SUNDAY, ShiftType.DAY));
         employeeService.updateAvailability("888", unavailable, false);
 
         List<Employee> available = employeeService.getAvailableEmployees(WeekDay.SUNDAY, ShiftType.DAY, Role.Cashier);
 
         assertEquals(1, available.size(), "Only one employee should be available");
-        assertEquals("777", available.get(0).getId());
+        assertEquals("777", available.getFirst().getId());
     }
 
     @Test
@@ -203,27 +205,27 @@ class EmployeeServiceTest {
 
     @Test
     void containsRole_EmployeeHasRole_ReturnsTrue() {
-        Employee emp = createTestEmployeeWithRoles("999", "Frank", true, Role.Storekeeper);
+        Employee emp = createTestEmployeeWithRoles("999", "Frank", Role.Storekeeper);
         employeeService.addEmployee(emp);
 
-        boolean result = employeeService.containsRole("999", Role.Storekeeper.getTag());
+        boolean result = employeeService.containsRole("999", Role.Storekeeper);
 
         assertTrue(result, "Employee should have the storekeeper role");
     }
 
     @Test
     void containsRole_EmployeeDoesNotHaveRole_ReturnsFalse() {
-        Employee emp = createTestEmployeeWithRoles("101", "Grace", true, Role.Cashier);
+        Employee emp = createTestEmployeeWithRoles("101", "Grace", Role.Cashier);
         employeeService.addEmployee(emp);
 
-        boolean result = employeeService.containsRole("101", Role.MANAGER.getTag());
+        boolean result = employeeService.containsRole("101", Role.MANAGER);
 
         assertFalse(result, "Employee should not have the manager role");
     }
 
     @Test
     void containsRole_NonExistentEmployee_ReturnsFalse() {
-        boolean result = employeeService.containsRole("202", Role.Cashier.getTag());
+        boolean result = employeeService.containsRole("202", Role.Cashier);
 
         assertFalse(result, "Non-existent employee should not have any role");
     }
@@ -232,15 +234,16 @@ class EmployeeServiceTest {
         return new Employee(
                 id, name, "123456", 50.0, SalaryType.HOURLY,
                 SessionManager.now(), JobScope.FULL_TIME, new ArrayList<>(),
-                "None", 12, WeekDay.SUNDAY, false, new HashMap<>(), isActive
+                "None", 12, WeekDay.SUNDAY, false, new HashMap<>(), isActive, 1
         );
     }
 
-    private Employee createTestEmployeeWithRoles(String id, String name, boolean isActive, Role... roles) {
+    private Employee createTestEmployeeWithRoles(String id, String name, Role... roles) {
         return new Employee(
                 id, name, "123456", 50.0, SalaryType.HOURLY,
                 SessionManager.now(), JobScope.FULL_TIME, Arrays.asList(roles),
-                "None", 12, WeekDay.SUNDAY, false, new HashMap<>(), isActive
+                "None", 12, WeekDay.SUNDAY, false,
+                new HashMap<>(), true, 1
         );
     }
 }

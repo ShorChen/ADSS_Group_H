@@ -27,15 +27,12 @@ public class RolePool {
         roles.add(Role.Cashier.getTag());
     }
 
-    public String getRole(String tag) {
-        for (String r : roles)
-            if (r.equals(tag))
-                return r;
-        return null;
+    public boolean containsRole(String role){
+        return roles.contains(role);
     }
 
-    public boolean addRole(String role) {
-        return roles.add(role);
+    public void addRole(String role) {
+        roles.add(role);
     }
 
     public List<String> getAllRoles() {

@@ -8,6 +8,7 @@ import presentation.ui_shared.View;
 import presentation.util.Option;
 
 import java.util.List;
+import java.util.Objects;
 
 public class PlaceEmployeesUI extends View {
 
@@ -21,14 +22,17 @@ public class PlaceEmployeesUI extends View {
     @Override
     public void display() {
         ShiftsView shiftsView = new ShiftsView(0);
-        shiftsView.selectShift(this::placeEmployeeFlow);
+        shiftsView.selectShift((day, type) -> placeEmployeeFlow(
+                day.toString(),
+                type.toString()
+        ));
         onDismiss.run();
 
     }
 
-    private void placeEmployeeFlow(int day, int type) {
+    private void placeEmployeeFlow(String day, String type) {
 
-        String selectedRole = selectionMenuOf("Roles", controller.getRoles());
+        String selectedRole = selectionMenuOf("Roles", controller.getRoles(), Objects::toString, o -> o);
         EmployeePL selectedEmployee = selectEmployeeFromMenu(day, type, selectedRole);
 
         try {
@@ -41,18 +45,18 @@ public class PlaceEmployeesUI extends View {
         }
     }
 
-    private EmployeePL selectEmployeeFromMenu(int day, int type, String role) {
+    private EmployeePL selectEmployeeFromMenu(String day, String type, String role) {
         List<EmployeePL> employees = controller.getAvailableEmployees(day, type, role);
         if (employees.isEmpty()) return null;
         return selectionMenuOf("---Available Employees---",
-                employees, EmployeePL::getId);
+                employees, EmployeePL::getId, o -> o);
     }
 
     private void displayOnEmptyMenu() {
         displayMenu(new Option.Builder("No available employee. Request Exceptional Placement?")
-                        .append("Yes", this::requestReplacements)
-                        .append("No", () -> {
-                        })
+                .append("Yes", this::requestReplacements)
+                .append("No", () -> {
+                })
         );
     }
 

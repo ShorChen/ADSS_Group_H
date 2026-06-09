@@ -6,9 +6,10 @@ import data_access.entities.EmployeeEntity;
 import data_access.pools.EmployeePool;
 import domain.entities.Employee;
 import domain.entities.Role;
-import domain.enums.WeekDay;
+import domain.entities.ShiftKey;
+import shared.enums.WeekDay;
 import domain.util.PasswordGenerator;
-import domain.enums.ShiftType;
+import shared.enums.ShiftType;
 
 public class EmployeeService {
 
@@ -21,7 +22,7 @@ public class EmployeeService {
     public String addEmployee(Employee employee) {
         String pass = PasswordGenerator.generatePassword();
         if (!employees.exists(employee.getId())) {
-            employees.addEmployee(employee.toEntity(pass));
+            employees.addUpdateEmployee(employee.toEntity(pass));
             return pass;
         }
         throw new IllegalArgumentException("An employee with the given id is already present in the system");
@@ -30,10 +31,10 @@ public class EmployeeService {
     public boolean deactivateEmployee(String id) {
         if (employees.exists(id)) {
             EmployeeEntity entity = employees.getEmployee(id);
-            if (entity.isActive()) {
-                entity.setActive(false);
-                return true;
-            }
+            if (!entity.active())
+                throw new IllegalArgumentException("Employee was already not active");
+            employees.deactivateEmployee(id);
+            return true;
         }
         return false;
     }
@@ -50,36 +51,33 @@ public class EmployeeService {
         if (!employees.exists(employee.getId())) {
             return false;
         }
-        return employees.getEmployee(employee.getId()).update(employee.toEntity(password));
+        employees.addUpdateEmployee(employee.toEntity(password));
+        return true;
     }
 
-    public void updateAvailability(String id, Map<domain.enums.WeekDay, Set<domain.enums.ShiftType>> shifts, boolean canWorkDoubleShifts) {
+    public void updateAvailability(String id, Set<ShiftKey> shifts, boolean canWorkDoubleShifts) {
         if (!employees.exists(id)) {
             throw new IllegalArgumentException("Employee with ID " + id + " not found");
         }
-
         EmployeeEntity entity = employees.getEmployee(id);
 
         Map<Integer, Set<Integer>> entityShifts = new HashMap<>();
+        shifts.forEach(shiftKey -> {
 
-        if (shifts != null) {
-            shifts.forEach((day, types) -> {
-                Set<Integer> shiftInts = new HashSet<>();
-                for (ShiftType type : types) {
-                    shiftInts.add(type.ordinal());
-                }
-                entityShifts.put(day.ordinal(), shiftInts);
-            });
-        }
+            Set<Integer> defaultSet = new HashSet<>();
+            defaultSet.add(ShiftType.number(shiftKey.shiftType()));
 
-        entity.setUnavailableShifts(entityShifts);
-        entity.setWorkingDoubles(canWorkDoubleShifts);
-
+            entityShifts.put(WeekDay.number(shiftKey.day()),
+                    entityShifts.getOrDefault(WeekDay.number(shiftKey.day()), defaultSet)
+            );
+        });
+        entity = entity.changeAvailability(entityShifts, canWorkDoubleShifts);
+        employees.addUpdateEmployee(entity);
     }
 
     public List<Employee> getAvailableEmployees(WeekDay weekDay, ShiftType shiftType, Role role) {
         List<Employee> employeeList = new ArrayList<>();
-        employees.getEmployees(role.getTag()).forEach(
+        employees.getEmployeesWithRole(role.getTag()).forEach(
                 e -> {
                     Employee employee = new Employee(e);
                     if (!employee.getUnavailableShifts()
@@ -90,7 +88,9 @@ public class EmployeeService {
         return employeeList;
     }
 
-    public boolean containsRole(String id, String role) {
-        return employees.containsRole(id, role);
+    public boolean containsRole(String id, Role role) {
+        if (!employees.exists(id))
+            throw new IllegalArgumentException("Employee Not Found");
+        return employees.getEmployee(id).qualifiedRoles().contains(role.getTag());
     }
 }

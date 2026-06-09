@@ -1,64 +1,22 @@
 package data_access.entities;
 
-public class RequestEntity {
-    private ShiftEntity shift;
-    private String prevEmployee;
-    private String newEmployee;
-    private String manager;
-    private boolean prevApproved;
-    private boolean newApproved;
-    private boolean managerApproved;
-    private boolean denied;
+import java.util.Objects;
 
-    public RequestEntity(ShiftEntity shift, String prevEmployee,
-                         String newEmployee, String manager, boolean prevApproved,
-                         boolean newApproved, boolean managerApproved,
-                         boolean denied) {
-        this.shift = shift;
-        this.prevEmployee = prevEmployee;
-        this.newEmployee = newEmployee;
-        this.manager = manager;
-        this.prevApproved = prevApproved;
-        this.newApproved = newApproved;
-        this.managerApproved = managerApproved;
-        this.denied = denied;
+public record RequestEntity(
+        int requestId, ShiftEntity shift, String prevEmployee, String newEmployee,
+        String manager,
+        String prevApproved,
+        String newApproved,
+        String managerApproved, boolean denied) {
+
+    @Override
+    public boolean equals(Object o) {
+        if (!(o instanceof RequestEntity entity)) return false;
+        return requestId == entity.requestId && denied == entity.denied && Objects.equals(manager, entity.manager) && Objects.equals(shift, entity.shift) && Objects.equals(newEmployee, entity.newEmployee) && Objects.equals(newApproved, entity.newApproved) && Objects.equals(prevEmployee, entity.prevEmployee) && Objects.equals(prevApproved, entity.prevApproved) && Objects.equals(managerApproved, entity.managerApproved);
     }
 
-    public RequestEntity(ShiftEntity shift, String prevEmployee, String newEmployee) {
-        this(shift, prevEmployee, newEmployee, null,true,
-                false, false, false);
+    @Override
+    public int hashCode() {
+        return Objects.hash(requestId, shift, prevEmployee, newEmployee, manager, prevApproved, newApproved, managerApproved, denied);
     }
-
-    public ShiftEntity getShift() {
-        return shift;
-    }
-
-    public String getPrevEmployee() {
-        return prevEmployee;
-    }
-
-    public String getNewEmployee() {
-        return newEmployee;
-    }
-
-    public String getManager() {
-        return manager;
-    }
-
-    public boolean isPrevApproved() {
-        return prevApproved;
-    }
-
-    public boolean isNewApproved() {
-        return newApproved;
-    }
-
-    public boolean isManagerApproved() {
-        return managerApproved;
-    }
-
-    public boolean isDenied() {
-        return denied;
-    }
-
 }

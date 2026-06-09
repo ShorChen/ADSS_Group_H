@@ -1,11 +1,15 @@
 package domain.services;
 
+import data_access.entities.RequestEntity;
+import data_access.entities.keys.BranchWeekKey;
 import data_access.pools.RequestsPool;
 import data_access.pools.ShiftPool;
 import domain.entities.Request;
 import domain.entities.Shift;
-import domain.enums.ShiftType;
-import domain.enums.WeekDay;
+import domain.util.RequestStateMachine;
+import shared.enums.RequestStatus;
+import shared.enums.ShiftType;
+import shared.enums.WeekDay;
 import org.jetbrains.annotations.NotNull;
 
 import java.time.DayOfWeek;
@@ -16,21 +20,16 @@ import java.util.List;
 
 public class RequestReplacementService {
     private final RequestsPool requestsPool;
-    private final ShiftPool shiftPool;
 
     public RequestReplacementService() {
         requestsPool = RequestsPool.Instance();
-        shiftPool = ShiftPool.Instance();
-
-    }
-
-    public Shift getShift(@NotNull LocalDate date, @NotNull WeekDay day, @NotNull ShiftType type) {
-        LocalDate weekDate = date.with(TemporalAdjusters.previousOrSame(DayOfWeek.SUNDAY));
-        return new Shift(shiftPool.getShift(weekDate, day.name(), type.name()));
     }
 
     public boolean requestReplacement(@NotNull Request request) {
-        return requestsPool.addRequest(request.toEntity());
+        RequestEntity entity = request.toEntity();
+        boolean exists = requestsPool.exists(entity);
+        requestsPool.addUpdateRequest(entity);
+        return exists;
     }
 
     public List<Request> getPendingRequests(String id) {
@@ -42,14 +41,28 @@ public class RequestReplacementService {
     }
 
     public boolean approve(@NotNull Request request, String id) {
-        boolean statusChanged = request.approve(id);
-        requestsPool.updateRequest(request.toEntity());
+        RequestStateMachine stateMachine = new RequestStateMachine();
+        RequestStateMachine.State startState = new RequestStateMachine.State(
+                request.getPrevStatus(),
+                request.getNewStatus(),
+                request.getManagerStatus());
+
+        RequestStateMachine.State endState = stateMachine.apply(startState, new RequestStateMachine.Letter(
+                RequestStateMachine.Player.NEW_EMPLOYEE, RequestStatus.ACCEPT)
+        );
+        boolean statusChanged = endState.equals(startState);
+
+        requestsPool.addUpdateRequest(request.toEntity());
         return statusChanged;
+
+
+        // TODO: this does not work
     }
 
     public boolean deny(@NotNull Request request, String id) {
-        if (!request.deny(id)) return false;
-        requestsPool.updateRequest(request.toEntity());
+        request.deny(id);
+        if (!request.isDenied()) return false;
+        requestsPool.addUpdateRequest(request.toEntity());
         return true;
     }
 

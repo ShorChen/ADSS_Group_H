@@ -1,9 +1,10 @@
 package domain.services;
 
+import data_access.entities.keys.BranchWeekKey;
 import data_access.pools.ShiftPool;
 import domain.entities.Role;
 import domain.entities.Shift;
-import domain.enums.WeekDay;
+import shared.enums.WeekDay;
 
 import java.util.Calendar;
 import java.util.Date;
@@ -17,12 +18,12 @@ public class HRManagerShiftService {
         this.shiftPool = ShiftPool.Instance(); 
     }
 
-    public void setJobsToShift(Shift shift, Map<Role, Integer> jobs) {
+    public void setJobsToShift(BranchWeekKey key, Shift shift, Map<Role, Integer> jobs) {
         if (shift == null || jobs == null) {
             throw new IllegalArgumentException("Shift or jobs cannot be null");
         }
-        jobs.forEach(shift::addJob);
-        shiftPool.update(shift.toEntity());
+        jobs.forEach(shift::addRole);
+        shiftPool.addUpdateShift(key, shift.toEntity());
     }
 
  

@@ -2,19 +2,24 @@ package presentation.control;
 
 import context.SessionManager;
 import domain.entities.Request;
+import domain.entities.Role;
 import domain.entities.Shift;
-import domain.entities.WeekShifts;
-import domain.enums.ShiftType;
-import domain.enums.WeekDay;
+import domain.entities.ShiftKey;
 import domain.services.EmployeeService;
 import domain.services.RequestReplacementService;
 import domain.services.ShiftService;
+import domain.util.RequestStateMachine;
 import presentation.model.RequestPL;
 import presentation.model.ShiftPL;
+import shared.enums.RequestStatus;
+import shared.enums.ShiftType;
+import shared.enums.WeekConstants;
+import shared.enums.WeekDay;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 public class RequestReplacementController {
     private final RequestReplacementService service;
@@ -29,22 +34,25 @@ public class RequestReplacementController {
         authController = new AuthController();
     }
 
-    public void currentEmployeeRequestShiftReplacement(int day, int type, String otherId) {
+    public void currentEmployeeRequestShiftReplacement(WeekDay day, ShiftType type, String otherId) {
 
-        Shift shift = service.getShift(SessionManager.now().toLocalDate(),
-                WeekDay.values()[day],
-                ShiftType.values()[type]);
-        ShiftPL shiftPL = new ShiftPL(shift);
+        LocalDate targetDate = SessionManager.now().plusWeeks(1).toLocalDate();
+        int year = targetDate.get(WeekConstants.WEEK_FIELDS.weekBasedYear());
+        int week = targetDate.get(WeekConstants.WEEK_FIELDS.weekOfWeekBasedYear());
+        int branchId = SessionManager.getCurrentEmployee().getBranchId();
 
-        if (shiftPL.find(otherId) != null)
+        Map<ShiftKey, Shift> map = shiftService.getShiftsOfWeek(branchId, year, week);
+        Shift shift = map.get(new ShiftKey(day, type));
+
+        if (shift.doesEmployeeWork(otherId))
             throw new IllegalArgumentException("Employee already in enrolled in that shift");
 
         String id = SessionManager.getCurrentEmployee().getId();
-        String role = shiftPL.find(id);
+        Role role = shift.getEmployeeShiftRole(id);
 
         if (employeeService.containsRole(otherId, role)) {
-            RequestPL r = new RequestPL(shiftPL, id, otherId);
-            service.requestReplacement(r.toRequest());
+            Request r = new Request(shift, id, otherId);
+            service.requestReplacement(r);
         }
         throw new IllegalArgumentException("other employee is not qualified for your job");
     }
@@ -73,33 +81,45 @@ public class RequestReplacementController {
     }
 
     public boolean doAllSidesApprove(RequestPL requestPL) {
-        return service.doAllSidesApprove(requestPL.toRequest());
+        return requestPL.toRequest().isApproved();
     }
 
     public boolean currentEmployeeDenied(RequestPL request) {
-        return service.deny(request.toReplacementRequest(),
+        return service.deny(request.toRequest(),
                 SessionManager.getCurrentEmployee().getId());
     }
 
     public boolean getCurrentEmployeeShiftsPredicate(ShiftPL shiftPL) {
         String id = SessionManager.getCurrentEmployee().getId();
         boolean isManager = authController.isManager(id);
+
         return shiftPL != null &&
-               (shiftPL.find(id) != null || isManager);
+               (shiftPL.toShift().doesEmployeeWork(id) || isManager);
     }
 
-    public void completeRequest(RequestPL request) {
-        LocalDate weekDate = SessionManager.now().toLocalDate();
-        WeekShifts weekShifts = shiftService.getNWeeksAgo(weekDate);
-        Shift shift = request.getShift().toShift();
-        switch (shift.getShiftType()) {
-            case ShiftType.DAY -> weekShifts.addDayShift(shift.getDay(), shift);
-            case ShiftType.EVENING -> weekShifts.addNightShift(shift.getDay(), shift);
-        }
-        shiftService.updateWeek(weekShifts);
-    }
+//    public void completeRequest(RequestPL request) {
+//        LocalDate weekDate = SessionManager.now().toLocalDate();
+//        WeekShifts weekShifts = shiftService.getNWeeksAgo(weekDate);
+//
+//        Shift shift = request.getShift().toShift();
+//        weekShifts.addUpdateShift(shift);
+//        shiftService.updateWeek(weekShifts);
+//    }
 
     public void deleteRequest(RequestPL request) {
         // todo: implement.
+    }
+
+    @Deprecated
+    void t(Request request, RequestStatus status){
+        RequestStateMachine stateMachine = new RequestStateMachine();
+        stateMachine.apply(new RequestStateMachine.State(request.getPrevStatus(),
+                        request.getNewStatus(), request.getManagerStatus()),
+                new RequestStateMachine.Letter(RequestStateMachine.Player.NEW_EMPLOYEE,
+                        RequestStatus.ACCEPT));
+    }
+
+    public void completeRequest(RequestPL request) {
+        // todo: implement
     }
 }

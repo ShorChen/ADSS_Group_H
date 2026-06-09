@@ -1,8 +1,7 @@
 package data_access.pools;
 
 import data_access.entities.EmployeeEntity;
-import domain.entities.Role;
-import domain.util.PasswordGenerator;
+import data_access.entities.keys.EmployeeKey;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -10,7 +9,7 @@ import java.util.List;
 import java.util.Map;
 
 public class EmployeePool {
-    private final Map<String, EmployeeEntity> employees;
+    private final Map<EmployeeKey, EmployeeEntity> employees;
 
     private static EmployeePool instance;
 
@@ -24,41 +23,47 @@ public class EmployeePool {
         this.employees = new HashMap<>();
     }
 
-    public void addEmployee(EmployeeEntity employee) {
-        employees.put(employee.getId(), employee);
+    public void addUpdateEmployee(EmployeeEntity employee) {
+        employees.put(createKey(employee.id()), employee);
     }
 
-
     public EmployeeEntity getEmployee(String id) {
-        return employees.get(id);
+        return employees.get(createKey(id));
     }
 
     public boolean exists(String id) {
-        return employees.containsKey(id);
+        return employees.containsKey(createKey(id));
     }
 
-    public boolean updatePassword(String id, String oldPass, String password) {
+    public boolean updatePassword(String id, String oldPass, String newPass) {
         if (!exists(id)) throw new IllegalArgumentException("No employee found");
-        return employees.get(id).setPassword(oldPass, password);
+        EmployeeEntity employee = employees.get(createKey(id));
+        if (!employee.checkPassword(oldPass)) return false;
+        addUpdateEmployee(employee.changePassword(newPass));
+        return true;
     }
 
-    public List<EmployeeEntity> getEmployees(String tag) {
+    public void deactivateEmployee(String id) {
+        if (!exists(id)) throw new IllegalArgumentException("No employee found");
+        EmployeeKey key = createKey(id);
+        EmployeeEntity employee = employees.get(key);
+        addUpdateEmployee(employee.changeActivityStatus(false));
+    }
+
+    public List<EmployeeEntity> getEmployeesWithRole(String roles) {
         List<EmployeeEntity> employeeEntityList = new ArrayList<>();
         employees.forEach((_, e) -> {
-            if (e.getQualifiedRoles().contains(tag))
+            if (e.qualifiedRoles().contains(roles))
                 employeeEntityList.add(e);
         });
         return employeeEntityList;
-    }
-
-    public boolean containsRole(String id, String role) {
-        if (!exists(id)) return false;
-        return employees.get(id).getQualifiedRoles().contains(role);
     }
 
     public void clear() {
         employees.clear();
     }
 
-
+    private EmployeeKey createKey(String id) {
+        return new EmployeeKey(id);
+    }
 }

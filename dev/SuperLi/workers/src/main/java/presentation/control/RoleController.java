@@ -16,7 +16,9 @@ public class RoleController {
     public boolean createRole(String tag) {
         if (tag.trim().isEmpty())
             throw new IllegalArgumentException("Tag can not be empty");
-        return service.createRole(tag);
+        boolean contains = service.containsRole(tag);
+        service.createRole(tag.trim());
+        return contains;
     }
 
     public List<String> getAllRoles() {

@@ -2,35 +2,38 @@ package presentation.model;
 
 import domain.entities.Employee;
 import domain.entities.Role;
-import domain.enums.JobScope;
-import domain.enums.SalaryType;
-import domain.enums.ShiftType;
-import domain.enums.WeekDay;
+import shared.enums.JobScope;
+import shared.enums.SalaryType;
+import shared.enums.ShiftType;
+import shared.enums.WeekDay;
 import org.jetbrains.annotations.NotNull;
 
 import java.time.LocalDateTime;
 import java.util.*;
 
 public class EmployeePL {
-    private final String id;
+    private String id;
     private String name;
     private String bankAccount;
     private double salary;
     private SalaryType salaryType;
     private LocalDateTime dateOfEmployment;
     private JobScope jobScope;
-    private final List<String> qualifiedRoles;
+    private Set<String> qualifiedRoles;
     private String constraints;
     private int yearlyRestDays;
-    private final WeekDay weeklyRestDay;
+    private WeekDay weeklyRestDay;
     private boolean workingDoubles;
     private Map<WeekDay, Set<ShiftType>> unavailableShifts;
     private boolean active = true;
+    private int branchId;
 
     public EmployeePL(String id, String name, String bankAccount,
                       double salary, SalaryType salaryType, LocalDateTime dateOfEmployment,
-                      JobScope jobScope, List<String> qualifiedRoles, String constraints,
-                      int yearlyRestDays, WeekDay weeklyRestDay, boolean workingDoubles, Map<WeekDay, Set<ShiftType>> unavailableShifts) {
+                      JobScope jobScope, Set<String> qualifiedRoles, String constraints,
+                      int yearlyRestDays, WeekDay weeklyRestDay, boolean workingDoubles,
+                      Map<WeekDay, Set<ShiftType>> unavailableShifts, boolean active,
+                      int branchId) {
         this.id = id;
         this.name = name;
         this.bankAccount = bankAccount;
@@ -38,12 +41,14 @@ public class EmployeePL {
         this.salaryType = salaryType;
         this.dateOfEmployment = dateOfEmployment;
         this.jobScope = jobScope;
-        this.qualifiedRoles = qualifiedRoles;
+        setQualifiedRoles(qualifiedRoles);
         this.constraints = constraints;
         this.yearlyRestDays = yearlyRestDays;
         this.weeklyRestDay = weeklyRestDay;
         this.workingDoubles = workingDoubles;
-        this.unavailableShifts = unavailableShifts;
+        setUnavailableShifts(unavailableShifts);
+        this.active = active;
+        this.branchId = branchId;
     }
 
     /**
@@ -55,21 +60,19 @@ public class EmployeePL {
                 employee.getId(), employee.getName(), employee.getBankAccount(),
                 employee.getSalary(), employee.getSalaryType(),
                 employee.getDateOfEmployment(), employee.getJobScope(),
-                new ArrayList<>(), employee.getConstraints(),
+                new HashSet<>(), employee.getConstraints(),
                 employee.getYearlyRestDays(), employee.getWeeklyRestDay(), employee.isWorkingDoubles(),
-                new HashMap<>()
+                new HashMap<>(), employee.isActive(), employee.getBranchId()
+        );
+        employee.getQualifiedRoles().forEach(role ->
+                qualifiedRoles.add(role.getTag()));
+
+        employee.getQualifiedRoles().forEach(r ->
+                this.qualifiedRoles.add(r.getTag())
         );
 
-        List<String> roles = new ArrayList<>();
-        employee.getQualifiedRoles().forEach(role -> roles.add(role.getTag()));
-        addQualifiedRoles(roles.toArray(String[]::new));
-
-        employee.getUnavailableShifts().forEach((weekDay,
-                                                 shiftTypes) -> {
-            Set<ShiftType> shiftTypesClone = new HashSet<>(shiftTypes);
-            unavailableShifts.put(weekDay, shiftTypesClone);
-        });
-        this.active = employee.isActive();
+        employee.getUnavailableShifts().forEach((weekDay, shiftTypes) ->
+                unavailableShifts.put(weekDay, new HashSet<>(shiftTypes)));
     }
 
     /**
@@ -81,8 +84,12 @@ public class EmployeePL {
         return new Employee(
                 id, name, bankAccount, salary, salaryType, dateOfEmployment,
                 jobScope, roles, constraints, yearlyRestDays,
-                weeklyRestDay, workingDoubles, getUnavailableShifts(), active
+                weeklyRestDay, workingDoubles, getUnavailableShifts(), active, branchId
         );
+    }
+
+    public boolean containsRole(String role) {
+        return qualifiedRoles.contains(role);
     }
 
     /**
@@ -91,10 +98,7 @@ public class EmployeePL {
      * @param roles the roles to add
      */
     public void addQualifiedRoles(String... roles) {
-        for (String qualifiedRole : roles) {
-            if (!this.qualifiedRoles.contains(qualifiedRole))
-                this.qualifiedRoles.add(qualifiedRole);
-        }
+        this.qualifiedRoles.addAll(Arrays.asList(roles));
     }
 
     /**
@@ -107,17 +111,13 @@ public class EmployeePL {
             qualifiedRoles.remove(role);
     }
 
-    /**
-     * Retrieves a copied list of the roles of an employee.
-     * The method does not give access to the internals of the object
-     * you can add or remove roles using {@link #addQualifiedRoles(String...)} and {@link #removeQualifiedRoles(String...)}
-     */
-    public List<String> getQualifiedRoles() {
-        return new ArrayList<>(qualifiedRoles);
-    }
 
     public String getId() {
         return id;
+    }
+
+    public void setId(String id) {
+        this.id = id;
     }
 
     public String getName() {
@@ -168,6 +168,19 @@ public class EmployeePL {
         this.jobScope = jobScope;
     }
 
+    /**
+     * Retrieves a copied list of the roles of an employee.
+     * The method does not give access to the internals of the object
+     * you can add or remove roles using {@link #addQualifiedRoles(String...)} and {@link #removeQualifiedRoles(String...)}
+     */
+    public Set<String> getQualifiedRoles() {
+        return new HashSet<>(qualifiedRoles);
+    }
+
+    public void setQualifiedRoles(Set<String> qualifiedRoles) {
+        this.qualifiedRoles = new HashSet<>(qualifiedRoles);
+    }
+
     public String getConstraints() {
         return constraints;
     }
@@ -186,6 +199,10 @@ public class EmployeePL {
 
     public WeekDay getWeeklyRestDay() {
         return weeklyRestDay;
+    }
+
+    public void setWeeklyRestDay(WeekDay weeklyRestDay) {
+        this.weeklyRestDay = weeklyRestDay;
     }
 
     public boolean isWorkingDoubles() {
@@ -210,7 +227,10 @@ public class EmployeePL {
     }
 
     public void setUnavailableShifts(Map<WeekDay, Set<ShiftType>> unavailableShifts) {
-        this.unavailableShifts = unavailableShifts;
+        this.unavailableShifts = new HashMap<>();
+        unavailableShifts.forEach((key, value) ->
+            this.unavailableShifts.put(key, new HashSet<>(value))
+        );
     }
 
     public boolean isActive() {
@@ -221,26 +241,34 @@ public class EmployeePL {
         this.active = active;
     }
 
+    public int getBranchId() {
+        return branchId;
+    }
+
+    public void setBranchId(int branchId) {
+        this.branchId = branchId;
+    }
+
     public static class Builder {
         private final String id;
-
         private String name;
         private String bankAccount;
         private double salary;
         private SalaryType salaryType;
         private LocalDateTime dateOfEmployment;
         private JobScope jobScope;
-        private List<String> qualifiedRoles;
+        private Set<String> qualifiedRoles;
         private String constraints;
         private int yearlyRestDays;
         private WeekDay weeklyRestDay;
         private boolean workingDoubles;
         private Map<WeekDay, Set<ShiftType>> unavailableShifts;
         private boolean active = true;
+        private int branchId;
 
         public Builder(String id) {
             this.id = id;
-            this.qualifiedRoles = new ArrayList<>();
+            this.qualifiedRoles = new HashSet<>();
             this.unavailableShifts = new HashMap<>();
         }
 
@@ -258,6 +286,7 @@ public class EmployeePL {
             this.weeklyRestDay = employee.getWeeklyRestDay();
             this.workingDoubles = employee.isWorkingDoubles();
             this.unavailableShifts = employee.getUnavailableShifts();
+            this.branchId = employee.getBranchId();
         }
 
         public Builder name(String name) {
@@ -290,9 +319,9 @@ public class EmployeePL {
             return this;
         }
 
-        public Builder qualifiedRoles(List<String> qualifiedRoles) {
+        public Builder qualifiedRoles(Set<String> qualifiedRoles) {
             this.qualifiedRoles = qualifiedRoles != null ?
-                    qualifiedRoles : new ArrayList<>();
+                    qualifiedRoles : new HashSet<>();
             return this;
         }
 
@@ -333,16 +362,19 @@ public class EmployeePL {
             return this;
         }
 
-        public EmployeePL build() {
-            EmployeePL emp = new EmployeePL(id, name, bankAccount, salary, salaryType,
-                    dateOfEmployment, jobScope, qualifiedRoles, constraints, yearlyRestDays,
-                    weeklyRestDay, workingDoubles, unavailableShifts);
-            emp.setActive(active);
-            return emp;
+        public Builder branchId(int branchId){
+            this.branchId = branchId;
+            return this;
         }
 
-        public List<String> getQualifiedRoles() {
-            return new ArrayList<>(qualifiedRoles);
+        public EmployeePL build() {
+            return new EmployeePL(id, name, bankAccount, salary, salaryType,
+                    dateOfEmployment, jobScope, qualifiedRoles, constraints, yearlyRestDays,
+                    weeklyRestDay, workingDoubles, unavailableShifts, active, branchId);
+        }
+
+        public HashSet<String> getQualifiedRoles() {
+            return new HashSet<>(qualifiedRoles);
         }
     }
 

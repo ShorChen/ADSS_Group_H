@@ -3,12 +3,16 @@ package presentation.control;
 import context.SessionManager;
 import domain.entities.Employee;
 import domain.entities.Role;
-import domain.enums.JobScope;
-import domain.enums.SalaryType;
-import domain.enums.WeekDay;
+import domain.entities.store.Branch;
 import domain.services.DataService;
 import domain.services.EmployeeService;
 import domain.services.ShiftService;
+import domain.services.StoreDetailsService;
+import presentation.model.BranchPL;
+import presentation.model.StoreDetailsPL;
+import shared.enums.JobScope;
+import shared.enums.SalaryType;
+import shared.enums.WeekDay;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -19,8 +23,10 @@ public class CreateStoreController {
     private final EmployeeService employeeService;
     private final ShiftService shiftService;
     private final DataService dataService;
+    private final StoreDetailsService storeDetailsService;
 
     public CreateStoreController() {
+        this.storeDetailsService = new StoreDetailsService();
         employeeService = new EmployeeService();
         shiftService = new ShiftService();
         dataService = new DataService();
@@ -33,17 +39,30 @@ public class CreateStoreController {
                 id, name, bankAccount, 0, SalaryType.GLOBALLY,
                 SessionManager.now(), JobScope.FULL_TIME,
                 roles, "", 24, WeekDay.valueOf(weekDay),
-                false, new HashMap<>(), true
+                false, new HashMap<>(), true, Branch.ALL_BRANCHES
         ));
     }
 
     public void setClosedDays(List<WeekDay> closeDays) {
         List<String> closed = new ArrayList<>();
         closeDays.forEach(w -> closed.add(w.name()));
-        shiftService.setClosedDays(closed);
+        storeDetailsService.setClosedDays(closed);
     }
 
     public void load() {
         dataService.load();
     }
+
+    public void setStoreDetails(StoreDetailsPL storeDetailsPL) {
+        storeDetailsService.addUpdateStoreDetails(storeDetailsPL);
+    }
+
+    public void addBranch(BranchPL branchPL) {
+        storeDetailsService.addUpdateBranch(branchPL.toBranch());
+    }
+
+    public boolean containsBranch(String location) {
+        return storeDetailsService.containsBranchAtLocation(location);
+    }
+
 }

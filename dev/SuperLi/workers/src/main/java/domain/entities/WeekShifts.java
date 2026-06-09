@@ -2,49 +2,48 @@ package domain.entities;
 
 import data_access.entities.ShiftEntity;
 import data_access.entities.WeekShiftsEntity;
-import domain.enums.ShiftType;
-import domain.enums.WeekDay;
+import shared.enums.ShiftType;
+import shared.enums.WeekDay;
 
 import java.time.LocalDate;
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
+@Deprecated
 public class WeekShifts {
     private LocalDate date;
-    private Map<WeekDay, Shift> dayShifts;
-    private Map<WeekDay, Shift> nightShifts;
+    private Map<WeekDay, Map<ShiftType, Shift>> shifts;
+    private final int id;
 
-    public WeekShifts(LocalDate date, Map<WeekDay, Shift> dayShifts,
-                      Map<WeekDay, Shift> nightShifts) {
+    public WeekShifts(LocalDate date, Map<WeekDay, Map<ShiftType, Shift>> shifts) {
         this.date = date;
-        this.dayShifts = dayShifts;
-        this.nightShifts = nightShifts;
+        this.id = WeekShiftsEntity.NO_ID;
+        setShifts(shifts);
     }
 
     public WeekShifts(WeekShiftsEntity shiftsEntity) {
-        this(shiftsEntity.getDate(), new HashMap<>(), new HashMap<>());
-        shiftsEntity.getDayShifts().forEach((day, entity) -> {
-            Shift shift = entity == null? null : new Shift(entity);
-            dayShifts.put(WeekDay.valueOf(day), shift);
+        this.date = shiftsEntity.getDate();
+        this.id = shiftsEntity.getId();
+        this.shifts = new HashMap<>();
+        shiftsEntity.getShifts().forEach((day, _shiftTypeToShift) -> {
+            Map<ShiftType, Shift> shiftTypeToShift = new HashMap<>();
+            _shiftTypeToShift.forEach((type, shift) ->
+                    shiftTypeToShift.put(ShiftType.fromType(type), new Shift(shift))
+            );
+            shifts.put(WeekDay.fromArgs(day), shiftTypeToShift);
         });
-        shiftsEntity.getNightShifts().forEach((day, entity) -> {
-            Shift shift = entity == null? null : new Shift(entity);
-            nightShifts.put(WeekDay.valueOf(day), shift);
-        });
+
     }
 
     public WeekShiftsEntity toEntity() {
-        Map<String, ShiftEntity> dayShiftEntityMap = new HashMap<>();
-        dayShifts.forEach((day, shift) ->
-                dayShiftEntityMap.put(day.name(), shift.toEntity())
-        );
-        Map<String, ShiftEntity> nightShiftEntityMap = new HashMap<>();
-        nightShifts.forEach((day, shift) ->
-                nightShiftEntityMap.put(day.name(), shift.toEntity())
-        );
-        return new WeekShiftsEntity(date, dayShiftEntityMap, nightShiftEntityMap);
+        Map<String, Map<String, ShiftEntity>> shifts = new HashMap<>();
+        this.shifts.forEach((weekDay, shiftTypeShiftMap) -> {
+            Map<String, ShiftEntity> shiftTypeToShiftEntity = new HashMap<>();
+            shiftTypeShiftMap.forEach((shiftType, shift) ->
+                    shiftTypeToShiftEntity.put(shiftType.toString(), shift.toEntity()));
+            shifts.put(weekDay.toString(), shiftTypeToShiftEntity);
+        });
+        return new WeekShiftsEntity(id, date, shifts);
     }
 
     public LocalDate getDate() {
@@ -55,46 +54,35 @@ public class WeekShifts {
         this.date = date;
     }
 
-    public Map<WeekDay, Shift> getDayShifts() {
-        return dayShifts;
-    }
-
-    public void setDayShifts(Map<WeekDay, Shift> dayShifts) {
-        this.dayShifts = dayShifts;
-    }
-
-    public Map<WeekDay, Shift> getNightShifts() {
-        return nightShifts;
-    }
-
-    public List<Shift> getShifts() {
-        List<Shift> shifts = new ArrayList<>();
-        dayShifts.forEach((day, shift) -> shifts.add(shift));
-        nightShifts.forEach((day, shift) -> shifts.add(shift));
-        return shifts;
-    }
-
-    public void setNightShifts(Map<WeekDay, Shift> nightShifts) {
-        this.nightShifts = nightShifts;
-    }
-
-    public void addDayShift(WeekDay day, Shift shift) {
-        dayShifts.put(day, shift);
-    }
-
-    public void addNightShift(WeekDay day, Shift shift) {
-        nightShifts.put(day, shift);
+    public void setShifts(Map<WeekDay, Map<ShiftType, Shift>> shifts) {
+        this.shifts = new HashMap<>();
+        shifts.forEach((day, _shiftTypeToShift) -> {
+            Map<ShiftType, Shift> shiftTypeToShift = new HashMap<>();
+            _shiftTypeToShift.forEach((type, shift) ->
+                    shiftTypeToShift.put(type, new Shift(shift))
+            );
+            shifts.put(day, shiftTypeToShift);
+        });
     }
 
     public Shift getShift(WeekDay day, ShiftType shiftType) {
-        if (dayShifts.containsKey(day) &&
-            dayShifts.get(day) != null &&
-            dayShifts.get(day).getShiftType().equals(shiftType))
-            return dayShifts.get(day);
-        if (nightShifts.containsKey(day) &&
-            nightShifts.get(day) != null &&
-            nightShifts.get(day).getShiftType().equals(shiftType))
-            return nightShifts.get(day);
-        return null;
+        if (!shifts.containsKey(day)) return null;
+        if (!shifts.get(day).containsKey(shiftType)) return null;
+        return new Shift(
+                shifts.get(day).get(shiftType)
+        );
+    }
+
+    public boolean isEmpty() {
+        return shifts.isEmpty();
+    }
+
+    public void addUpdateShift(Shift shift) {
+        WeekDay day = shift.getDay();
+        ShiftType shiftType = shift.getShiftType();
+
+        if (!shifts.containsKey(day)) shifts.put(day, new HashMap<>());
+        shifts.get(day).put(shiftType, new Shift(shift));
+        //shift.assignToWeek(id);
     }
 }

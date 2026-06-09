@@ -1,18 +1,22 @@
 package presentation.ui_employee;
 
 import context.SessionManager;
+import domain.entities.ShiftKey;
 import presentation.control.EmployeeShiftController;
 import presentation.ui_shared.ShiftsView;
 import presentation.ui_shared.View;
 import presentation.util.Option;
+import shared.enums.ShiftType;
+import shared.enums.WeekDay;
 
-import java.util.*;
+import java.util.HashSet;
+import java.util.Set;
 
 public class EmployeeChooseShiftsUI extends View {
     private final ShiftsView shiftsView = new ShiftsView(0);
     private boolean open = false;
     private final EmployeeShiftController controller;
-    private Map<Integer, Set<Integer>> selectedShifts;
+    private Set<ShiftKey> selectedShifts;
 
     public EmployeeChooseShiftsUI(Runnable onDismiss) {
         super(onDismiss);
@@ -22,7 +26,7 @@ public class EmployeeChooseShiftsUI extends View {
     @Override
     public void display() {
         open = true;
-        selectedShifts = new HashMap<>();
+        selectedShifts = new HashSet<>();
         while (open) {
             System.out.println("Viewing Schedule of next week");
             shiftsView.display();
@@ -57,8 +61,8 @@ public class EmployeeChooseShiftsUI extends View {
         onDismiss.run();
     }
 
-    private void addSelectedShift(int day, int shift) {
-        selectedShifts.computeIfAbsent(day, _ -> new HashSet<>()).add(shift);
+    private void addSelectedShift(WeekDay day, ShiftType shift) {
+        selectedShifts.add(new ShiftKey(day, shift));
     }
 
     @Override

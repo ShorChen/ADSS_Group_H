@@ -2,9 +2,8 @@ package presentation.model;
 
 import domain.entities.Role;
 import domain.entities.Shift;
-import domain.enums.ShiftType;
-import domain.enums.WeekDay;
-import util.BoundedSet;
+import shared.enums.ShiftType;
+import shared.enums.WeekDay;
 
 import java.time.LocalDateTime;
 import java.util.HashMap;
@@ -13,60 +12,73 @@ import java.util.Map;
 import java.util.Set;
 
 public class ShiftPL {
-
-
-    private final LocalDateTime startDate;
-    private final WeekDay day;
-    private final ShiftType shiftType;
-    private final Map<String, Set<String>> employees;
-    private final Map<String, Float> additionalHours;
+    private LocalDateTime startDate;
+    private WeekDay day;
+    private ShiftType shiftType;
+    private Map<String, Set<String>> employees;
+    private Map<Role, Integer> capacities;
+    private Map<String, Float> additionalHours;
 
 
     public ShiftPL(LocalDateTime startDate, WeekDay day, ShiftType shiftType,
-                   Map<String, Set<String>> employees, Map<String, Float> additionalHours) {
+                   Map<String, Set<String>> employees, Map<Role, Integer> capacities,
+                   Map<String, Float> additionalHours) {
         this.startDate = startDate;
         this.day = day;
         this.shiftType = shiftType;
-        this.employees = employees;
-        this.additionalHours = additionalHours;
+        setEmployees(employees);
+        setCapacities(capacities);
+        setAdditionalHours(additionalHours);
+
     }
 
     public Shift toShift() {
-        Map<Role, BoundedSet<String>> shiftEmployees = new HashMap<>();
+        Map<Role, Set<String>> shiftEmployees = new HashMap<>();
         employees.forEach((role, idSet) ->
                 shiftEmployees.put(new Role(role),
-                        new BoundedSet<>(idSet, idSet.size())
+                        new HashSet<>(idSet)
                 )
         );
         return new Shift(
                 startDate, day, shiftType,
-                shiftEmployees, additionalHours
+                shiftEmployees, capacities, additionalHours
         );
     }
 
 
     public ShiftPL(Shift shift) {
         this(shift.getStartDate(), shift.getDay(), shift.getShiftType(),
-                new HashMap<>(), shift.getAdditionalHours());
+                new HashMap<>(), shift.getCapacities(), shift.getAdditionalHours());
 
-        shift.getEmployees().forEach((role, workers) ->
-                employees.put(role.getTag(), new HashSet<>(workers)));
+        shift.getEmployees().forEach((role, employeeIds) ->
+                employees.put(role.getTag(), new HashSet<>(employeeIds)));
     }
 
     public LocalDateTime getStartDate() {
         return startDate;
     }
 
+    public void setStartDate(LocalDateTime startDate) {
+        this.startDate = startDate;
+    }
+
     public WeekDay getDay() {
         return day;
+    }
+
+    public void setDay(WeekDay day) {
+        this.day = day;
     }
 
     public ShiftType getShiftType() {
         return shiftType;
     }
 
+    public void setShiftType(ShiftType shiftType) {
+        this.shiftType = shiftType;
+    }
+
     /**
-     *
      * @return a map of role to set of employee ids working in this shift
      * @apiNote the method returns a deep copy of the map.
      */
@@ -78,8 +90,30 @@ public class ShiftPL {
         return map;
     }
 
+    public void setEmployees(Map<String, Set<String>> employees) {
+        this.employees = new HashMap<>();
+        employees.forEach((key, value) ->
+                this.employees.put(key, new HashSet<>(value))
+        );
+    }
+
+    public Map<Role, Integer> getCapacities() {
+        return new HashMap<>(capacities);
+    }
+
+    public void setCapacities(Map<Role, Integer> capacities) {
+        this.capacities = new HashMap<>();
+        this.capacities.putAll(capacities);
+    }
+
+    public void setAdditionalHours(Map<String, Float> additionalHours) {
+        this.additionalHours = new HashMap<>();
+        this.additionalHours.putAll(additionalHours);
+    }
+
     /**
      * The method retrieves a map of worker id to its additional hours
+     *
      * @return the additional hours of each employee on the shift
      * @apiNote the method returns a deep copy.
      */
@@ -87,10 +121,4 @@ public class ShiftPL {
         return new HashMap<>(additionalHours);
     }
 
-    public String find(String id) {
-        for (Map.Entry<String, Set<String>> e : employees.entrySet()) {
-            if (e.getValue().contains(id)) return e.getKey();
-        }
-        return null;
-    }
 }

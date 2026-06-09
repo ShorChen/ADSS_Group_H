@@ -1,60 +1,69 @@
 package data_access.entities;
 
+import org.jetbrains.annotations.NotNull;
+
 import java.time.LocalDate;
+import java.util.HashMap;
 import java.util.Map;
 
+@Deprecated
 public class WeekShiftsEntity {
+    private static int ID = 0;
+    public static final int NO_ID = -1;
+    private final int id;
     private LocalDate date;
-    private Map<String, ShiftEntity> dayShifts;
-    private Map<String, ShiftEntity> nightShifts;
+    private Map<String, Map<String, ShiftEntity>> shifts; // <day, <shiftType, shift>>
 
-    public WeekShiftsEntity(LocalDate date, Map<String, ShiftEntity> dayShifts,
-                            Map<String, ShiftEntity> nightShifts) {
+    public WeekShiftsEntity(LocalDate date, Map<String, Map<String, ShiftEntity>> shifts) {
+        this(NO_ID, date, shifts);
+    }
+
+    public WeekShiftsEntity(int id, @NotNull LocalDate date,
+                            @NotNull Map<String,
+                                    @NotNull Map<String, ShiftEntity>> shifts) {
+        if (id == NO_ID) {
+            this.id = ++ID;
+        } else this.id = id;
         this.date = date;
-        this.dayShifts = dayShifts;
-        this.nightShifts = nightShifts;
+        setShifts(shifts);
     }
 
     public LocalDate getDate() {
         return date;
     }
 
-    public void setDate(LocalDate date) {
+    public void setDate(@NotNull LocalDate date) {
         this.date = date;
     }
 
-    public Map<String, ShiftEntity> getDayShifts() {
-        return dayShifts;
-    }
-
-    public void setDayShifts(Map<String, ShiftEntity> dayShifts) {
-        this.dayShifts = dayShifts;
-    }
-
-    public Map<String, ShiftEntity> getNightShifts() {
-        return nightShifts;
-    }
-
-    public void setNightShifts(Map<String, ShiftEntity> nightShifts) {
-        this.nightShifts = nightShifts;
-    }
-
-    public void addDayShift(String day, ShiftEntity shift) {
-        dayShifts.put(day, shift);
-    }
-
-    public void addNightShift(String day, ShiftEntity shift) {
-        nightShifts.put(shift.getDay(), shift);
-    }
-
     public ShiftEntity getShift(String day, String shiftType) {
-        if (dayShifts.containsKey(day) &&
-            dayShifts.get(day).getShiftType().equals(shiftType))
-            return dayShifts.get(day);
-        if (nightShifts.containsKey(day) &&
-            nightShifts.get(day).getShiftType().equals(shiftType))
-            return nightShifts.get(day);
-        return null;
+        if (!shifts.containsKey(day)) return null;
+        if (!shifts.get(day).containsKey(shiftType)) return null;
+        return shifts.get(day).get(shiftType);
     }
 
+    public void addUpdateShift(@NotNull ShiftEntity shift) {
+        String day = shift.day();
+        String shiftType = shift.shiftType();
+
+        if (!shifts.containsKey(day)) shifts.put(day, new HashMap<>());
+        shifts.get(day).put(shiftType, shift);
+    }
+
+    public Map<String, Map<String, ShiftEntity>> getShifts() {
+        Map<String, Map<String, ShiftEntity>> result = new HashMap<>();
+        shifts.forEach((day, oldValue) ->
+                result.put(day, new HashMap<>(oldValue)));
+        return result;
+    }
+
+    public void setShifts(@NotNull Map<String, Map<String, ShiftEntity>> shifts) {
+        this.shifts = new HashMap<>();
+        shifts.forEach((day, oldValue) ->
+                this.shifts.put(day, new HashMap<>(oldValue)));
+    }
+
+    public int getId() {
+        return id;
+    }
 }

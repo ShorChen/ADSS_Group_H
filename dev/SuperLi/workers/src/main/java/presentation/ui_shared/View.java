@@ -5,6 +5,7 @@ import presentation.util.Option;
 
 import java.util.InputMismatchException;
 import java.util.List;
+import java.util.Objects;
 import java.util.Scanner;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Function;
@@ -98,24 +99,26 @@ public abstract class View {
             options.get(selection).getAction().run();
     }
 
-    public <T> T selectionMenuOf(String message, List<T> options, Function<T, String> repr) {
-        AtomicReference<T> t = new AtomicReference<>();
-        Option.Builder builder = new Option.Builder(message);
-        options.forEach(o -> builder.append(repr.apply(o), () -> t.set(o)));
-        displayMenu(builder);
-
-        return t.get();
-    }
-
-    public <T> T selectionMenuOf(String message, List<T> options) {
-        return selectionMenuOf(message, options, Object::toString);
-    }
-
     private void debug(Option.Builder options) {
         options.append("Move time (DEBUGGING)", () -> {
             int hours = getNextInteger("Move hours forward");
             SessionManager.debug(hours);
             System.out.println("Set time to " + SessionManager.now());
         });
+    }
+
+
+
+    public <T, E> T selectionMenuOf(String message, List<E> options, Function<E, String> repr, Function<E, T> f) {
+        AtomicReference<T> t = new AtomicReference<>();
+        Option.Builder builder = new Option.Builder(message);
+        options.forEach(o -> builder.append(repr.apply(o), () -> t.set(f.apply(o))));
+        displayMenu(builder);
+
+        return t.get();
+    }
+
+    public <T> T selectionMenuOf(String message, List<T> options) {
+        return selectionMenuOf(message, options, Objects::toString, o -> o);
     }
 }

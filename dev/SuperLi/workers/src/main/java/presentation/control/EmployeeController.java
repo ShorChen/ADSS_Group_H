@@ -37,13 +37,13 @@ public class EmployeeController {
     }
 
     public boolean grantQualifications(Employee employee, Role... roles) {
-        //Todo: implement
+        // Todo: implement
         System.out.println("Method not yet implemented");
         return false;
     }
 
     public boolean revokeQualifications(Employee employee, Role... roles) {
-        //Todo: implement
+        // Todo: implement
         System.out.println("Method not yet implemented");
         return false;
     }

@@ -1,12 +1,12 @@
 package data_access.pools;
 
 import data_access.entities.RequestEntity;
+import data_access.entities.keys.RequestKey;
 
-import java.time.LocalDateTime;
 import java.util.*;
 
 public class RequestsPool {
-    private final Map<LocalDateTime, RequestEntity> requests;
+    private final Map<RequestKey, RequestEntity> requests;
 
     private static RequestsPool instance;
 
@@ -20,24 +20,24 @@ public class RequestsPool {
         this.requests = new HashMap<>();
     }
 
-    public boolean addRequest(RequestEntity request) {
-        return requests.put(request.getShift().getStartDate(), request) == null;
+    public void addUpdateRequest(RequestEntity request) {
+        requests.put(createKey(request.requestId(), request.shift().shiftId()), request);
+    }
+
+    public boolean exists(RequestEntity request) {
+        return requests.containsKey(createKey(request.requestId(), request.shift().shiftId()));
     }
 
     public List<RequestEntity> getPendingRequests(String id) {
         List<RequestEntity> requestEntities = new ArrayList<>();
         requests.forEach((_, entity) -> {
-            if (Objects.equals(id, entity.getPrevEmployee()) ||
-                Objects.equals(id, entity.getNewEmployee()) ||
-                Objects.equals(id, entity.getManager()))
+            if (Objects.equals(id, entity.prevEmployee()) ||
+                Objects.equals(id, entity.newEmployee()) ||
+                Objects.equals(id, entity.manager()))
                 requestEntities.add(entity);
         });
 
         return requestEntities;
-    }
-
-    public void updateRequest(RequestEntity entity) {
-        requests.put(entity.getShift().getStartDate(), entity);
     }
 
     public List<RequestEntity> getAll() {
@@ -46,5 +46,9 @@ public class RequestsPool {
 
     public void clear() {
         requests.clear();
+    }
+
+    private RequestKey createKey(int requestId, int shiftId) {
+        return new RequestKey(requestId, shiftId);
     }
 }

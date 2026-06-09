@@ -1,64 +1,74 @@
 package data_access.entities;
 
-import util.BoundedSet;
+import org.jetbrains.annotations.NotNull;
+import shared.enums.WeekConstants;
 
 import java.time.LocalDateTime;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Set;
+import java.time.temporal.WeekFields;
+import java.util.*;
 
-public class ShiftEntity {
-    private final LocalDateTime startDate;
-    private final String day;
-    private final String shiftType;
-    private Map<String, Set<String>> employees;
-    private Map<String, Float> additionalHours;
+public record ShiftEntity(
+        int shiftId, LocalDateTime startDate, String day, String shiftType,
+        Map<String, Set<String>> employees, Map<String, Float> additionalHours
+) {
+    private static final WeekFields WEEK_FIELDS = WeekConstants.WEEK_FIELDS;
+    public static final ShiftEntity EMPTY_SHIFT = new ShiftEntity(null,
+            "", "", new HashMap<>(), new HashMap<>());
+    public static final int NO_ID = -1;
 
     public ShiftEntity(LocalDateTime startDate, String day,
                        String shiftType, Map<String, Set<String>> employees,
                        Map<String, Float> additionalHours) {
+        this(NO_ID, startDate, day, shiftType, employees, additionalHours);
+    }
+
+    public ShiftEntity(int shiftId, LocalDateTime startDate, String day,
+                       String shiftType, Map<String, Set<String>> employees,
+                       Map<String, Float> additionalHours) {
+        this.shiftId = shiftId;
         this.startDate = startDate;
         this.day = day;
         this.shiftType = shiftType;
-        this.employees = employees;
-        this.additionalHours = additionalHours;
+
+        this.employees = new HashMap<>();
+        employees.forEach((key, value) ->
+                this.employees.put(key, new HashSet<>(value))
+        );
+
+        this.additionalHours = new HashMap<>(additionalHours);
+
     }
 
-    public LocalDateTime getStartDate() {
-        return startDate;
-    }
-
-    public String getDay() {
-        return day;
-    }
-
-    public String getShiftType() {
-        return shiftType;
-    }
-
-    public Map<String, Set<String>> getEmployees() {
+    @Override
+    public @NotNull Map<String, Set<String>> employees() {
         Map<String, Set<String>> result = new HashMap<>();
-        employees.forEach((key, value) -> {
-            Set<String> set = new BoundedSet<>(value, value.size());
-            result.put(key, set);
-        });
+        employees.forEach((key, value) ->
+            result.put(key, new HashSet<>(value))
+        );
         return result;
     }
 
-    public Map<String, Float> getAdditionalHours() {
-        return additionalHours;
+    public @NotNull Map<String, Float> additionalHours() {
+        return new HashMap<>(additionalHours);
     }
 
+    public int getYear() {
 
-    public boolean update(ShiftEntity entity) {
-        if (entity == null) return false;
-        if (!Objects.equals(startDate, entity.startDate) ||
-            !Objects.equals(day, entity.day) ||
-            !Objects.equals(shiftType, entity.shiftType)) return false;
+        return startDate.get(WEEK_FIELDS.weekBasedYear());
+    }
 
-        employees = entity.getEmployees();
-        additionalHours = entity.getAdditionalHours();
-        return true;
+    public int getWeek() {
+        return startDate.get(WEEK_FIELDS.weekOfWeekBasedYear());
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (!(o instanceof ShiftEntity that)) return false;
+        return shiftId == that.shiftId && Objects.equals(day, that.day) && Objects.equals(shiftType, that.shiftType) && Objects.equals(startDate, that.startDate) && Objects.equals(employees, that.employees) && Objects.equals(additionalHours, that.additionalHours);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(shiftId, startDate, day, shiftType, employees, additionalHours);
     }
 }

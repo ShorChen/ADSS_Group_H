@@ -1,17 +1,29 @@
 package presentation.ui_shared;
 
+import presentation.control.FirstScreenController;
+
 public class FirstScreenUI extends View {
+    private final FirstScreenController controller;
+
     public FirstScreenUI() {
         super(null);
+        controller = new FirstScreenController();
     }
 
     @Override
     public void display() {
-        CreateStoreUI createStoreUI = new CreateStoreUI();
-        createStoreUI.display();
+        if (controller.isFirstStarUp()) createStore();
+        else login();
 
-        LoginUI loginUI;
-        loginUI = new LoginUI();
+    }
+
+    private void createStore() {
+        CreateStoreUI createStoreUI = new CreateStoreUI(this::login);
+        createStoreUI.display();
+    }
+
+    private void login(){
+        LoginUI loginUI = new LoginUI(this::display);
         loginUI.display();
     }
 

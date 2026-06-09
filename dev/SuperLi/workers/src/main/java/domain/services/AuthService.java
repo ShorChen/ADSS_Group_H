@@ -25,7 +25,7 @@ public class AuthService {
 
     public Employee login(String id, String password) {
         EmployeeEntity entity = employees.getEmployee(id);
-        if (entity == null || !entity.isActive()) return null;
+        if (entity == null || !entity.active()) return null;
         if (entity.checkPassword(password))
             return new Employee(entity);
         return null;
@@ -37,7 +37,7 @@ public class AuthService {
 
     public boolean isManager(String id) {
         if (employees.exists(id))
-            return employees.getEmployee(id).getQualifiedRoles().contains(Role.MANAGER.getTag());
+            return employees.getEmployee(id).qualifiedRoles().contains(Role.MANAGER.getTag());
         throw new IllegalArgumentException("No employee found");
     }
 

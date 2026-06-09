@@ -4,8 +4,8 @@ import context.SessionManager;
 import domain.entities.Employee;
 import domain.entities.Role;
 import domain.entities.Shift;
-import domain.enums.ShiftType;
-import domain.enums.WeekDay;
+import shared.enums.ShiftType;
+import shared.enums.WeekDay;
 import domain.services.EmployeeService;
 import domain.services.HRManagerShiftService;
 import domain.services.ShiftService;
@@ -29,7 +29,7 @@ public class HRManagerShiftController {
 
     public void setJobsToShift(Shift shift, Map<Role, Integer> jobs) {
         try {
-            hrService.setJobsToShift(shift, jobs);
+            //hrService.setJobsToShift(shift, jobs);
         } catch (IllegalArgumentException e) {
             System.out.println("Error setting jobs to shift: " + e.getMessage());
         }
@@ -63,22 +63,18 @@ public class HRManagerShiftController {
     }
 
     public String issueReport() {
-        //todo
+        // todo
         return null;
     }
 
-    public void openShift(int day, int type, EmployeePL shiftManager) {
-        WeekDay weekDay = WeekDay.values()[day];
-        ShiftType shiftType = ShiftType.values()[type];
-        service.updateShift(SessionManager.now().toLocalDate(), weekDay,
-                shiftType, new Shift(weekDay, shiftType, shiftManager.getId()));
+    public void openShift(WeekDay day, ShiftType type, EmployeePL shiftManager) {
+        service.addUpdateShift(SessionManager.now().toLocalDate(), day,
+                type, new Shift(day, type, shiftManager.getId()));
     }
 
-    public void closeShift(int day, int type) {
-        WeekDay weekDay = WeekDay.values()[day];
-        ShiftType shiftType = ShiftType.values()[type];
-        service.updateShift(SessionManager.now().toLocalDate(), weekDay,
-                shiftType, null);
+    public void closeShift(WeekDay day, ShiftType type) {
+        service.addUpdateShift(SessionManager.now().toLocalDate(), day,
+                type, null);
     }
 
     public EmployeePL getShiftManager(String id) {

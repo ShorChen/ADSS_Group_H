@@ -1,26 +1,24 @@
 package presentation.control;
 
-import domain.entities.Role;
-import domain.enums.WeekDay;
-import domain.services.ShiftService;
+import domain.services.StoreDetailsService;
 import presentation.model.EmployeePL;
+import shared.enums.WeekDay;
 
-import java.util.ArrayList;
 import java.util.List;
 
 public class AddUpdateEmployeeController {
-    private final ShiftService shiftService;
     private final EmployeeController employeeController;
     private final RoleController roleController;
+    private final StoreDetailsService storeDetailsService;
 
     public AddUpdateEmployeeController() {
-        shiftService = new ShiftService();
         employeeController = new EmployeeController();
         roleController = new RoleController();
+        storeDetailsService = new StoreDetailsService();
     }
 
     public List<WeekDay> getClosedDays() {
-        return shiftService.getClosedDays();
+        return storeDetailsService.getClosedDays();
     }
 
     public EmployeePL getEmployeeDetails(String employeeId) {
@@ -37,9 +35,5 @@ public class AddUpdateEmployeeController {
 
     public List<String> getAllRoles() {
         return roleController.getAllRoles();
-    }
-
-    public String getRole(String role) {
-        return roleController.getRole(role);
     }
 }

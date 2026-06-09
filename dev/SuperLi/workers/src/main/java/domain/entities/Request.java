@@ -1,50 +1,102 @@
 package domain.entities;
 
 import data_access.entities.RequestEntity;
+import shared.enums.RequestStatus;
 
 import java.util.Objects;
 
 public class Request {
+    public static final int NO_ID = -1;
+    private int requestId;
     private Shift shift;
     private String prevEmployee;
     private String newEmployee;
     private String manager;
-    private boolean prevApproved;
-    private boolean newApproved;
-    private boolean managerApproved;
-    private boolean denied;
+    private RequestStatus prevStatus;
+    private RequestStatus newStatus;
+    private RequestStatus managerStatus;
 
     public Request(Shift shift, String prevEmployee, String newEmployee) {
-        this.shift = shift;
-        this.prevEmployee = prevEmployee;
-        this.newEmployee = newEmployee;
-        prevApproved = true;
+        this(NO_ID, shift, prevEmployee, newEmployee, "", RequestStatus.ACCEPT,
+                RequestStatus.PENDING, RequestStatus.PENDING);
     }
 
-    public Request(Shift shift, String prevEmployee, String newEmployee,
-                   String manager, boolean prevApproved, boolean newApproved,
-                   boolean managerApproved, boolean denied) {
+    public Request(int requestId, Shift shift, String prevEmployee, String newEmployee,
+                   String manager, RequestStatus prevStatus, RequestStatus newStatus,
+                   RequestStatus managerStatus) {
+        this.requestId = requestId;
         this.shift = shift;
         this.prevEmployee = prevEmployee;
         this.newEmployee = newEmployee;
         this.manager = manager;
-        this.prevApproved = prevApproved;
-        this.newApproved = newApproved;
-        this.managerApproved = managerApproved;
-        this.denied = denied;
+        this.prevStatus = prevStatus;
+        this.newStatus = newStatus;
+        this.managerStatus = managerStatus;
     }
 
     public RequestEntity toEntity() {
-        return new RequestEntity(shift.toEntity(), prevEmployee, newEmployee, manager,
-                prevApproved, newApproved, managerApproved, denied);
+        return new RequestEntity(requestId, shift.toEntity(), prevEmployee,
+                newEmployee, manager, prevStatus.toString(),
+                newStatus.toString(), managerStatus.toString(), isDenied());
     }
 
     public Request(RequestEntity entity) {
         this(
-                new Shift(entity.getShift()),
-                entity.getPrevEmployee(), entity.getNewEmployee(), entity.getManager(),
-                entity.isPrevApproved(), entity.isNewApproved(),
-                entity.isManagerApproved(), entity.isDenied());
+                entity.requestId(), new Shift(entity.shift()),
+                entity.prevEmployee(), entity.newEmployee(), entity.manager(),
+                RequestStatus.fromArgs(entity.prevApproved()),
+                RequestStatus.fromArgs(entity.newApproved()),
+                RequestStatus.fromArgs(entity.managerApproved())
+        );
+    }
+
+    public void approve(String id) {
+        if (!isDenied()) {
+            if (Objects.equals(id, prevEmployee)) {
+                prevStatus = RequestStatus.ACCEPT;
+            }
+            if (Objects.equals(id, newEmployee)) {
+                newStatus = RequestStatus.ACCEPT;
+            }
+            if (manager.isBlank()) {
+                managerStatus = RequestStatus.ACCEPT;
+                manager = id;
+            }
+        }
+
+    }
+
+    public void deny(String id) {
+        if (!isApproved()) {
+            if (Objects.equals(id, prevEmployee)) {
+                prevStatus = RequestStatus.REJECT;
+            }
+            if (Objects.equals(id, newEmployee)) {
+                newStatus = RequestStatus.REJECT;
+
+            }
+            if (manager.isBlank()) {
+                managerStatus = RequestStatus.REJECT;
+                manager = id;
+            }
+        }
+
+    }
+
+    public boolean isDenied() {
+        return prevStatus == RequestStatus.REJECT ||
+               newStatus == RequestStatus.REJECT ||
+               managerStatus == RequestStatus.REJECT;
+    }
+
+    public boolean isApproved() {
+        return prevStatus == RequestStatus.ACCEPT &&
+               newStatus == RequestStatus.ACCEPT &&
+               managerStatus == RequestStatus.ACCEPT;
+    }
+
+    public Shift getShift() {
+        return new Shift(shift);
     }
 
     public String getPrevEmployee() {
@@ -59,65 +111,19 @@ public class Request {
         return manager;
     }
 
-    public boolean isDenied() {
-        return denied;
+    public RequestStatus getPrevStatus() {
+        return prevStatus;
     }
 
-    public Shift getShift() {
-        return shift;
+    public RequestStatus getNewStatus() {
+        return newStatus;
     }
 
-    public boolean isManagerApproved() {
-        return managerApproved;
+    public RequestStatus getManagerStatus() {
+        return managerStatus;
     }
 
-    public boolean isNewApproved() {
-        return newApproved;
-    }
-
-    public boolean isPrevApproved() {
-        return prevApproved;
-    }
-
-    public boolean approve(String id) {
-        if (denied) return false;
-        if (Objects.equals(id, prevEmployee)) {
-            prevApproved = true;
-            return true;
-        }
-        if (Objects.equals(id, newEmployee)) {
-            newApproved = true;
-        }
-        if (manager == null) {
-            managerApproved = true;
-        }
-        return false;
-
-    }
-
-    public boolean deny(String id) {
-        if (isApproved() || denied) return false;
-        if (Objects.equals(id, prevEmployee)) {
-            prevApproved = false;
-            denied = true;
-            return true;
-        }
-        if (Objects.equals(id, newEmployee)) {
-            newApproved = false;
-            denied = true;
-            return true;
-
-        }
-        if (manager == null) {
-            managerApproved = false;
-            denied = true;
-            return true;
-        }
-        return false;
-    }
-
-    public boolean isApproved() {
-        return prevApproved && (newApproved || newEmployee == null) &&
-               managerApproved && !denied;
+    public int getRequestId() {
+        return requestId;
     }
 }

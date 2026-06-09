@@ -3,15 +3,16 @@ package presentation.control;
 import context.SessionManager;
 import domain.entities.Role;
 import domain.entities.Shift;
-import domain.entities.WeekShifts;
-import domain.enums.ShiftType;
-import domain.enums.WeekDay;
+import domain.entities.ShiftKey;
 import domain.services.EmployeeService;
 import domain.services.RoleService;
 import domain.services.ShiftService;
 import presentation.model.EmployeePL;
-import presentation.model.ShiftPL;
+import shared.enums.ShiftType;
+import shared.enums.WeekConstants;
+import shared.enums.WeekDay;
 
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -32,25 +33,31 @@ public class PlaceEmployeesController {
         return roles;
     }
 
-    public List<EmployeePL> getAvailableEmployees(int day, int type, String role) {
+    public List<EmployeePL> getAvailableEmployees(String day, String type, String role) {
         List<EmployeePL> employeePLList = new ArrayList<>();
-        employeeService.getAvailableEmployees(WeekDay.values()[day], ShiftType.values()[type],
+        employeeService.getAvailableEmployees(WeekDay.fromArgs(day), ShiftType.fromType(type),
                 new Role(role)).forEach(e -> employeePLList.add(new EmployeePL(e)));
         return employeePLList;
     }
 
-    public void assignToShift(int day, int type, EmployeePL employeePL, String role) {
-        WeekShifts week = shiftService.getNWeeksAgo(SessionManager.now().toLocalDate());
-        ShiftType shiftType = ShiftType.values()[type];
+    public void assignToShift(String day, String type, EmployeePL selectedEmployee, String selectedRole) {
 
-        Shift s = week.getDayShifts().get(WeekDay.values()[day]);
-        if (shiftType == ShiftType.EVENING)
-            s = week.getNightShifts().get(WeekDay.values()[day]);
-        if (new ShiftPL(s).find(employeePL.getId()) != null)
-            throw new UnsupportedOperationException("Employee is already in the shift");
-
-        s.assign(new Role(role), employeePL.toEmployee());
-        shiftService.updateWeek(week);
-
+        // todo
     }
+
+//    public void assignToShift(String day, String type, EmployeePL employeePL, String role) {
+//
+//        LocalDate dateNextWeek = SessionManager.now().plusWeeks(1).toLocalDate();
+//        Shift s = shiftService.getShiftsOfWeek(SessionManager.getCurrentEmployee().getBranchId(),
+//                        dateNextWeek.get(WeekConstants.WEEK_FIELDS.weekBasedYear()),
+//                        dateNextWeek.get(WeekConstants.WEEK_FIELDS.weekOfWeekBasedYear()))
+//                .get(new ShiftKey(WeekDay.fromArgs(day), ShiftType.fromType(type)));
+//
+//        if (s.doesEmployeeWork(employeePL.getId()))
+//            throw new UnsupportedOperationException("Employee is already in the shift");
+//
+//        s.assignEmployeeToRole(new Role(role), employeePL.toEmployee());
+//        shiftService.updateShift(s);
+//
+//    }
 }
