@@ -3,9 +3,10 @@ package presentation.ui_manager;
 import presentation.control.ViewBranchController;
 import presentation.model.BranchPL;
 import presentation.ui_shared.View;
+import presentation.ui_shared.ViewCLI;
 import presentation.util.Option;
 
-public class ViewBranchUI extends View {
+public class ViewBranchUI extends ViewCLI {
     private ViewBranchController controller;
     private boolean open;
 

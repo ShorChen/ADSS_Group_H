@@ -3,9 +3,10 @@ package presentation.ui_manager;
 import presentation.control.EmployeeController;
 import presentation.model.EmployeePL;
 import presentation.ui_shared.View;
+import presentation.ui_shared.ViewCLI;
 import presentation.util.Option;
 
-public class ManageEmployeesUI extends View {
+public class ManageEmployeesUI extends ViewCLI {
     private final EmployeeController controller;
     private boolean open = false;
 

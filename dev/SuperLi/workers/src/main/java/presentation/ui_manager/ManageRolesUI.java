@@ -1,10 +1,10 @@
 package presentation.ui_manager;
 
 import presentation.control.RoleController;
-import presentation.ui_shared.View;
+import presentation.ui_shared.ViewCLI;
 import presentation.util.Option;
 
-public class ManageRolesUI extends View {
+public class ManageRolesUI extends ViewCLI {
     private final RoleController controller;
     private boolean open = false;
 
@@ -28,8 +28,12 @@ public class ManageRolesUI extends View {
 
     private void createRole() {
         String newRole = getNextLine("Enter Role Name");
-        boolean added = controller.createRole(newRole);
-        System.out.println(added ? "new role added" : "Role is already present in the system");
+        if (controller.containsRole(newRole))
+            System.out.println("Role is already present in the system");
+        else {
+            controller.createRole(newRole);
+            System.out.println("new role added");
+        }
     }
 
 

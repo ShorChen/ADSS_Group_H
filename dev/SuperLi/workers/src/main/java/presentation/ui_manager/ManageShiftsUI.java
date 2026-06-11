@@ -5,13 +5,13 @@ import presentation.control.HRManagerShiftController;
 import presentation.model.EmployeePL;
 import presentation.ui_employee.RequestReplacementUI;
 import presentation.ui_shared.ShiftsView;
-import presentation.ui_shared.View;
+import presentation.ui_shared.ViewCLI;
 import presentation.util.Option;
 
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 
-public class ManageShiftsUI extends View {
+public class ManageShiftsUI extends ViewCLI {
     private final HRManagerShiftController controller;
     private boolean open = false;
     private ShiftsView shiftsView;
@@ -28,15 +28,15 @@ public class ManageShiftsUI extends View {
             shiftsView = new ShiftsView(0);
             shiftsView.display();
             displayMenu(new Option.Builder("--- Manage Shifts ---")
-                            .append("Back", onDismiss)
-                            .append("Open Shift", this::openShift)
-                            .append("Close Shift", this::closeShift)
-                            .append("Place Employee", this::placeEmployees)
-                            .append("Set Submission Deadline", this::setDeadline)
-                            .append("Handle Replacement Requests", this::handleReplacements)
-                    //.append("Create Shift Template (Not Implemented)", this::createTemplate)
-                    //.append("Set Default Template (Not Implemented)", this::setDefaultTemplate)
-                    //.append("Issue HR Report (Not Implemented)", this::issueReport)
+                    .append("Back", onDismiss)
+                    .append("Open Shift", this::openShift)
+                    .append("Close Shift", this::closeShift)
+                    .append("Place Employee", this::placeEmployees)
+                    .append("Set Submission Deadline", this::setDeadline)
+                    .append("Handle Replacement Requests", this::handleReplacements)
+                    .append("Create Shift Template (Not Implemented)", this::createTemplate)
+                    .append("Set Default Template (Not Implemented)", this::setDefaultTemplate)
+                    .append("Issue HR Report (Not Implemented)", this::issueReport)
 
             );
         }

@@ -2,19 +2,15 @@ package domain;
 
 import data_access.pools.ShiftPool;
 import domain.entities.Shift;
-import domain.entities.WeekShifts;
-import shared.enums.ShiftType;
-import shared.enums.WeekDay;
+import domain.entities.ShiftKey;
 import domain.services.ShiftService;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import shared.enums.ShiftType;
+import shared.enums.WeekDay;
 
-import java.time.DayOfWeek;
-import java.time.LocalDate;
-import java.time.temporal.TemporalAdjusters;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
+import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -22,145 +18,73 @@ class ShiftServiceTest {
 
     private ShiftService shiftService;
 
+    // Test constants
+    private final int branchId = 1;
+    private final int year = 2026;
+    private final int week = 24;
+    private final WeekDay day = WeekDay.MONDAY;
+    private final ShiftType type = ShiftType.DAY;
+    private final String managerId = "MANAGER";
+
     @BeforeEach
     void setUp() {
-        ShiftPool.Instance().clear();
+        // Reset the singleton instance to ensure a clean slate for the test
+        ShiftPool.free();
         shiftService = new ShiftService();
     }
 
-    // ================
-    //  getNWeeksAgo
-    // ================
-
-    @Test
-    void getNWeeksAgo_WeekExists_ReturnsCorrectWeekShifts() {
-        LocalDate tuesday = LocalDate.of(2026, 5, 5);
-        WeekShifts weekToSave = new WeekShifts(tuesday, new HashMap<>());
-        shiftService.updateWeek(weekToSave);
-
-        WeekShifts result = shiftService.getNWeeksAgo(tuesday);
-
-        assertNotNull(result, "WeekShifts should not be null");
+    @AfterEach
+    void tearDown() {
+        // Clean up the singleton pool state after the test completes
+        ShiftPool.free();
     }
 
     @Test
-    void getNWeeksAgo_WeekDoesNotExist_ReturnsEmptyWeekShiftsObject() {
-        LocalDate randomDate = LocalDate.of(2020, 1, 1);
+    void testAddUpdateShiftAndGetShiftsOfWeek() {
+        // Arrange
+        // Create a real Shift instance. (Pass whatever arguments your Shift constructor requires)
+        Shift expectedShift = new Shift(day, type, managerId);
 
-        WeekShifts result = shiftService.getNWeeksAgo(randomDate);
+        // Act
+        shiftService.addUpdateShift(branchId, year, week, day.toString(), type.toString(), expectedShift);
+        Map<ShiftKey, Shift> weekMap = shiftService.getShiftsOfWeek(branchId, year, week);
 
-        assertNotNull(result);
-        assertTrue(result.isEmpty(), "Expected an empty WeekShifts object");
-    }
+        // Assert
+        assertNotNull(weekMap, "The returned shift map should not be null.");
+        assertEquals(1, weekMap.size(), "The map should contain exactly one shift.");
 
-    // ========================
-    //  ClosedDays (Integration)
-    // =========================
+        // Verify the map contains the correct key and value
+        ShiftKey expectedKey = new ShiftKey(day, type);
+        assertTrue(weekMap.containsKey(expectedKey), "The map should contain the expected ShiftKey.");
 
-    @Test
-    void setAndGetClosedDays_ValidDays_ReturnsMappedEnums() {
-        List<String> closedDaysInput = new ArrayList<>(List.of("FRIDAY", "SATURDAY"));
-
-        shiftService.setClosedDays(closedDaysInput);
-        List<WeekDay> result = shiftService.getClosedDays();
-
-        assertEquals(2, result.size());
-        assertTrue(result.contains(WeekDay.FRIDAY));
-        assertTrue(result.contains(WeekDay.SATURDAY));
+        Shift actualShift = weekMap.get(expectedKey);
+        assertEquals(expectedShift.getDay(), actualShift.getDay());
+        assertEquals(expectedShift.getShiftType(), actualShift.getShiftType());
     }
 
     @Test
-    void getClosedDays_EmptyList_ReturnsEmptyList() {
-        shiftService.setClosedDays(new ArrayList<>());
-        List<WeekDay> result = shiftService.getClosedDays();
+    void testGetShiftsOfWeek_ReturnsEmptyMapWhenNoShiftsExist() {
+        // Act
+        Map<ShiftKey, Shift> weekMap = shiftService.getShiftsOfWeek(branchId, year, week);
 
-        assertTrue(result.isEmpty(), "Closed days list should be empty");
-    }
-
-    // =============
-    //  updateWeek
-    // =============
-
-    @Test
-    void updateWeek_ValidWeekShifts_UpdatesSuccessfully() {
-        LocalDate sunday = LocalDate.of(2024, 1, 7); // Sunday
-        WeekShifts week = new WeekShifts(sunday, new HashMap<>());
-        shiftService.updateWeek(week);
-
-        WeekShifts retrieved = shiftService.getNWeeksAgo(sunday.plusDays(1)); // Monday of that week
-
-        assertNotNull(retrieved, "Week should be updated and retrievable");
-        assertEquals(sunday, retrieved.getDate());
-    }
-
-    // =============
-    //  updateShift
-    // =============
-
-    @Test
-    void updateShift_AddDayShift_UpdatesSuccessfully() {
-        LocalDate monday = LocalDate.of(2026, 5, 5); // Monday
-        LocalDate weekStart = monday.with(TemporalAdjusters.previousOrSame(DayOfWeek.SUNDAY));
-        WeekShifts emptyWeek = new WeekShifts(weekStart, new HashMap<>());
-        shiftService.updateWeek(emptyWeek);
-
-        Shift shift = new Shift(WeekDay.MONDAY, ShiftType.DAY, "manager123");
-        shiftService.updateShift(monday, WeekDay.MONDAY, ShiftType.DAY, shift);
-
-        WeekShifts week = shiftService.getNWeeksAgo(monday);
-        Shift retrievedShift = week.getShift(WeekDay.MONDAY, ShiftType.DAY);
-
-        assertNotNull(retrievedShift, "Shift should be added");
-        assertEquals(ShiftType.DAY, retrievedShift.getShiftType());
-        assertEquals("manager123", retrievedShift.getShiftManager());
+        // Assert
+        assertNotNull(weekMap);
+        assertTrue(weekMap.isEmpty(), "The shift map should be empty for a week with no scheduled shifts.");
     }
 
     @Test
-    void updateShift_AddNightShift_UpdatesSuccessfully() {
-        LocalDate tuesday = LocalDate.of(2026, 5, 6); // Tuesday
-        LocalDate weekStart = tuesday.with(TemporalAdjusters.previousOrSame(DayOfWeek.SUNDAY));
-        WeekShifts emptyWeek = new WeekShifts(weekStart, new HashMap<>());
-        shiftService.updateWeek(emptyWeek);
+    void testCloseShift_ReturnsEmptyMap() {
+        // Arrange: Populate the pool with an active shift first
+        Shift activeShift = new Shift(day, type, managerId);
+        shiftService.addUpdateShift(branchId, year, week, day.toString(), type.toString(), activeShift);
 
-        Shift shift = new Shift(WeekDay.TUESDAY, ShiftType.EVENING, "manager456");
-        shiftService.updateShift(tuesday, WeekDay.TUESDAY, ShiftType.EVENING, shift);
+        // Act: Close the shift
+        shiftService.closeShift(branchId, year, week, day.toString(), type.toString());
+        Map<ShiftKey, Shift> weekMap = shiftService.getShiftsOfWeek(branchId, year, week);
 
-        WeekShifts week = shiftService.getNWeeksAgo(tuesday);
-        Shift retrievedShift = week.getShift(WeekDay.TUESDAY, ShiftType.EVENING);
-
-        assertNotNull(retrievedShift, "Night shift should be added");
-        assertEquals(ShiftType.EVENING, retrievedShift.getShiftType());
-    }
-
-    @Test
-    void updateShift_RemoveShiftBySettingNull_RemovesSuccessfully() {
-        LocalDate wednesday = LocalDate.of(2026, 5, 7); // Wednesday
-        LocalDate weekStart = wednesday.with(TemporalAdjusters.previousOrSame(DayOfWeek.SUNDAY));
-        WeekShifts emptyWeek = new WeekShifts(weekStart, new HashMap<>());
-        shiftService.updateWeek(emptyWeek);
-
-        Shift shift = new Shift(WeekDay.WEDNESDAY, ShiftType.DAY, "manager789");
-        shiftService.updateShift(wednesday, WeekDay.WEDNESDAY, ShiftType.DAY, shift);
-
-        // Now remove it
-        shiftService.updateShift(wednesday, WeekDay.WEDNESDAY, ShiftType.DAY, Shift.EMPTY_SHIFT);
-
-        WeekShifts week = shiftService.getNWeeksAgo(wednesday);
-        Shift retrievedShift = week.getShift(WeekDay.WEDNESDAY, ShiftType.DAY);
-
-        assertNull(retrievedShift, "Shift should be removed");
-    }
-
-    // Additional test for getNWeeksAgo with different dates
-    @Test
-    void getNWeeksAgo_DifferentDaysInSameWeek_ReturnsSameWeek() {
-        LocalDate sunday = LocalDate.of(2024, 1, 7);
-        LocalDate monday = LocalDate.of(2024, 1, 8);
-        WeekShifts weekSun = new WeekShifts(sunday, new HashMap<>());
-        shiftService.updateWeek(weekSun);
-
-        WeekShifts weekMon = shiftService.getNWeeksAgo(monday);
-
-        assertEquals(sunday, weekMon.getDate(), "Should return the same week for any day in the week");
+        // Assert
+        ShiftKey key = new ShiftKey(day, type);
+        assertFalse(weekMap.containsKey(key), "The shift should have been removed");
+        assertTrue(weekMap.isEmpty(), "We should have removed all shifts");
     }
 }

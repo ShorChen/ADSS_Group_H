@@ -4,13 +4,13 @@ import presentation.control.PlaceEmployeesController;
 import presentation.model.EmployeePL;
 import presentation.ui_employee.RequestReplacementUI;
 import presentation.ui_shared.ShiftsView;
-import presentation.ui_shared.View;
+import presentation.ui_shared.ViewCLI;
 import presentation.util.Option;
 
 import java.util.List;
 import java.util.Objects;
 
-public class PlaceEmployeesUI extends View {
+public class PlaceEmployeesUI extends ViewCLI {
 
     private final PlaceEmployeesController controller;
 

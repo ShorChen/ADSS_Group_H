@@ -59,8 +59,8 @@ public class EmployeePool {
         return employeeEntityList;
     }
 
-    public void clear() {
-        employees.clear();
+    public static void free() {
+        instance = null;
     }
 
     private EmployeeKey createKey(String id) {

@@ -2,7 +2,7 @@ package presentation.ui_manager;
 
 import presentation.control.AddUpdateEmployeeController;
 import presentation.model.EmployeePL;
-import presentation.ui_shared.View;
+import presentation.ui_shared.ViewCLI;
 import presentation.util.Option;
 import shared.enums.JobScope;
 import shared.enums.SalaryType;
@@ -16,7 +16,7 @@ import java.util.List;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicBoolean;
 
-public class AddUpdateEmployeeView extends View {
+public class AddUpdateEmployeeView extends ViewCLI {
 
 
     private final AddUpdateEmployeeController controller;

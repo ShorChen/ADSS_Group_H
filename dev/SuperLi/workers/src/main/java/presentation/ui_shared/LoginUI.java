@@ -5,7 +5,7 @@ import presentation.control.AuthController;
 import presentation.ui_employee.EmployeeHomeUI;
 import presentation.ui_manager.ManagerHomeUI;
 
-public class LoginUI extends View {
+public class LoginUI extends ViewCLI {
 
     private boolean open = false;
     AuthController controller = new AuthController();

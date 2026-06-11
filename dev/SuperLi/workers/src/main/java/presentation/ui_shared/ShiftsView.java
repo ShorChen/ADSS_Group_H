@@ -10,7 +10,7 @@ import shared.enums.WeekDay;
 import java.util.*;
 import java.util.function.Function;
 
-public class ShiftsView extends View {
+public class ShiftsView extends ViewCLI {
     private static final int INDEX_SUN_DAY = 116;
     private static final int INDEX_SUN_NIGHT = 188;
     private static final int MARGIN = 4;

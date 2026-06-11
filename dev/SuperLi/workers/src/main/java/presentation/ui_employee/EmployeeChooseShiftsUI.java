@@ -4,7 +4,7 @@ import context.SessionManager;
 import domain.entities.ShiftKey;
 import presentation.control.EmployeeShiftController;
 import presentation.ui_shared.ShiftsView;
-import presentation.ui_shared.View;
+import presentation.ui_shared.ViewCLI;
 import presentation.util.Option;
 import shared.enums.ShiftType;
 import shared.enums.WeekDay;
@@ -12,7 +12,7 @@ import shared.enums.WeekDay;
 import java.util.HashSet;
 import java.util.Set;
 
-public class EmployeeChooseShiftsUI extends View {
+public class EmployeeChooseShiftsUI extends ViewCLI {
     private final ShiftsView shiftsView = new ShiftsView(0);
     private boolean open = false;
     private final EmployeeShiftController controller;

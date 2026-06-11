@@ -46,4 +46,8 @@ public class BranchPool {
     private BranchKey createKey(int branchId, String location) {
         return new BranchKey(branchId, location);
     }
+
+    public static void free(){
+        instance = null;
+    }
 }

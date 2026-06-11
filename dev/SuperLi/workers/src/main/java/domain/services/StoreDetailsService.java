@@ -1,8 +1,6 @@
 package domain.services;
 
-import data_access.pools.BranchPool;
 import data_access.pools.StorePool;
-import domain.entities.store.Branch;
 import presentation.model.StoreDetailsPL;
 import shared.enums.WeekDay;
 
@@ -10,26 +8,20 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class StoreDetailsService {
-    private BranchPool branchPool;
-    private StorePool storePool;
+    private final StorePool storePool;
 
     public StoreDetailsService() {
-        branchPool = BranchPool.Instance();
         storePool = StorePool.Instance();
     }
 
     public void addUpdateStoreDetails(StoreDetailsPL storeDetailsPL) {
-        branchPool = BranchPool.Instance();
-        storePool = StorePool.Instance();
+        List<String> closedDays = new ArrayList<>();
+        storeDetailsPL.getClosedDays().forEach(day ->
+                closedDays.add(day.toString())
+        );
+        storePool.setClosedDays(closedDays);
     }
 
-    public void addUpdateBranch(Branch branch) {
-        branchPool.addUpdateBranch(branch.toEntity());
-    }
-
-    public boolean containsBranchAtLocation(String location) {
-        return branchPool.getAllBranchLocations().contains(location);
-    }
 
     public void setClosedDays(List<String> closed) {
         storePool.setClosedDays(closed);

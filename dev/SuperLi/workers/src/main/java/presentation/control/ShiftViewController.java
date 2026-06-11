@@ -3,7 +3,7 @@ package presentation.control;
 import context.SessionManager;
 import domain.entities.Shift;
 import domain.entities.ShiftKey;
-import shared.enums.WeekConstants;
+import shared.WeekConstants;
 import domain.services.EmployeeService;
 import domain.services.ShiftService;
 import presentation.model.EmployeePL;

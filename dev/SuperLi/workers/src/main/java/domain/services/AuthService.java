@@ -11,7 +11,6 @@ public class AuthService {
 
     public AuthService() {
         employees = EmployeePool.Instance();
-
     }
 
     public boolean changePassword(String id, String oldPass, String newPass) {

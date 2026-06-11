@@ -27,6 +27,10 @@ public class RolePool {
         roles.add(Role.Cashier.getTag());
     }
 
+    public static void free(){
+        instance = null;
+    }
+
     public boolean containsRole(String role){
         return roles.contains(role);
     }

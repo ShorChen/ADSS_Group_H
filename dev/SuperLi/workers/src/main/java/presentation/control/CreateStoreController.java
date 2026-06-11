@@ -4,10 +4,7 @@ import context.SessionManager;
 import domain.entities.Employee;
 import domain.entities.Role;
 import domain.entities.store.Branch;
-import domain.services.DataService;
-import domain.services.EmployeeService;
-import domain.services.ShiftService;
-import domain.services.StoreDetailsService;
+import domain.services.*;
 import presentation.model.BranchPL;
 import presentation.model.StoreDetailsPL;
 import shared.enums.JobScope;
@@ -24,12 +21,14 @@ public class CreateStoreController {
     private final ShiftService shiftService;
     private final DataService dataService;
     private final StoreDetailsService storeDetailsService;
+    private final BranchService branchService;
 
     public CreateStoreController() {
         this.storeDetailsService = new StoreDetailsService();
         employeeService = new EmployeeService();
         shiftService = new ShiftService();
         dataService = new DataService();
+        branchService = new BranchService();
     }
 
     public String registerManager(String id, String name, String bankAccount, String weekDay) {
@@ -58,11 +57,11 @@ public class CreateStoreController {
     }
 
     public void addBranch(BranchPL branchPL) {
-        storeDetailsService.addUpdateBranch(branchPL.toBranch());
+        branchService.addUpdateBranch(branchPL.toBranch());
     }
 
     public boolean containsBranch(String location) {
-        return storeDetailsService.containsBranchAtLocation(location);
+        return branchService.containsBranchAtLocation(location);
     }
 
 }

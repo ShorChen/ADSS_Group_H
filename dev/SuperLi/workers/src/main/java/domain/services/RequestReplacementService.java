@@ -1,20 +1,12 @@
 package domain.services;
 
 import data_access.entities.RequestEntity;
-import data_access.entities.keys.BranchWeekKey;
 import data_access.pools.RequestsPool;
-import data_access.pools.ShiftPool;
 import domain.entities.Request;
-import domain.entities.Shift;
 import domain.util.RequestStateMachine;
-import shared.enums.RequestStatus;
-import shared.enums.ShiftType;
-import shared.enums.WeekDay;
 import org.jetbrains.annotations.NotNull;
+import shared.enums.RequestStatus;
 
-import java.time.DayOfWeek;
-import java.time.LocalDate;
-import java.time.temporal.TemporalAdjusters;
 import java.util.ArrayList;
 import java.util.List;
 

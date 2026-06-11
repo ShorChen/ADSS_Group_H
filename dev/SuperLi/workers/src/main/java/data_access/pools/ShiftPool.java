@@ -2,15 +2,12 @@ package data_access.pools;
 
 import data_access.entities.ShiftEntity;
 import data_access.entities.keys.BranchWeekKey;
-import domain.entities.Shift;
-import org.jetbrains.annotations.NotNull;
-import shared.enums.ShiftType;
-import shared.enums.WeekDay;
+import data_access.entities.keys.ShiftEntityKey;
 
 import java.util.*;
 
 public class ShiftPool {
-    private final Map<BranchWeekKey, List<ShiftEntity>> shiftsTable;
+    private final Map<BranchWeekKey, Map<ShiftEntityKey, ShiftEntity>> shiftsTable;
     private static ShiftPool instance;
 
     public static ShiftPool Instance() {
@@ -86,20 +83,33 @@ public class ShiftPool {
 
 
     public List<ShiftEntity> getShiftsByBranchAndWeek(int branchId, int year, int week) {
-        List<ShiftEntity> shifts = shiftsTable.get(createKey(branchId, year, week));
-        return shifts != null ? List.copyOf(shifts) : Collections.emptyList();
+        List<ShiftEntity> shifts = new ArrayList<>();
+        shiftsTable.getOrDefault(createKey(branchId, year, week), new HashMap<>())
+                .forEach((_, shift) ->
+                        shifts.add(shift)
+                );
+        return shifts;
     }
 
-    public void addUpdateShift(BranchWeekKey branchWeekKey, ShiftEntity shift) {
-        List<ShiftEntity> defaultValue = new ArrayList<>();
-        defaultValue.add(shift);
-        shiftsTable.put(
-                branchWeekKey,
-                shiftsTable.getOrDefault(branchWeekKey, defaultValue)
-        );
+    public void addUpdateShift(BranchWeekKey branchWeekKey, ShiftEntityKey shiftEntityKey,
+                               ShiftEntity shift) {
+        Map<ShiftEntityKey, ShiftEntity> week =
+                shiftsTable.computeIfAbsent(branchWeekKey, _ -> new HashMap<>());
+        week.put(shiftEntityKey, shift);
+    }
+
+    public void removeShift(int branchId, int year, int week, String day, String type) {
+        shiftsTable.getOrDefault(createKey(branchId, year, week), new HashMap<>())
+                .remove(new ShiftEntityKey(day, type));
     }
 
     private BranchWeekKey createKey(int branchId, int year, int week) {
         return new BranchWeekKey(branchId, year, week);
     }
+
+    public static void free() {
+        instance = null;
+    }
+
+
 }

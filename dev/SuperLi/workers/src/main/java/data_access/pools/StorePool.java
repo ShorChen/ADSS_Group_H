@@ -31,4 +31,7 @@ public class StorePool {
         this.closedDays = new ArrayList<>(closedDays);
     }
 
+    public static void free(){
+        instance = null;
+    }
 }

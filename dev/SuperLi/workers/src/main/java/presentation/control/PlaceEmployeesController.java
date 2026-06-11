@@ -1,18 +1,13 @@
 package presentation.control;
 
-import context.SessionManager;
 import domain.entities.Role;
-import domain.entities.Shift;
-import domain.entities.ShiftKey;
 import domain.services.EmployeeService;
 import domain.services.RoleService;
 import domain.services.ShiftService;
 import presentation.model.EmployeePL;
 import shared.enums.ShiftType;
-import shared.enums.WeekConstants;
 import shared.enums.WeekDay;
 
-import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 

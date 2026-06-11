@@ -18,13 +18,13 @@ public class HRManagerShiftService {
         this.shiftPool = ShiftPool.Instance(); 
     }
 
-    public void setJobsToShift(BranchWeekKey key, Shift shift, Map<Role, Integer> jobs) {
-        if (shift == null || jobs == null) {
-            throw new IllegalArgumentException("Shift or jobs cannot be null");
-        }
-        jobs.forEach(shift::addRole);
-        shiftPool.addUpdateShift(key, shift.toEntity());
-    }
+//    public void setJobsToShift(BranchWeekKey key, Shift shift, Map<Role, Integer> jobs) {
+//        if (shift == null || jobs == null) {
+//            throw new IllegalArgumentException("Shift or jobs cannot be null");
+//        }
+//        jobs.forEach(shift::addRole);
+//        shiftPool.addUpdateShift(key, shift.toEntity());
+//    }
 
  
 //    public List<String> placeToShifts(List<EmployeePL> employees, List<Shift> shifts) {

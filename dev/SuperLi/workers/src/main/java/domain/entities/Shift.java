@@ -6,15 +6,10 @@ import shared.enums.ShiftType;
 import shared.enums.WeekDay;
 
 import java.time.LocalDateTime;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 public class Shift {
-    public static final Shift EMPTY_SHIFT = new Shift(null, null,
-            null, new HashMap<>(), new HashMap<>());
     private LocalDateTime startDate;
     private WeekDay day;
     private ShiftType shiftType;
@@ -57,19 +52,16 @@ public class Shift {
         this(o.startDate, o.day, o.shiftType, o.employees, o.capacities, o.additionalHours);
     }
 
-    public Shift(ShiftEntity entity) {
+    public Shift (ShiftEntity entity) {
         this(entity.startDate(), WeekDay.fromArgs(entity.day()),
                 ShiftType.fromType(entity.shiftType()), new HashMap<>(),
                 entity.additionalHours()
         );
-
         entity.employees().forEach((role, employeeIds) ->
-                this.employees.put(new Role(role), new HashSet<>(employeeIds)));
+                employees.put(new Role(role), new HashSet<>(employeeIds)));
     }
 
     public ShiftEntity toEntity() {
-        if (equals(EMPTY_SHIFT)) return ShiftEntity.EMPTY_SHIFT;
-
         Map<String, Set<String>> rolesToEmployees = new HashMap<>();
         employees.forEach((role, employeesSet) ->
                 rolesToEmployees.put(role.getTag(), new HashSet<>(employeesSet)));

@@ -13,12 +13,10 @@ public class RoleController {
         this.service = new RoleService();
     }
 
-    public boolean createRole(String tag) {
+    public void createRole(String tag) {
         if (tag.trim().isEmpty())
             throw new IllegalArgumentException("Tag can not be empty");
-        boolean contains = service.containsRole(tag);
         service.createRole(tag.trim());
-        return contains;
     }
 
     public List<String> getAllRoles() {
@@ -29,5 +27,9 @@ public class RoleController {
 
     public String getRole(String tag) {
         return service.getRole(tag).getTag();
+    }
+
+    public boolean containsRole(String tag){
+        return service.containsRole(tag);
     }
 }

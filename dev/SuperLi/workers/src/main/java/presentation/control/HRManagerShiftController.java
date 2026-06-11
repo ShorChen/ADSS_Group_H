@@ -4,22 +4,24 @@ import context.SessionManager;
 import domain.entities.Employee;
 import domain.entities.Role;
 import domain.entities.Shift;
-import shared.enums.ShiftType;
-import shared.enums.WeekDay;
 import domain.services.EmployeeService;
 import domain.services.HRManagerShiftService;
 import domain.services.ShiftService;
 import presentation.model.EmployeePL;
+import shared.WeekConstants;
+import shared.enums.ShiftType;
+import shared.enums.WeekDay;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.Map;
 
 public class HRManagerShiftController {
-    private ShiftService service;
-    private HRManagerShiftService hrService;
-    private EmployeeService employeeService;
+    private final ShiftService service;
+    private final HRManagerShiftService hrService;
+    private final EmployeeService employeeService;
 
     public HRManagerShiftController() {
         this.service = new ShiftService();
@@ -31,7 +33,7 @@ public class HRManagerShiftController {
         try {
             //hrService.setJobsToShift(shift, jobs);
         } catch (IllegalArgumentException e) {
-            System.out.println("Error setting jobs to shift: " + e.getMessage());
+            throw new IllegalArgumentException("Error setting jobs to shift: " + e.getMessage());
         }
     }
 
@@ -45,7 +47,7 @@ public class HRManagerShiftController {
         try {
             //hrService.placeToShifts(employees, shifts);
         } catch (Exception e) {
-            System.out.println("Error during shift placement: " + e.getMessage());
+            throw new IllegalArgumentException("Error during shift placement: " + e.getMessage());
         }
     }
 
@@ -68,13 +70,22 @@ public class HRManagerShiftController {
     }
 
     public void openShift(WeekDay day, ShiftType type, EmployeePL shiftManager) {
-        service.addUpdateShift(SessionManager.now().toLocalDate(), day,
-                type, new Shift(day, type, shiftManager.getId()));
+        LocalDate targetDate = SessionManager.now().plusWeeks(1).toLocalDate();
+        int year = targetDate.get(WeekConstants.WEEK_FIELDS.weekBasedYear());
+        int week = targetDate.get(WeekConstants.WEEK_FIELDS.weekOfWeekBasedYear());
+        int branchId = SessionManager.getCurrentEmployee().getBranchId();
+
+        service.addUpdateShift(branchId, year, week, day.toString(), type.toString(),
+                new Shift(day, type, shiftManager.getId()));
     }
 
     public void closeShift(WeekDay day, ShiftType type) {
-        service.addUpdateShift(SessionManager.now().toLocalDate(), day,
-                type, null);
+        LocalDate targetDate = SessionManager.now().plusWeeks(1).toLocalDate();
+        int year = targetDate.get(WeekConstants.WEEK_FIELDS.weekBasedYear());
+        int week = targetDate.get(WeekConstants.WEEK_FIELDS.weekOfWeekBasedYear());
+        int branchId = SessionManager.getCurrentEmployee().getBranchId();
+
+        service.closeShift(branchId, year, week, day.toString(), type.toString());
     }
 
     public EmployeePL getShiftManager(String id) {

@@ -47,6 +47,10 @@ public class EmployeeService {
         return null;
     }
 
+    public boolean containsEmployee(String id) {
+        return employees.exists(id);
+    }
+
     public boolean updateEmployee(Employee employee, String password) {
         if (!employees.exists(employee.getId())) {
             return false;

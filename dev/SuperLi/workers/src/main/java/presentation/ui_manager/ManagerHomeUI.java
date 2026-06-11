@@ -1,10 +1,10 @@
 package presentation.ui_manager;
 
 import presentation.control.AuthController;
-import presentation.ui_shared.View;
+import presentation.ui_shared.ViewCLI;
 import presentation.util.Option;
 
-public class ManagerHomeUI extends View {
+public class ManagerHomeUI extends ViewCLI {
     private boolean open = false;
     private final AuthController controller;
 

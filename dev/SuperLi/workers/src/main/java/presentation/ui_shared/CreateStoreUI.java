@@ -13,7 +13,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
 
-public class CreateStoreUI extends View {
+public class CreateStoreUI extends ViewCLI {
 
     private final CreateStoreController controller;
     private boolean open = false;
@@ -34,7 +34,6 @@ public class CreateStoreUI extends View {
         while (open) {
             displayMenu(new Option.Builder("--- Init System ---")
                     .append("Register Store Manager", this::createStore)
-                    .append("Set Closed Days", this::setClosedDays)
                     .append("Load Data", this::loadData)
                     .append("Debug Mode", this::setDebugMode));
         }
@@ -86,7 +85,7 @@ public class CreateStoreUI extends View {
                             .append("Add Branch", this::createBranch)
             );
         }
-        controller.setStoreDetails(new StoreDetailsPL(branches, id));
+        controller.setStoreDetails(new StoreDetailsPL(branches, id, closeDays));
         onDismiss.run();
     }
 

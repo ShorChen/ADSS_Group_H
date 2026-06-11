@@ -4,11 +4,14 @@ import data_access.entities.EmployeeEntity;
 import data_access.entities.RequestEntity;
 import data_access.entities.ShiftEntity;
 import data_access.entities.keys.BranchWeekKey;
+import data_access.entities.keys.ShiftEntityKey;
 import data_access.pools.EmployeePool;
 import data_access.pools.RequestsPool;
 import data_access.pools.RolePool;
 import data_access.pools.ShiftPool;
 import shared.enums.RequestStatus;
+import shared.enums.ShiftType;
+import shared.enums.WeekDay;
 
 import java.time.LocalDateTime;
 import java.util.*;
@@ -38,22 +41,23 @@ public class DataService {
     private void loadShifts() {
         ShiftEntity s1 = new ShiftEntity(
                 LocalDateTime.of(2026, 4, 19, 6, 0),
-                "SUNDAY",
-                "DAY",
+                WeekDay.SUNDAY.toString(),
+                ShiftType.DAY.toString(),
                 empsOfShift(),
                 new HashMap<>()
         );
         ShiftEntity m2 = new ShiftEntity(
                 LocalDateTime.of(2026, 4, 20, 14, 0),
-                "MONDAY",
-                "EVENING",
+                WeekDay.MONDAY.toString(),
+                ShiftType.EVENING.toString(),
                 empsOfShift(),
                 new HashMap<>()
         );
 
-        shiftPool.addUpdateShift(new BranchWeekKey(1, s1.getYear(), s1.getWeek()), s1);
-        shiftPool.addUpdateShift(new BranchWeekKey(1, s1.getYear(), s1.getWeek()), s1);
-        shiftPool.addUpdateShift(new BranchWeekKey(1, m2.getYear(), m2.getWeek()), m2);
+        shiftPool.addUpdateShift(new BranchWeekKey(1, s1.getYear(), s1.getWeek()),
+                new ShiftEntityKey(WeekDay.SUNDAY.toString(), ShiftType.DAY.toString()), s1);
+        shiftPool.addUpdateShift(new BranchWeekKey(1, m2.getYear(), m2.getWeek()),
+                new ShiftEntityKey(WeekDay.MONDAY.toString(), ShiftType.EVENING.toString()), m2);
 
         requestsPool.addUpdateRequest(
                 new RequestEntity(-1, s1, "id 1", "id 4",

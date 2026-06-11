@@ -1,12 +1,12 @@
 package domain.services;
 
+import data_access.entities.keys.BranchWeekKey;
+import data_access.entities.keys.ShiftEntityKey;
 import data_access.pools.ShiftPool;
 import domain.entities.Shift;
 import domain.entities.ShiftKey;
-import shared.enums.ShiftType;
-import shared.enums.WeekDay;
+import org.jetbrains.annotations.NotNull;
 
-import java.time.LocalDate;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -48,7 +48,15 @@ public class ShiftService {
         return weekMap;
     }
 
-    public void addUpdateShift(LocalDate localDate, WeekDay day, ShiftType type, Shift shift) {
+    public void addUpdateShift(int branchId, int year, int week,
+                               String day, String type,
+                               @NotNull Shift shift) {
+        shiftPool.addUpdateShift(new BranchWeekKey(branchId, year, week),
+                new ShiftEntityKey(day, type), shift.toEntity());
+    }
 
+    public void closeShift(int branchId, int year, int week,
+                           String day, String type) {
+        shiftPool.removeShift(branchId, year, week, day, type);
     }
 }

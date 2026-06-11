@@ -13,7 +13,7 @@ import presentation.model.RequestPL;
 import presentation.model.ShiftPL;
 import shared.enums.RequestStatus;
 import shared.enums.ShiftType;
-import shared.enums.WeekConstants;
+import shared.WeekConstants;
 import shared.enums.WeekDay;
 
 import java.time.LocalDate;

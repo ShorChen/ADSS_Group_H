@@ -1,7 +1,7 @@
 package data_access.entities;
 
 import org.jetbrains.annotations.NotNull;
-import shared.enums.WeekConstants;
+import shared.WeekConstants;
 
 import java.time.LocalDateTime;
 import java.time.temporal.WeekFields;
@@ -12,8 +12,6 @@ public record ShiftEntity(
         Map<String, Set<String>> employees, Map<String, Float> additionalHours
 ) {
     private static final WeekFields WEEK_FIELDS = WeekConstants.WEEK_FIELDS;
-    public static final ShiftEntity EMPTY_SHIFT = new ShiftEntity(null,
-            "", "", new HashMap<>(), new HashMap<>());
     public static final int NO_ID = -1;
 
     public ShiftEntity(LocalDateTime startDate, String day,

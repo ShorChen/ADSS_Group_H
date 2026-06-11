@@ -3,10 +3,10 @@ package presentation.ui_employee;
 import presentation.control.RequestReplacementController;
 import presentation.model.RequestPL;
 import presentation.ui_shared.ShiftsView;
-import presentation.ui_shared.View;
+import presentation.ui_shared.ViewCLI;
 import presentation.util.Option;
 
-public class RequestReplacementUI extends View {
+public class RequestReplacementUI extends ViewCLI {
     private boolean open;
     private final RequestReplacementController controller;
     private ShiftsView shiftsView;
@@ -38,6 +38,7 @@ public class RequestReplacementUI extends View {
 
     private void chooseAction(RequestPL request) {
         displayMenu(new Option.Builder("Request: " + request)
+                        .append("Back", () -> {})
                         .append("Approve", () -> onRequestApproved(request))
                         .append("Deny", () -> onRequestDenied(request)));
     }

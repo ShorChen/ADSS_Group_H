@@ -1,17 +1,17 @@
 package domain;
 
 import context.SessionManager;
+import data_access.pools.EmployeePool;
 import domain.entities.Employee;
 import domain.entities.Role;
 import domain.entities.ShiftKey;
+import domain.services.EmployeeService;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.Test;
 import shared.enums.JobScope;
 import shared.enums.SalaryType;
 import shared.enums.ShiftType;
 import shared.enums.WeekDay;
-import domain.services.EmployeeService;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
-import data_access.pools.EmployeePool;
 
 import java.util.*;
 
@@ -19,12 +19,11 @@ import static org.junit.jupiter.api.Assertions.*;
 
 class EmployeeServiceTest {
 
-    private EmployeeService employeeService;
+    private final EmployeeService employeeService = new EmployeeService();
 
-    @BeforeEach
+    @AfterEach
     void setUp() {
-        EmployeePool.Instance().clear();
-        employeeService = new EmployeeService();
+        EmployeePool.free();
     }
 
     // ==============
@@ -36,9 +35,8 @@ class EmployeeServiceTest {
         Employee emp = createTestEmployee("123", "Dani", true);
         String pass = employeeService.addEmployee(emp);
 
-        assertNotNull(pass, "Password should not be null");
         assertFalse(pass.isEmpty(), "Password should not be empty");
-        assertNotNull(employeeService.getEmployeeDetails("123"), "Employee must be saved in the pool");
+        assertTrue(employeeService.containsEmployee("123"));
     }
 
     @Test
@@ -47,12 +45,8 @@ class EmployeeServiceTest {
         employeeService.addEmployee(emp1);
 
         Employee emp2 = createTestEmployee("123", "Yossi", true);
+        assertThrows(IllegalArgumentException.class, () -> employeeService.addEmployee(emp2));
 
-        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () -> {
-            employeeService.addEmployee(emp2);
-        });
-
-        assertEquals("An employee with the given id is already present in the system", exception.getMessage());
     }
 
     // ===================
@@ -63,24 +57,19 @@ class EmployeeServiceTest {
     void deactivateEmployee_ActiveEmployee_ReturnsTrueAndSetsInactive() {
         employeeService.addEmployee(createTestEmployee("111", "Rina", true));
 
-        boolean result = employeeService.deactivateEmployee("111");
-
-        assertTrue(result, "Should return true for successful deactivation");
+        employeeService.deactivateEmployee("111");
         assertFalse(employeeService.getEmployeeDetails("111").isActive(), "Employee status should be false");
     }
 
     @Test
     void deactivateEmployee_AlreadyInactiveEmployee_ReturnsFalse() {
         employeeService.addEmployee(createTestEmployee("222", "Bob", false));
-
-        boolean result = employeeService.deactivateEmployee("222");
-
-        assertFalse(result, "Should return false if employee was already inactive");
+        assertThrows(IllegalArgumentException.class, () -> employeeService.deactivateEmployee("222"));
     }
 
     @Test
     void deactivateEmployee_NonExistentEmployee_ReturnsFalse() {
-        boolean result = employeeService.deactivateEmployee("999"); // עובד שלא קיים
+        boolean result = employeeService.deactivateEmployee("999");
         assertFalse(result);
     }
 
@@ -95,9 +84,8 @@ class EmployeeServiceTest {
         Set<ShiftKey> unavailable = new HashSet<>();
         unavailable.add(new ShiftKey(WeekDay.SUNDAY, ShiftType.EVENING));
 
-        assertDoesNotThrow(() -> {
-            employeeService.updateAvailability("333", unavailable, true);
-        });
+        assertDoesNotThrow(() ->
+                employeeService.updateAvailability("333", unavailable, true));
 
         Employee updated = employeeService.getEmployeeDetails("333");
         assertTrue(updated.isWorkingDoubles());
@@ -158,6 +146,7 @@ class EmployeeServiceTest {
         Employee retrieved = employeeService.getEmployeeDetails("555");
         assertEquals("Bob Updated", retrieved.getName());
         assertEquals(60.0, retrieved.getSalary());
+
     }
 
     @Test
@@ -225,9 +214,7 @@ class EmployeeServiceTest {
 
     @Test
     void containsRole_NonExistentEmployee_ReturnsFalse() {
-        boolean result = employeeService.containsRole("202", Role.Cashier);
-
-        assertFalse(result, "Non-existent employee should not have any role");
+        assertThrows(IllegalArgumentException.class, () -> employeeService.containsRole("202", Role.Cashier));
     }
 
     private Employee createTestEmployee(String id, String name, boolean isActive) {

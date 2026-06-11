@@ -1,6 +1,7 @@
 package domain.services;
 
 import data_access.pools.BranchPool;
+import domain.entities.store.Branch;
 import presentation.model.BranchPL;
 
 import java.util.ArrayList;
@@ -18,5 +19,13 @@ public class BranchService {
         branchPool.getAllBranches().forEach(branch ->
                 branches.add(new BranchPL(branch)));
         return branches;
+    }
+
+    public void addUpdateBranch(Branch branch) {
+        branchPool.addUpdateBranch(branch.toEntity());
+    }
+
+    public boolean containsBranchAtLocation(String location) {
+        return branchPool.getAllBranchLocations().contains(location);
     }
 }

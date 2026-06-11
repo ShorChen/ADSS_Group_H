@@ -44,8 +44,8 @@ public class RequestsPool {
         return new ArrayList<>(requests.values());
     }
 
-    public void clear() {
-        requests.clear();
+    public static void free(){
+        instance = null;
     }
 
     private RequestKey createKey(int requestId, int shiftId) {

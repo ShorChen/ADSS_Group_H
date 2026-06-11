@@ -2,10 +2,10 @@ package presentation.ui_manager;
 
 
 import presentation.ui_shared.ShiftsView;
-import presentation.ui_shared.View;
+import presentation.ui_shared.ViewCLI;
 import presentation.util.Option;
 
-public class ViewShiftHistoryUI extends View {
+public class ViewShiftHistoryUI extends ViewCLI {
     private boolean open = false;
     private ShiftsView shiftsView;
     private int weeksAgo = 1;
