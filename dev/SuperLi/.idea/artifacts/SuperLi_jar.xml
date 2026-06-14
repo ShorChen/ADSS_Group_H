@@ -1,0 +1,8 @@
+<component name="ArtifactManager">
+  <artifact type="jar" name="SuperLi:jar">
+    <output-path>$PROJECT_DIR$/out/artifacts/SuperLi_jar</output-path>
+    <root id="archive" name="SuperLi.jar">
+      <element id="module-output" name="main" />
+    </root>
+  </artifact>
+</component>
