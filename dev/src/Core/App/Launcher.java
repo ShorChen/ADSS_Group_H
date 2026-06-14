@@ -1,5 +1,7 @@
 package Core.App;
 
+import Core.DataAccess.DatabaseManager;
+
 import java.io.OutputStream;
 import java.io.PrintStream;
 
@@ -22,6 +24,8 @@ public class Launcher {
                 originalErr.print(x);
             }
         });
+        DatabaseManager.createTables();
+        DatabaseManager.seedDatabase();
         MainApp.main(args);
     }
 }

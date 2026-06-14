@@ -24,7 +24,6 @@ public class OrderController {
         this.orderService = orderService;
     }
 
-    // RENAMED: Accurately reflects fetching all suppliers
     public List<SupplierPL> getAllSuppliers() throws Exception {
         SessionManager.getInstance().requireRole(Role.ORDER_MANAGER);
         Response<List<SupplierSL>> response = orderService.getAllSuppliers();
@@ -37,27 +36,18 @@ public class OrderController {
         throw new Exception(response.getErrorMessage());
     }
 
-    // RENAMED & REFACTORED: Passes a mapped list of DTOs instead of 6 parallel arrays
     public Map<String, Integer> placeOrders(List<OrderItemPL> currentOrder) throws Exception {
         SessionManager.getInstance().requireRole(Role.ORDER_MANAGER);
-
-        // Group the big cart by supplier
         Map<String, List<OrderItemPL>> grouped = currentOrder.stream().collect(Collectors.groupingBy(OrderItemPL::supplierBusinessNumber));
         Map<String, Integer> generatedOrderIds = new HashMap<>();
-
         for (Map.Entry<String, List<OrderItemPL>> entry : grouped.entrySet()) {
             String businessNumber = entry.getKey();
             String supplierName = entry.getValue().get(0).supplierName();
-
-            // Map Presentation Layer items to Service Layer items
             List<OrderItemSL> slItems = entry.getValue().stream().map(pl -> new OrderItemSL(
                     pl.productName(), pl.supplierBusinessNumber(), pl.supplierName(),
-                    pl.catalogId(), pl.quantity(), pl.priceBeforeDiscount(), pl.finalPrice() // Assumes your record uses 'finalPrice' or 'totalPrice'
+                    pl.catalogId(), pl.quantity(), pl.priceBeforeDiscount(), pl.finalPrice()
             )).collect(Collectors.toList());
-
-            // Send the clean list to the service layer
             Response<Integer> response = orderService.placeOrder(businessNumber, slItems);
-
             if (!response.isSuccess()) throw new Exception(response.getErrorMessage());
             generatedOrderIds.put(supplierName, response.getData());
         }
@@ -78,12 +68,10 @@ public class OrderController {
         return new AgreementPL(data.agreementId(), data.startDate(), deliveryTermsPL, productLinesPL, discountPolicyPL);
     }
 
-    // FIX: Safely reads Service Objects and converts them to Presentation Objects for the GUI
     public List<OrderPL> getOrderHistory() throws Exception {
         SessionManager.getInstance().requireRole(Role.ORDER_MANAGER);
         Response<List<OrderSL>> response = orderService.getOrderHistory();
         if (!response.isSuccess()) throw new Exception(response.getErrorMessage());
-
         return response.getData().stream().map(sl -> new OrderPL(
                 sl.orderId(),
                 sl.supplierBusinessNumber(),

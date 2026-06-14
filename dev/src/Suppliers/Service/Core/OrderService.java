@@ -62,11 +62,11 @@ public class OrderService {
 
     public Response<Integer> executeAutomaticOrders() {
         try {
-            DayOfWeek today = LocalDate.now().getDayOfWeek();
+            DayOfWeek tomorrow = LocalDate.now().plusDays(1).getDayOfWeek();
             int count = 0;
-            for (SupplierDL supplier : supplierFacade.getAllSuppliers()) {
-                for (AgreementDL agreement : supplier.getAgreements()) {
-                    if (!agreement.getDeliveryTerms().isOnDemand() && agreement.getDeliveryTerms().getFixedDeliveryDays().contains(today)) {
+            for (SupplierDL supplier : supplierFacade.getAllSuppliers())
+                for (AgreementDL agreement : supplier.getAgreements())
+                    if (!agreement.getDeliveryTerms().isOnDemand() && agreement.getDeliveryTerms().getFixedDeliveryDays().contains(tomorrow)) {
                         List<OrderItemDL> items = new ArrayList<>();
                         for (ProductLineDL pl : agreement.getProductLines()) {
                             double discountPct = agreement.getDiscountPolicy().calculateDiscount(pl.getSupplierCatalogId(), pl.getQuantity());
@@ -75,14 +75,11 @@ public class OrderService {
                             items.add(new OrderItemDL(pl.getSupplierCatalogId(), pl.getName(), pl.getQuantity(), listPrice, listPrice - finalPrice, finalPrice));
                         }
                         if (!items.isEmpty()) {
-                            String phones = supplier.getContactPersonnel().isEmpty() ? "N/A" :
-                                    supplier.getContactPersonnel().stream().map(cp -> cp.getName() + " (" + cp.getPhone() + ")").collect(Collectors.joining(", "));
+                            String phones = supplier.getContactPersonnel().isEmpty() ? "N/A" : supplier.getContactPersonnel().stream().map(cp -> cp.getName() + " (" + cp.getPhone() + ")").collect(Collectors.joining(", "));
                             orderFacade.createOrder(supplier.getBusinessNumber(), supplier.getName(), supplier.getAddress(), phones, items);
                             count++;
                         }
                     }
-                }
-            }
             return new Response<>(count);
         } catch (Exception ex) {
             return new Response<>(ex.getMessage());
