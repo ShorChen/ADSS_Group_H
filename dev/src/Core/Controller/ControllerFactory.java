@@ -1,5 +1,6 @@
 package Core.Controller;
 
+import Core.Service.SystemIntegrationService;
 import Inventory.Presentation.Controller.InventoryController;
 import Suppliers.Presentation.Controller.OrderController;
 import Suppliers.Presentation.Controller.SupplierController;
@@ -22,43 +23,77 @@ import Transportation.DataAccess.SqlImpl.SqlTransportDAO;
 
 public class ControllerFactory {
     private static ControllerFactory instance;
-    private final AuthController authController;
-    private final SupplierController supplierController;
-    private final OrderController orderController;
-    private final InventoryController inventoryController;
-    private final TransportController transportController;
+    private AuthController authController;
+    private SupplierController supplierController;
+    private OrderController orderController;
+    private InventoryController inventoryController;
+    private TransportController transportController;
+    private SystemIntegrationController systemIntegrationController;
+    private SupplierFacade supplierFacade;
+    private SupplierService supplierService;
+    private OrderService orderService;
+    private InventoryService inventoryService;
+    private TransportService transportService;
 
-    private ControllerFactory() {
-        SqlAuthDAO authDAO = new SqlAuthDAO();
-        SqlSupplierDAO supplierDAO = new SqlSupplierDAO();
-        SqlOrderDAO orderDAO = new SqlOrderDAO();
-        SqlInventoryDAO inventoryDAO = new SqlInventoryDAO();
-        SqlTransportDAO transportDAO = new SqlTransportDAO();
-        AuthFacade authFacade = new AuthFacade(authDAO);
-        SupplierFacade supplierFacade = new SupplierFacade(supplierDAO);
-        OrderFacade orderFacade = new OrderFacade(orderDAO);
-        InventoryFacade inventoryFacade = new InventoryFacade(inventoryDAO);
-        TransportFacade transportFacade = new TransportFacade(transportDAO);
-        AuthService authService = new AuthService(authFacade);
-        SupplierService supplierService = new SupplierService(supplierFacade);
-        OrderService orderService = new OrderService(supplierFacade, orderFacade);
-        InventoryService inventoryService = new InventoryService(inventoryFacade);
-        TransportService transportService = new TransportService(transportFacade);
-        this.authController = new AuthController(authService);
-        this.supplierController = new SupplierController(supplierService);
-        this.orderController = new OrderController(orderService);
-        this.inventoryController = new InventoryController(inventoryService);
-        this.transportController = new TransportController(transportService);
-    }
+    private ControllerFactory() {}
 
     public static ControllerFactory getInstance() {
         if (instance == null) instance = new ControllerFactory();
         return instance;
     }
 
-    public AuthController getAuthController() { return authController; }
-    public SupplierController getSupplierController() { return supplierController; }
-    public OrderController getOrderController() { return orderController; }
-    public InventoryController getInventoryController() { return inventoryController; }
-    public TransportController getTransportController() { return transportController; }
+    public AuthController getAuthController() {
+        if (authController == null) authController = new AuthController(new AuthService(new AuthFacade(new SqlAuthDAO())));
+        return authController;
+    }
+
+    private SupplierFacade getSupplierFacade() {
+        if (supplierFacade == null) supplierFacade = new SupplierFacade(new SqlSupplierDAO());
+        return supplierFacade;
+    }
+
+    private SupplierService getSupplierService() {
+        if (supplierService == null) supplierService = new SupplierService(getSupplierFacade());
+        return supplierService;
+    }
+
+    public SupplierController getSupplierController() {
+        if (supplierController == null) supplierController = new SupplierController(getSupplierService());
+        return supplierController;
+    }
+
+    private OrderService getOrderService() {
+        if (orderService == null) orderService = new OrderService(getSupplierFacade(), new OrderFacade(new SqlOrderDAO()));
+        return orderService;
+    }
+
+    public OrderController getOrderController() {
+        if (orderController == null) orderController = new OrderController(getOrderService());
+        return orderController;
+    }
+
+    private InventoryService getInventoryService() {
+        if (inventoryService == null) inventoryService = new InventoryService(new InventoryFacade(new SqlInventoryDAO()));
+        return inventoryService;
+    }
+
+    public InventoryController getInventoryController() {
+        if (inventoryController == null) inventoryController = new InventoryController(getInventoryService());
+        return inventoryController;
+    }
+
+    private TransportService getTransportService() {
+        if (transportService == null) transportService = new TransportService(new TransportFacade(new SqlTransportDAO()));
+        return transportService;
+    }
+
+    public TransportController getTransportController() {
+        if (transportController == null) transportController = new TransportController(getTransportService());
+        return transportController;
+    }
+
+    public SystemIntegrationController getSystemIntegrationController() {
+        if (systemIntegrationController == null) systemIntegrationController = new SystemIntegrationController(new SystemIntegrationService(getInventoryService(), getOrderService(), getTransportService()));
+        return systemIntegrationController;
+    }
 }
