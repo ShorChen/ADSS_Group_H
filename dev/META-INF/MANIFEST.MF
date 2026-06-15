@@ -1,3 +1,2 @@
 Manifest-Version: 1.0
-Workers.Main-Class: Core.App.Launcher
-
+Main-Class: Core.App.Launcher
