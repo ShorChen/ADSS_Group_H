@@ -1,16 +1,16 @@
 package Workers;
 
-import Workers.context.SessionManager;
-import Workers.data_access.pools.EmployeePool;
-import Workers.domain.entities.Employee;
-import Workers.domain.entities.Role;
-import Workers.domain.entities.ShiftKey;
-import Workers.domain.services.EmployeeService;
+import Workers.Context.SessionManager;
+import Workers.DataAccess.Pools.EmployeePool;
+import Workers.Domain.Entities.Employee;
+import Workers.Domain.Entities.Role;
+import Workers.Domain.Entities.ShiftKey;
+import Workers.Domain.Service.EmployeeService;
 import org.junit.jupiter.api.*;
-import Workers.shared.enums.JobScope;
-import Workers.shared.enums.SalaryType;
-import Workers.shared.enums.ShiftType;
-import Workers.shared.enums.WeekDay;
+import Workers.Shared.Enums.JobScope;
+import Workers.Shared.Enums.SalaryType;
+import Workers.Shared.Enums.ShiftType;
+import Workers.Shared.Enums.WeekDay;
 
 import java.util.*;
 

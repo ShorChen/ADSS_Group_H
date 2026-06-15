@@ -14,6 +14,7 @@ import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.layout.*;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 public class InventoryDashboard {
@@ -26,12 +27,14 @@ public class InventoryDashboard {
         this.appNavigator = appNavigator;
         inventoryController = ControllerFactory.getInstance().getInventoryController();
         productsTable = new TableView<>();
+
         Button logoutBtn = new Button("Logout");
         logoutBtn.setOnAction(e -> logout());
         HBox topBar = new HBox(15, new Region(), logoutBtn);
         HBox.setHgrow(topBar.getChildren().get(0), Priority.ALWAYS);
         topBar.setPadding(new Insets(10));
         topBar.setStyle("-fx-background-color: #333333;");
+
         TabPane tabPane = new TabPane();
         Tab productsTab = new Tab("Products", createProductsView());
         productsTab.setClosable(false);
@@ -43,7 +46,9 @@ public class InventoryDashboard {
         promotionsTab.setClosable(false);
         Tab reportsTab = new Tab("Reports", createReportsView());
         reportsTab.setClosable(false);
+
         tabPane.getTabs().addAll(productsTab, categoriesTab, defectsTab, promotionsTab, reportsTab);
+
         BorderPane mainLayout = new BorderPane();
         mainLayout.setTop(topBar);
         mainLayout.setCenter(tabPane);
@@ -54,7 +59,7 @@ public class InventoryDashboard {
     private void logout() {
         try {
             ControllerFactory.getInstance().getAuthController().logout();
-            appNavigator.showLoginScreen();
+            appNavigator.showLoginScreen(); // Ensure this matches your interface method name
         } catch (Exception ex) {
             showAlert("Logout Error", ex.getMessage());
         }
@@ -191,7 +196,6 @@ public class InventoryDashboard {
         Button addBtn = new Button("Add Category");
         ListView<String> catList = new ListView<>();
 
-        // Initial populate
         catList.getItems().setAll(inventoryController.getAllCategories().stream().map(c -> "ID: " + c.categoryId() + " | Name: " + c.name() + " | Parent: " + c.parentId()).collect(Collectors.toList()));
 
         addBtn.setOnAction(e -> {
@@ -234,21 +238,45 @@ public class InventoryDashboard {
         Button reportBtn = new Button("Report Defect");
         ListView<String> defectList = new ListView<>();
 
-        // Initial populate
-        defectList.getItems().setAll(inventoryController.getAllDefectiveItems().stream().map(d -> "ID: " + d.defectId() + " | Barcode: " + d.barcode() + " | Qty: " + d.quantity() + " | Reason: " + d.reason()).collect(Collectors.toList()));
+        // Initial populate with names
+        refreshDefectsList(defectList);
 
         reportBtn.setOnAction(e -> {
             try {
                 inventoryController.reportDefectiveItem(barcodeField.getText(), Integer.parseInt(qtyField.getText()), locationBox.getValue(), reasonField.getText());
                 showAlert("Success", "Defect recorded.");
                 refreshProductsTable();
-                defectList.getItems().setAll(inventoryController.getAllDefectiveItems().stream().map(d -> "ID: " + d.defectId() + " | Barcode: " + d.barcode() + " | Qty: " + d.quantity() + " | Reason: " + d.reason()).collect(Collectors.toList()));
+                refreshDefectsList(defectList); // Refresh with names
                 checkAutomaticAlert(barcodeField.getText());
             } catch (Exception ex) { showAlert("Error", ex.getMessage()); }
         });
         formBox.getChildren().addAll(barcodeField, qtyField, locationBox, reasonField, reportBtn);
         layout.getChildren().addAll(new Label("Report Defective or Expired Item"), formBox, defectList);
         return layout;
+    }
+
+    // NEW HELPER METHOD: Fetches defects and maps barcode to product name
+    private void refreshDefectsList(ListView<String> defectList) {
+        try {
+            // Get all products to create a lookup map (Barcode -> Name)
+            Map<String, String> barcodeToNameMap = inventoryController.getAllProducts().stream()
+                    .collect(Collectors.toMap(ProductPL::barcode, ProductPL::name, (existing, replacement) -> existing));
+
+            List<String> displayStrings = inventoryController.getAllDefectiveItems().stream()
+                    .map(d -> {
+                        String productName = barcodeToNameMap.getOrDefault(d.barcode(), "Unknown Product");
+                        return "ID: " + d.defectId() +
+                                " | Barcode: " + d.barcode() +
+                                " (" + productName + ")" +
+                                " | Qty: " + d.quantity() +
+                                " | Reason: " + d.reason();
+                    })
+                    .collect(Collectors.toList());
+
+            defectList.getItems().setAll(displayStrings);
+        } catch (Exception e) {
+            showAlert("Error Loading Defects", e.getMessage());
+        }
     }
 
     private VBox createPromotionsView() {
@@ -264,7 +292,6 @@ public class InventoryDashboard {
         Button addBtn = new Button("Create Promotion");
         ListView<String> promoList = new ListView<>();
 
-        // Initial populate
         promoList.getItems().setAll(inventoryController.getAllPromotions().stream().map(p -> "ID: " + p.promoId() + " | Name: " + p.name() + " | Target: " + p.targetId() + " | Status: " + (p.isActive() ? "ACTIVE" : "EXPIRED")).collect(Collectors.toList()));
 
         addBtn.setOnAction(e -> {
@@ -339,5 +366,6 @@ public class InventoryDashboard {
         alert.showAndWait();
     }
 
+    @SuppressWarnings("unused")
     public Scene getScene() { return scene; }
 }

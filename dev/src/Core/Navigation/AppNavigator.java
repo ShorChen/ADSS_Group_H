@@ -6,4 +6,5 @@ public interface AppNavigator {
     void showOrderManagerDashboard();
     void showInventoryManagerDashboard();
     void showTransportManagerDashboard();
+    void showWorkersManagerDashboard();
 }

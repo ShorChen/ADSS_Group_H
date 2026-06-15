@@ -44,6 +44,7 @@ public class LoginScreen {
             case INVENTORY_MANAGER -> appNavigator.showInventoryManagerDashboard();
             case SUPPLIER_MANAGER -> appNavigator.showSupplierManagerDashboard();
             case TRANSPORTATION_MANAGER -> appNavigator.showTransportManagerDashboard();
+            case HR_MANAGER -> appNavigator.showWorkersManagerDashboard();
             default -> throw new IllegalStateException("Unexpected role: " + role);
         }
     }

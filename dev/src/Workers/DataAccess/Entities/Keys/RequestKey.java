@@ -1,0 +1,4 @@
+package Workers.DataAccess.Entities.Keys;
+
+public record RequestKey(int requestId, int shiftId) {
+}

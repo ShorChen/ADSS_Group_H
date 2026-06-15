@@ -1,12 +1,12 @@
 package Workers;
 
-import Workers.data_access.pools.ShiftPool;
-import Workers.domain.entities.Shift;
-import Workers.domain.entities.ShiftKey;
-import Workers.domain.services.ShiftService;
+import Workers.DataAccess.Pools.ShiftPool;
+import Workers.Domain.Entities.Shift;
+import Workers.Domain.Entities.ShiftKey;
+import Workers.Domain.Service.ShiftService;
 import org.junit.jupiter.api.*;
-import Workers.shared.enums.ShiftType;
-import Workers.shared.enums.WeekDay;
+import Workers.Shared.Enums.ShiftType;
+import Workers.Shared.Enums.WeekDay;
 
 import java.util.Map;
 

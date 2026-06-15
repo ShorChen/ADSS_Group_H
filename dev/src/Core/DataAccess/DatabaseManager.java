@@ -70,6 +70,7 @@ public class DatabaseManager {
             stmt.execute("INSERT OR IGNORE INTO AuthCodes(code, role) VALUES('INV123', 'INVENTORY_MANAGER')");
             stmt.execute("INSERT OR IGNORE INTO AuthCodes(code, role) VALUES('SUP123', 'SUPPLIER_MANAGER')");
             stmt.execute("INSERT OR IGNORE INTO AuthCodes(code, role) VALUES('TRANS123', 'TRANSPORTATION_MANAGER')");
+            stmt.execute("INSERT OR IGNORE INTO AuthCodes(code, role) VALUES('HR123', 'HR_MANAGER')");
             stmt.execute("INSERT OR IGNORE INTO Suppliers(businessNumber, name, address, bankAccount, paymentTerms) VALUES('1111', 'Tnuva', 'Tel Aviv', 'IL1111111111111111111111111', 'NET30')");
             stmt.execute("INSERT OR IGNORE INTO Suppliers(businessNumber, name, address, bankAccount, paymentTerms) VALUES('2222', 'Osem', 'Petah Tikva', 'IL2222222222222222222222222', 'EOM')");
             stmt.execute("INSERT OR IGNORE INTO Suppliers(businessNumber, name, address, bankAccount, paymentTerms) VALUES('3333', 'Strauss', 'Haifa', 'IL3333333333333333333333333', 'NET60')");

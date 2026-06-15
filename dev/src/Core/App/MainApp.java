@@ -5,6 +5,7 @@ import Inventory.Presentation.GUI.InventoryDashboard;
 import Suppliers.Presentation.GUI.OrderDashboard;
 import Suppliers.Presentation.GUI.SupplierDashboard;
 import Transportation.Presentation.GUI.TransportDashboard;
+import Workers.Presentation.GUI.WorkersDashboard;
 import Core.Controller.ControllerFactory;
 import javafx.application.Application;
 import javafx.scene.Parent;
@@ -56,6 +57,12 @@ public class MainApp extends Application implements AppNavigator {
     public void showTransportManagerDashboard() {
         TransportDashboard td = new TransportDashboard(this);
         switchScene(td.getScene());
+    }
+
+    @Override
+    public void showWorkersManagerDashboard() {
+        WorkersDashboard wd = new WorkersDashboard(this);
+        switchScene(wd.getScene());
     }
 
     public static void switchScene(Scene newScene) {
