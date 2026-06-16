@@ -34,8 +34,6 @@ public class ManageShiftsUI extends ViewCLI {
                     .append("Place Employee", this::placeEmployees)
                     .append("Set Submission Deadline", this::setDeadline)
                     .append("Handle Replacement Requests", this::handleReplacements)
-                    .append("Create Shift Template (Not Implemented)", this::createTemplate)
-                    .append("Set Default Template (Not Implemented)", this::setDefaultTemplate)
                     .append("Issue HR Report (Not Implemented)", this::issueReport)
 
             );
@@ -56,18 +54,6 @@ public class ManageShiftsUI extends ViewCLI {
 
     private void closeShift() {
         shiftsView.selectShift(controller::closeShift);
-    }
-
-    private void createTemplate() {
-        String name = getNextLine("Enter new template name:");
-        controller.createShiftTemplate(name, null);
-        System.out.println("Template '" + name + "' created successfully.");
-    }
-
-    private void setDefaultTemplate() {
-        String name = getNextLine("Enter the name of the template to set as default:");
-        controller.setShiftTemplateAsDefault(name);
-        System.out.println("Default template updated.");
     }
 
     private void placeEmployees() {

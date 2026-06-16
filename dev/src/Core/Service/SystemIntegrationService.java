@@ -13,7 +13,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-@SuppressWarnings("ClassCanBeRecord")
 public class SystemIntegrationService {
     private final InventoryService inventoryService;
     private final OrderService orderService;
@@ -28,11 +27,11 @@ public class SystemIntegrationService {
     public Response<Boolean> executeDailyIntegration() {
         try {
             Response<Integer> periodicRes = orderService.executeAutomaticOrders();
-            if (!periodicRes.isSuccess()) return new Response<>(false, periodicRes.getErrorMessage());
+            if (!periodicRes.isSuccess()) return new Response<>(periodicRes.getErrorMessage());
             Response<List<LowStockAlertSL>> shortageRes = inventoryService.generateShortageReport();
-            if (!shortageRes.isSuccess()) return new Response<>(false, shortageRes.getErrorMessage());
+            if (!shortageRes.isSuccess()) return new Response<>(shortageRes.getErrorMessage());
             List<LowStockAlertSL> alerts = shortageRes.getData();
-            if (alerts.isEmpty()) return new Response<>(true, null);
+            if (alerts.isEmpty()) return new Response<>(null);
             Map<String, List<OrderItemSL>> ordersBySupplier = new HashMap<>();
             for (LowStockAlertSL alert : alerts) {
                 int neededAmount = (alert.minRequired() - alert.currentTotal()) + 1;
@@ -59,9 +58,9 @@ public class SystemIntegrationService {
                     }
                 }
             }
-            return new Response<>(true, null);
+            return new Response<>(null);
         } catch (Exception e) {
-            return new Response<>(false, e.getMessage());
+            return new Response<>(e.getMessage());
         }
     }
 }

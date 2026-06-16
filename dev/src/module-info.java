@@ -1,6 +1,8 @@
 module SuperLee {
     requires javafx.controls;
     requires java.sql;
+    requires org.jetbrains.annotations;
+    requires jdk.jshell;
     exports Core.App to javafx.graphics;
     opens Core.App to javafx.graphics;
     exports Suppliers.Presentation.GUI to javafx.graphics;

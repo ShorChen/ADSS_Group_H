@@ -11,6 +11,7 @@ import Core.Service.Response;
 import Suppliers.Service.DTO.SupplierSL;
 import Suppliers.Service.DTO.OrderSL;
 import Suppliers.Service.DTO.OrderItemSL;
+import jdk.jshell.spi.ExecutionControl;
 
 import java.time.DayOfWeek;
 import java.time.LocalDate;
@@ -110,5 +111,13 @@ public class OrderService {
         } catch (Exception e) {
             return new Response<>(e.getMessage());
         }
+    }
+
+    public Response<OrderItemSL> findCheapest(String barcode, int neededAmount) {
+        throw new UnsupportedOperationException("Not Implemented, in OrderService.java");
+    }
+
+    public boolean getSupplierTransports(String bizNum) {
+        throw new UnsupportedOperationException("Not Implemented, in OrderService.java");
     }
 }
