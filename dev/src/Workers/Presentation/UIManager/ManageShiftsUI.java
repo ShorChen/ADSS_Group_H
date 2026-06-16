@@ -75,7 +75,6 @@ public class ManageShiftsUI extends ViewCLI {
 
     private void setDeadline() {
         boolean validDate = false;
-
         while (!validDate) {
             String date = getNextLine("Enter Date For Deadline (dd/MM/yyyy HH:mm) or type cancel to cancel: ");
             if (date.equalsIgnoreCase("cancel")) {
