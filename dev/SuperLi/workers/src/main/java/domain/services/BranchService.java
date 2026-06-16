@@ -14,10 +14,10 @@ public class BranchService {
         branchPool = BranchPool.Instance();
     }
 
-    public List<BranchPL> getBranches() {
-        List<BranchPL> branches = new ArrayList<>();
+    public List<Branch> getBranches() {
+        List<Branch> branches = new ArrayList<>();
         branchPool.getAllBranches().forEach(branch ->
-                branches.add(new BranchPL(branch)));
+                branches.add(new Branch(branch)));
         return branches;
     }
 

@@ -18,10 +18,14 @@ public class FirstScreenUI extends View {
     }
 
     private void createStore() {
-        CreateStoreUI createStoreUI = new CreateStoreUI(this::login);
+        CreateStoreUI createStoreUI = new CreateStoreUI(this::onStoreCreated);
         createStoreUI.display();
     }
 
+    private void onStoreCreated(){
+        controller.setIsFirstStartUpAsFalse();
+        login();
+    }
     private void login(){
         LoginUI loginUI = new LoginUI(this::display);
         loginUI.display();

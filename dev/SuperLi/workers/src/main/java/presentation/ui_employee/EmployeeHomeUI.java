@@ -1,7 +1,6 @@
 package presentation.ui_employee;
 
 import presentation.control.AuthController;
-import presentation.ui_shared.View;
 import presentation.ui_shared.ViewCLI;
 import presentation.util.Option;
 
@@ -41,7 +40,6 @@ public class EmployeeHomeUI extends ViewCLI {
         }
 
     }
-
 
     private void chooseShifts() {
         EmployeeChooseShiftsUI shiftsUI = new EmployeeChooseShiftsUI(this::display);

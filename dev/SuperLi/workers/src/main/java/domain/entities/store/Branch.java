@@ -5,17 +5,15 @@ import data_access.entities.BranchEntity;
 public class Branch {
     public static final int ALL_BRANCHES = -1 ;
     private int branchId;
-    private String managerId;
     private String location;
 
-    public Branch(int branchId, String managerId, String location) {
+    public Branch(int branchId, String location) {
         this.branchId = branchId;
-        this.managerId = managerId;
         this.location = location;
     }
 
-    public Branch(Branch branch) {
-        this(branch.branchId, branch.managerId, branch.location);
+    public Branch(BranchEntity branch) {
+        this(branch.branchId(), branch.location());
     }
 
     public int getBranchId() {
@@ -24,14 +22,6 @@ public class Branch {
 
     public void setBranchId(int branchId) {
         this.branchId = branchId;
-    }
-
-    public String getManagerId() {
-        return managerId;
-    }
-
-    public void setManagerId(String managerId) {
-        this.managerId = managerId;
     }
 
     public String getLocation() {

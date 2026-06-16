@@ -1,16 +1,20 @@
 package presentation.ui_manager;
 
+import domain.services.ManagerHomeController;
 import presentation.control.AuthController;
+import presentation.ui_employee.RequestReplacementUI;
 import presentation.ui_shared.ViewCLI;
 import presentation.util.Option;
 
 public class ManagerHomeUI extends ViewCLI {
     private boolean open = false;
-    private final AuthController controller;
+    private final ManagerHomeController controller;
+    private final AuthController authController;
 
     public ManagerHomeUI(Runnable onDismiss) {
         super(onDismiss);
-        controller = new AuthController();
+        controller = new ManagerHomeController();
+        authController = new AuthController();
     }
 
     @Override
@@ -22,6 +26,10 @@ public class ManagerHomeUI extends ViewCLI {
                     .append("Change Password", this::changePassword)
                     .append("Manage Branches", this::managerBranches)
                     .append("Manage Roles", this::manageRoles)
+                    .append("Set Submission Deadline", this::setDeadline)
+                    .append("Handle Replacement Requests", this::handleReplacements)
+                    .append("Issue HR Report (Not Implemented)", this::issueReport)
+
             );
 
         }
@@ -32,7 +40,8 @@ public class ManagerHomeUI extends ViewCLI {
         String oldPassword = getNextLine("Enter Old Password");
         String password = getNextLine("Enter New Password");
         try {
-            boolean passChanged = controller.changeCurrentEmployeePassword(oldPassword, password);
+            boolean passChanged = authController
+                    .changeCurrentEmployeePassword(oldPassword, password);
             if (passChanged)
                 System.out.println("Password Changed");
             else System.out.println("The two passwords do not match");
@@ -53,6 +62,38 @@ public class ManagerHomeUI extends ViewCLI {
         close();
         manageRolesUI.display();
     }
+
+
+    private void setDeadline() {
+        boolean validDate = false;
+        if (controller.isFirstWeek()) return;
+        while (!validDate) {
+            String date = getNextLine("Enter Date For Deadline (dd/MM/yyyy HH:mm) or type cancel to cancel: ");
+            if (date.equalsIgnoreCase("cancel")) {
+                System.out.println("Canceled");
+                return;
+            }
+            try {
+                controller.setDeadline(date);
+                validDate = true;
+                System.out.println("Deadline set to " + date);
+            } catch (Exception e) {
+                System.out.println(e.getMessage());
+            }
+        }
+
+    }
+
+    private void handleReplacements() {
+        RequestReplacementUI requestUI = new RequestReplacementUI(this::display);
+        close();
+        requestUI.display();
+    }
+
+    private void issueReport() {
+        System.out.println(controller.issueReport());
+    }
+
 
     @Override
     public void close() {

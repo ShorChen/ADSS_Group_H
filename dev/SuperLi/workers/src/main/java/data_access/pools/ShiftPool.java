@@ -1,8 +1,10 @@
 package data_access.pools;
 
 import data_access.entities.ShiftEntity;
+import data_access.entities.keys.BranchKey;
 import data_access.entities.keys.BranchWeekKey;
 import data_access.entities.keys.ShiftEntityKey;
+import data_access.entities.keys.WeekKey;
 
 import java.util.*;
 
@@ -104,7 +106,7 @@ public class ShiftPool {
     }
 
     private BranchWeekKey createKey(int branchId, int year, int week) {
-        return new BranchWeekKey(branchId, year, week);
+        return new BranchWeekKey(new BranchKey(branchId), new WeekKey(year, week));
     }
 
     public static void free() {

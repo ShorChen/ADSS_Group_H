@@ -1,7 +1,9 @@
 package domain.services;
 
+import data_access.entities.keys.BranchKey;
 import data_access.entities.keys.BranchWeekKey;
 import data_access.entities.keys.ShiftEntityKey;
+import data_access.entities.keys.WeekKey;
 import data_access.pools.ShiftPool;
 import domain.entities.Shift;
 import domain.entities.ShiftKey;
@@ -51,7 +53,8 @@ public class ShiftService {
     public void addUpdateShift(int branchId, int year, int week,
                                String day, String type,
                                @NotNull Shift shift) {
-        shiftPool.addUpdateShift(new BranchWeekKey(branchId, year, week),
+        shiftPool.addUpdateShift(new BranchWeekKey(
+                new BranchKey(branchId),  new WeekKey(year, week)),
                 new ShiftEntityKey(day, type), shift.toEntity());
     }
 

@@ -2,7 +2,6 @@ package presentation.ui_manager;
 
 import presentation.control.BranchController;
 import presentation.model.BranchPL;
-import presentation.ui_shared.View;
 import presentation.ui_shared.ViewCLI;
 import presentation.util.Option;
 

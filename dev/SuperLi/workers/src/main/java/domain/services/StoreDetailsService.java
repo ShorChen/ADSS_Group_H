@@ -1,5 +1,8 @@
 package domain.services;
 
+import data_access.entities.keys.BranchKey;
+import data_access.entities.keys.BranchWeekKey;
+import data_access.entities.keys.WeekKey;
 import data_access.pools.StorePool;
 import presentation.model.StoreDetailsPL;
 import shared.enums.WeekDay;
@@ -34,4 +37,7 @@ public class StoreDetailsService {
         return closedDays;
     }
 
+    public boolean isFirstWeek(int branchId, int year, int week) {
+        return storePool.getStartingWeek(branchId).equals(new WeekKey(year, week));
+    }
 }

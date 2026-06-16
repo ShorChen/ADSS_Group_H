@@ -28,8 +28,8 @@ public class BranchPool {
         return new ArrayList<>(locations);
     }
 
-    public boolean exists(int branchId, String location) {
-        return branches.containsKey(createKey(branchId, location));
+    public boolean exists(int branchId) {
+        return branches.containsKey(createKey(branchId));
     }
 
     public List<BranchEntity> getAllBranches(){
@@ -40,11 +40,11 @@ public class BranchPool {
     }
 
     public void addUpdateBranch(@NotNull BranchEntity branch) {
-        branches.put(createKey(branch.branchId(), branch.location()), branch);
+        branches.put(createKey(branch.branchId()), branch);
     }
 
-    private BranchKey createKey(int branchId, String location) {
-        return new BranchKey(branchId, location);
+    private BranchKey createKey(int branchId) {
+        return new BranchKey(branchId);
     }
 
     public static void free(){

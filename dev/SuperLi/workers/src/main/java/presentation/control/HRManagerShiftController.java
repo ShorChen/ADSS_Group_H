@@ -51,23 +51,7 @@ public class HRManagerShiftController {
         }
     }
 
-    public void setDeadline(String date) {
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm");
-        try {
-            LocalDateTime dateTime = LocalDateTime.parse(date, formatter);
-            if (!dateTime.minusDays(1).plusMinutes(1).isAfter(SessionManager.now()))
-                throw new IllegalArgumentException("Deadline date must be at least one day from now");
-            SessionManager.setDeadline(dateTime);
 
-        } catch (Exception e) {
-            throw new IllegalArgumentException(e.getMessage());
-        }
-    }
-
-    public String issueReport() {
-        // todo
-        return null;
-    }
 
     public void openShift(WeekDay day, ShiftType type, EmployeePL shiftManager) {
         LocalDate targetDate = SessionManager.now().plusWeeks(1).toLocalDate();

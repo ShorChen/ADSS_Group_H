@@ -3,8 +3,10 @@ package domain.services;
 import data_access.entities.EmployeeEntity;
 import data_access.entities.RequestEntity;
 import data_access.entities.ShiftEntity;
+import data_access.entities.keys.BranchKey;
 import data_access.entities.keys.BranchWeekKey;
 import data_access.entities.keys.ShiftEntityKey;
+import data_access.entities.keys.WeekKey;
 import data_access.pools.EmployeePool;
 import data_access.pools.RequestsPool;
 import data_access.pools.RolePool;
@@ -54,9 +56,11 @@ public class DataService {
                 new HashMap<>()
         );
 
-        shiftPool.addUpdateShift(new BranchWeekKey(1, s1.getYear(), s1.getWeek()),
+        shiftPool.addUpdateShift(new BranchWeekKey(
+                new BranchKey(1), new WeekKey(s1.getYear(), s1.getWeek())),
                 new ShiftEntityKey(WeekDay.SUNDAY.toString(), ShiftType.DAY.toString()), s1);
-        shiftPool.addUpdateShift(new BranchWeekKey(1, m2.getYear(), m2.getWeek()),
+        shiftPool.addUpdateShift(new BranchWeekKey(
+                new BranchKey(1), new WeekKey(m2.getYear(), m2.getWeek())),
                 new ShiftEntityKey(WeekDay.MONDAY.toString(), ShiftType.EVENING.toString()), m2);
 
         requestsPool.addUpdateRequest(

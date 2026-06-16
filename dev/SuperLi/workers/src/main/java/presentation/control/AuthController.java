@@ -20,16 +20,12 @@ public class AuthController {
         return SessionManager.hasContext();
     }
 
-    public void logout() {
-        SessionManager.logout();
+    public boolean isManager(String id){
+        return service.isManager(id);
     }
 
     public boolean changeCurrentEmployeePassword(String oldPass, String newPass) {
         return service.changePassword(SessionManager.getCurrentEmployee().getId(), oldPass, newPass);
-    }
-
-    public boolean isManager(String id){
-        return service.isManager(id);
     }
 
 }

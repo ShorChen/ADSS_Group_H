@@ -111,9 +111,7 @@ public class CreateStoreUI extends ViewCLI {
         System.out.println("---Create Branch---");
         String location = getNextLine("Enter Location: ");
         if (!controller.containsBranch(location))
-            controller.addBranch(
-                    new BranchPL(id, location, new ArrayList<>())
-            );
+            controller.addBranch(new BranchPL(location));
         else System.out.println("Store already has a branch is " + location);
     }
 
