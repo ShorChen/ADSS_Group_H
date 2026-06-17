@@ -1,83 +1,165 @@
 package Integration;
-import Core.Domain.Role;
-import Inventory.Domain.Entities.ProductDL;
-import Suppliers.Domain.Entities.OrderDL;
-import Suppliers.Domain.Security.SessionManager;
-import Transportation.Domain.Entities.*;
+
+import Core.Service.Response;
+import Inventory.Service.Core.InventoryService;
+import Suppliers.Service.Core.OrderService;
+import Transportation.Service.Core.TransportService;
+import Workers.Domain.Service.EmployeeService;
+
 import org.junit.jupiter.api.*;
 import java.time.LocalDate;
 import java.util.ArrayList;
-import java.util.List;
+
 import static org.junit.jupiter.api.Assertions.*;
+
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
-@TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 public class SystemIntegrationTests {
-    private ProductDL inventoryProduct;
-    private OrderDL generatedOrder;
-    private DeliveryDL generatedDelivery;
-    @Test
-    @Order(1)
-    void step01_loginAsManager() {
-        SessionManager.getInstance().login(Role.ORDER_MANAGER);
-        assertEquals(Role.ORDER_MANAGER, SessionManager.getInstance().getCurrentRole());
+
+    // Your Services
+    private InventoryService inventoryService;
+    private OrderService orderService;
+    private TransportService transportService;
+    private EmployeeService employeeService;
+
+    @BeforeEach
+    void setUp() {
+        // [!] Initialize your Services and Facades here.
+        // Example:
+        // inventoryFacade = new InventoryFacade(new SqlInventoryDAO());
+        // inventoryService = new InventoryService(inventoryFacade);
+        // orderService = new OrderService(supplierFacade, orderFacade);
+        // transportService = new TransportService(transportFacade);
+        // employeeService = new EmployeeService(employeesFacade);
+
+        // WIRE THE INTEGRATIONS FOR ASSIGNMENT 2:
+        // inventoryService.setOrderService(orderService);
+        // transportService.setEmployeeService(employeeService);
+
+        // [!] Seed your database/maps here so the tests have data to work with.
+        // Add Product: "Milk" (Min: 20, Current: 30)
+        // Add Product: "Bread" (No suppliers sell this item)
+        // Add Supplier: "Tnuva" (Sells Milk)
+        // Add Driver: "D_HEAVY" (License: HEAVY, Role: DRIVER)
+        // Add Driver: "D_LIGHT" (License: LIGHT, Role: DRIVER)
+        // Add Cashier: "CASH_1" (License: NONE, Role: CASHIER)
+        // Add Truck: "TRK_HEAVY" (Weight: 15000 kg)
     }
+
+    // =================================================================================
+    // INTEGRATION 1: INVENTORY & SUPPLIERS (Automatic Shortage Orders)
+    // =================================================================================
+
     @Test
-    @Order(2)
-    void step02_initializeInventory() {
-        inventoryProduct = new ProductDL("1001", "Milk 3%", "Tnuva", 1, 4.0, 6.0, 50, 20, 10, "A1", 1);
-        assertNotNull(inventoryProduct);
-        assertEquals(30, inventoryProduct.getTotalQuantity());
+    @DisplayName("1. Reporting a defect that drops stock BELOW minimum triggers a shortage order")
+    void testDefectDropsStockBelowMinimum_TriggersOrder() {
+        // Milk starts at 30. Min is 20. Reporting 15 defects drops stock to 15.
+        // Expectation: A shortage order for 5 Milk should be automatically placed.
+        Response<String> res = inventoryService.reportDefectiveItem("MILK_BARCODE", 15, "SHELF", "Broken");
+
+        assertTrue(res.isSuccess());
+        assertTrue(res.getData().contains("Automatic shortage order placed successfully"),
+                "The system should have warned that an automatic order was placed.");
     }
+
     @Test
-    @Order(3)
-    void step03_verifyStockShortage() {
-        assertTrue(inventoryProduct.getTotalQuantity() < inventoryProduct.getMinQuantity());
+    @DisplayName("2. Reporting a defect that keeps stock ABOVE minimum does NOT trigger an order")
+    void testDefectMaintainsStockAboveMinimum_NoOrderTriggered() {
+        // Milk starts at 30. Min is 20. Reporting 2 defects drops stock to 28.
+        Response<String> res = inventoryService.reportDefectiveItem("MILK_BARCODE", 2, "SHELF", "Broken");
+
+        assertTrue(res.isSuccess());
+        assertFalse(res.getData().contains("Automatic shortage order placed"),
+                "An order should not be placed if stock is still above minimum.");
     }
+
     @Test
-    @Order(4)
-    void step04_generateShortageOrder() {
-        generatedOrder = new OrderDL(1, "1111", "Tnuva", "Tel Aviv", "050-0000000", new ArrayList<>());
-        assertEquals("1111", generatedOrder.getSupplierBusinessNumber());
+    @DisplayName("3. Updating pricing to increase the Minimum Threshold triggers an immediate order")
+    void testUpdatePricingIncreasesMinimum_TriggersOrder() {
+        // Milk starts at 30. Min is 20.
+        // We change the minimum required to 40. Now we are short 10!
+        Response<String> res = inventoryService.updateProductPricing("MILK_BARCODE", 6.50, 40);
+
+        assertTrue(res.isSuccess());
+        assertTrue(res.getData().contains("Automatic shortage order placed successfully"));
     }
+
     @Test
-    @Order(5)
-    void step05_verifyOrderAttributes() {
-        assertNotNull(generatedOrder.getOrderDate());
-        assertEquals("Tnuva", generatedOrder.getSupplierName());
+    @DisplayName("4. Shortage order FAILS because no supplier sells the product -> Rolls back inventory")
+    void testShortageOrderFails_TriggersInventoryRollback() {
+        // Bread starts at 30. Min is 20. We drop stock to 10.
+        // OrderService will try to order Bread, but no supplier sells it.
+        Response<String> res = inventoryService.updateProductQuantities("BREAD_BARCODE", 5, 5);
+
+        assertFalse(res.isSuccess(), "The operation should fail because the order couldn't be placed.");
+        assertTrue(res.getErrorMessage().contains("reverted"),
+                "The inventory update should be rolled back to maintain data consistency.");
     }
+
     @Test
-    @Order(6)
-    void step06_setupTransportInfrastructure() {
-        TruckDL truck = new TruckDL("11-222-33", "Volvo", 5000.0, 15000.0, true);
-        DriverDL driver = new DriverDL("D001", "Moshe", "HEAVY", LocalDate.now().plusYears(1));
-        assertNotNull(truck);
-        assertNotNull(driver);
+    @DisplayName("5. Shortage order successfully selects the cheapest supplier ignoring case")
+    void testGenerateShortageOrder_FindsCheapestSupplier() {
+        // Directly test the OrderService integration logic for 50 missing items of "milk"
+        Response<Integer> res = orderService.generateShortageOrder("milk", 50);
+
+        assertTrue(res.isSuccess());
+        assertNotNull(res.getData(), "Should return a valid Order ID for the cheapest supplier.");
     }
+
+    // =================================================================================
+    // INTEGRATION 2: TRANSPORTATION & EMPLOYEES (Driver License Validation)
+    // =================================================================================
+
     @Test
-    @Order(7)
-    void step07_createTransportRoute() {
-        DestinationDL dest = new DestinationDL("Branch 1", new ArrayList<>());
-        dest.getItems().add(new CargoItemDL("Milk", 10.0, 20));
-        List<DestinationDL> route = new ArrayList<>();
-        route.add(dest);
-        generatedDelivery = new DeliveryDL(1, LocalDate.now(), "08:00", "PENDING", "11-222-33", "D001", "Tnuva", route);
-        assertEquals(1, generatedDelivery.getDestinations().size());
+    @DisplayName("6. Transport allows delivery if driver has the CORRECT license for heavy truck")
+    void testTransportation_ValidDriverLicenseForHeavyTruck() {
+        // Truck is 15,000kg. Driver D_HEAVY has a HEAVY license.
+        Response<Boolean> res = transportService.validateDriverLicense("D_HEAVY", 15000.0);
+
+        assertTrue(res.isSuccess());
+        assertTrue(res.getData(), "Driver with HEAVY license should be valid for 15000kg truck.");
     }
+
     @Test
-    @Order(8)
-    void step08_verifyCargoLoading() {
-        assertEquals(20, generatedDelivery.getDestinations().get(0).getItems().get(0).getQuantity());
+    @DisplayName("7. Transport BLOCKS delivery if driver has INCORRECT license for heavy truck")
+    void testTransportation_InvalidDriverLicenseForHeavyTruck() {
+        // Truck is 15,000kg. Driver D_LIGHT only has a LIGHT license.
+        Response<Boolean> res = transportService.validateDriverLicense("D_LIGHT", 15000.0);
+
+        assertFalse(res.isSuccess());
+        assertTrue(res.getErrorMessage().toLowerCase().contains("insufficient license"),
+                "System must block a light-licensed driver from driving a heavy truck.");
     }
+
     @Test
-    @Order(9)
-    void step09_verifyDeliveryState() {
-        assertEquals("PENDING", generatedDelivery.getStatus());
-        assertEquals("Tnuva", generatedDelivery.getOriginSite());
+    @DisplayName("8. Transport BLOCKS delivery if the requested Driver ID does not exist")
+    void testTransportation_DriverDoesNotExist() {
+        // Calling EmployeeService with a fake ID
+        Response<Boolean> res = transportService.validateDriverLicense("FAKE_ID_999", 5000.0);
+
+        assertFalse(res.isSuccess());
+        assertTrue(res.getErrorMessage().toLowerCase().contains("not found"),
+                "System must fail gracefully if the employee does not exist.");
     }
+
     @Test
-    @Order(10)
-    void step10_logoutAndClearSession() {
-        SessionManager.getInstance().logout();
-        assertThrows(SecurityException.class, () -> SessionManager.getInstance().getCurrentRole());
+    @DisplayName("9. Transport BLOCKS delivery if the Employee is NOT a Driver (e.g., Cashier)")
+    void testTransportation_EmployeeIsNotADriver() {
+        // Employee exists, but their JobScope is CASHIER, not DRIVER.
+        Response<Boolean> res = transportService.validateDriverLicense("CASH_1", 5000.0);
+
+        assertFalse(res.isSuccess());
+        assertTrue(res.getErrorMessage().toLowerCase().contains("not a driver"),
+                "System must ensure the employee actually holds the DRIVER job scope.");
+    }
+
+    @Test
+    @DisplayName("10. Full Delivery Issuance fails completely if license check fails")
+    void testIssueDelivery_IntegrationFailsOnInvalidLicense() {
+        // Try to issue an entire delivery routing using the light driver on the heavy truck
+        Response<Integer> res = transportService.issueDelivery("TRK_HEAVY", "D_LIGHT", LocalDate.now(), new ArrayList<>());
+
+        assertFalse(res.isSuccess(), "The delivery should not be created.");
+        assertTrue(res.getErrorMessage().toLowerCase().contains("license validation failed"),
+                "The root cause should bubble up from the Employee validation.");
     }
 }

@@ -1,6 +1,5 @@
 package Core.Controller;
 
-import Core.Service.SystemIntegrationService;
 import Inventory.Presentation.Controller.InventoryController;
 import Suppliers.Presentation.Controller.OrderController;
 import Suppliers.Presentation.Controller.SupplierController;
@@ -28,7 +27,6 @@ public class ControllerFactory {
     private OrderController orderController;
     private InventoryController inventoryController;
     private TransportController transportController;
-    private SystemIntegrationController systemIntegrationController;
     private SupplierFacade supplierFacade;
     private SupplierService supplierService;
     private OrderService orderService;
@@ -73,7 +71,10 @@ public class ControllerFactory {
     }
 
     private InventoryService getInventoryService() {
-        if (inventoryService == null) inventoryService = new InventoryService(new InventoryFacade(new SqlInventoryDAO()));
+        if (inventoryService == null) {
+            inventoryService = new InventoryService(new InventoryFacade(new SqlInventoryDAO()));
+            inventoryService.setOrderService(getOrderService());
+        }
         return inventoryService;
     }
 
@@ -90,10 +91,5 @@ public class ControllerFactory {
     public TransportController getTransportController() {
         if (transportController == null) transportController = new TransportController(getTransportService());
         return transportController;
-    }
-
-    public SystemIntegrationController getSystemIntegrationController() {
-        if (systemIntegrationController == null) systemIntegrationController = new SystemIntegrationController(new SystemIntegrationService(getInventoryService(), getOrderService(), getTransportService()));
-        return systemIntegrationController;
     }
 }

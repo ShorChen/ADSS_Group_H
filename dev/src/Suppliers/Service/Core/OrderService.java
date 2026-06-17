@@ -11,7 +11,6 @@ import Core.Service.Response;
 import Suppliers.Service.DTO.SupplierSL;
 import Suppliers.Service.DTO.OrderSL;
 import Suppliers.Service.DTO.OrderItemSL;
-import jdk.jshell.spi.ExecutionControl;
 
 import java.time.DayOfWeek;
 import java.time.LocalDate;
@@ -32,8 +31,9 @@ public class OrderService {
     public Response<List<SupplierSL>> getAllSuppliers() {
         try {
             List<SupplierSL> allSuppliers = new ArrayList<>();
-            for (SupplierDL dl : supplierFacade.getAllSuppliers())
-                allSuppliers.add(new SupplierSL(dl));
+            for (SupplierDL supplierDL : supplierFacade.getAllSuppliers()) {
+                allSuppliers.add(new SupplierSL(supplierDL));
+            }
             return new Response<>(allSuppliers);
         } catch (Exception ex) {
             return new Response<>(ex.getMessage());
@@ -45,14 +45,14 @@ public class OrderService {
             SupplierDL supplier = supplierFacade.getSupplierOrThrow(businessNumber);
             String address = supplier.getAddress();
             String phones = supplier.getContactPersonnel().isEmpty() ? "N/A" :
-                    supplier.getContactPersonnel().stream().map(cp -> cp.getName() + " (" + cp.getPhone() + ")").collect(Collectors.joining(", "));
-            List<OrderItemDL> itemsDL = items.stream().map(sl -> new OrderItemDL(
-                    sl.catalogId(),
-                    sl.productName(),
-                    sl.quantity(),
-                    sl.priceBeforeDiscount(),
-                    sl.priceBeforeDiscount() - sl.finalPrice(),
-                    sl.finalPrice()
+                    supplier.getContactPersonnel().stream().map(contact -> contact.getName() + " (" + contact.getPhone() + ")").collect(Collectors.joining(", "));
+            List<OrderItemDL> itemsDL = items.stream().map(itemSL -> new OrderItemDL(
+                    itemSL.catalogId(),
+                    itemSL.productName(),
+                    itemSL.quantity(),
+                    itemSL.priceBeforeDiscount(),
+                    itemSL.priceBeforeDiscount() - itemSL.finalPrice(),
+                    itemSL.finalPrice()
             )).collect(Collectors.toList());
             OrderDL order = orderFacade.createOrder(businessNumber, supplier.getName(), address, phones, itemsDL);
             return new Response<>(order.getOrderId());
@@ -65,22 +65,25 @@ public class OrderService {
         try {
             DayOfWeek tomorrow = LocalDate.now().plusDays(1).getDayOfWeek();
             int count = 0;
-            for (SupplierDL supplier : supplierFacade.getAllSuppliers())
-                for (AgreementDL agreement : supplier.getAgreements())
+            for (SupplierDL supplier : supplierFacade.getAllSuppliers()) {
+                for (AgreementDL agreement : supplier.getAgreements()) {
                     if (!agreement.getDeliveryTerms().isOnDemand() && agreement.getDeliveryTerms().getFixedDeliveryDays().contains(tomorrow)) {
                         List<OrderItemDL> items = new ArrayList<>();
-                        for (ProductLineDL pl : agreement.getProductLines()) {
-                            double discountPct = agreement.getDiscountPolicy().calculateDiscount(pl.getSupplierCatalogId(), pl.getQuantity());
-                            double listPrice = pl.getBasePrice() * pl.getQuantity();
+                        for (ProductLineDL productLine : agreement.getProductLines()) {
+                            double discountPct = agreement.getDiscountPolicy().calculateDiscount(productLine.getSupplierCatalogId(), productLine.getQuantity());
+                            double listPrice = productLine.getBasePrice() * productLine.getQuantity();
                             double finalPrice = listPrice * (1.0 - (discountPct / 100.0));
-                            items.add(new OrderItemDL(pl.getSupplierCatalogId(), pl.getName(), pl.getQuantity(), listPrice, listPrice - finalPrice, finalPrice));
+                            items.add(new OrderItemDL(productLine.getSupplierCatalogId(), productLine.getName(), productLine.getQuantity(), listPrice, listPrice - finalPrice, finalPrice));
                         }
+
                         if (!items.isEmpty()) {
-                            String phones = supplier.getContactPersonnel().isEmpty() ? "N/A" : supplier.getContactPersonnel().stream().map(cp -> cp.getName() + " (" + cp.getPhone() + ")").collect(Collectors.joining(", "));
+                            String phones = supplier.getContactPersonnel().isEmpty() ? "N/A" : supplier.getContactPersonnel().stream().map(contact -> contact.getName() + " (" + contact.getPhone() + ")").collect(Collectors.joining(", "));
                             orderFacade.createOrder(supplier.getBusinessNumber(), supplier.getName(), supplier.getAddress(), phones, items);
                             count++;
                         }
                     }
+                }
+            }
             return new Response<>(count);
         } catch (Exception ex) {
             return new Response<>(ex.getMessage());
@@ -90,17 +93,17 @@ public class OrderService {
     public Response<List<OrderSL>> getOrderHistory() {
         try {
             List<OrderDL> historyDL = orderFacade.getOrderHistory();
-            List<OrderSL> historySL = historyDL.stream().map(dl -> new OrderSL(
-                    dl.getOrderId(),
-                    dl.getSupplierBusinessNumber(),
-                    dl.getSupplierName(),
-                    dl.getAddress(),
-                    dl.getContactPhone(),
-                    dl.getOrderDate(),
-                    dl.getItems().stream().map(itemDL -> new OrderItemSL(
+            List<OrderSL> historySL = historyDL.stream().map(orderDL -> new OrderSL(
+                    orderDL.getOrderId(),
+                    orderDL.getSupplierBusinessNumber(),
+                    orderDL.getSupplierName(),
+                    orderDL.getAddress(),
+                    orderDL.getContactPhone(),
+                    orderDL.getOrderDate(),
+                    orderDL.getItems().stream().map(itemDL -> new OrderItemSL(
                             itemDL.productName(),
-                            dl.getSupplierBusinessNumber(),
-                            dl.getSupplierName(),
+                            orderDL.getSupplierBusinessNumber(),
+                            orderDL.getSupplierName(),
                             itemDL.catalogId(),
                             itemDL.quantity(),
                             itemDL.listPrice(),
@@ -113,11 +116,43 @@ public class OrderService {
         }
     }
 
-    public Response<OrderItemSL> findCheapest(String barcode, int neededAmount) {
-        throw new UnsupportedOperationException("Not Implemented, in OrderService.java");
-    }
-
-    public boolean getSupplierTransports(String bizNum) {
-        throw new UnsupportedOperationException("Not Implemented, in OrderService.java");
+    public Response<Integer> generateShortageOrder(String productName, int missingAmount) {
+        try {
+            SupplierDL bestSupplier = null;
+            ProductLineDL bestProductLine = null;
+            double lowestFinalPrice = Double.MAX_VALUE;
+            double chosenListPrice = 0;
+            for (SupplierDL supplier : supplierFacade.getAllSuppliers()) {
+                for (AgreementDL agreement : supplier.getAgreements()) {
+                    for (ProductLineDL productLine : agreement.getProductLines()) {
+                        if (productLine.getName().equalsIgnoreCase(productName)) {
+                            double discountPercentage = agreement.getDiscountPolicy().calculateDiscount(productLine.getSupplierCatalogId(), missingAmount);
+                            double listPrice = productLine.getBasePrice() * missingAmount;
+                            double finalPrice = listPrice * (1.0 - (discountPercentage / 100.0));
+                            if (finalPrice < lowestFinalPrice) {
+                                lowestFinalPrice = finalPrice;
+                                chosenListPrice = listPrice;
+                                bestSupplier = supplier;
+                                bestProductLine = productLine;
+                            }
+                        }
+                    }
+                }
+            }
+            if (bestSupplier == null)
+                return new Response<>("No supplier found offering product: " + productName);
+            OrderItemSL optimalItem = new OrderItemSL(
+                    bestProductLine.getName(),
+                    bestSupplier.getBusinessNumber(),
+                    bestSupplier.getName(),
+                    bestProductLine.getSupplierCatalogId(),
+                    missingAmount,
+                    chosenListPrice,
+                    lowestFinalPrice
+            );
+            return placeOrder(bestSupplier.getBusinessNumber(), List.of(optimalItem));
+        } catch (Exception e) {
+            return new Response<>("System error generating shortage order: " + e.getMessage());
+        }
     }
 }
