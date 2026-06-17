@@ -7,6 +7,8 @@ public class Role {
     public static final Role Storekeeper = new Role("Storekeeper");
     public static final Role ShiftManager = new Role("Shift Manager");
     public static final Role Cashier = new Role("Cashier");
+    public static final Role Driver = new Role("Driver");
+
 
     private final String tag;
     public Role(String tag) {

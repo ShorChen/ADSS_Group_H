@@ -20,6 +20,7 @@ import Suppliers.DataAccess.SqlImpl.SqlOrderDAO;
 import Suppliers.DataAccess.SqlImpl.SqlSupplierDAO;
 import Inventory.DataAccess.SqlImpl.SqlInventoryDAO;
 import Transportation.DataAccess.SqlImpl.SqlTransportDAO;
+import Workers.Domain.Service.ShiftService;
 
 public class ControllerFactory {
     private static ControllerFactory instance;
@@ -83,7 +84,12 @@ public class ControllerFactory {
     }
 
     private TransportService getTransportService() {
-        if (transportService == null) transportService = new TransportService(new TransportFacade(new SqlTransportDAO()));
+        if (transportService == null) {
+            Transportation.DataAccess.TransportDAO transportDAO = new Transportation.DataAccess.SqlImpl.SqlTransportDAO();
+            Transportation.Domain.Facades.TransportFacade transportFacade = new Transportation.Domain.Facades.TransportFacade(transportDAO);
+            ShiftService shiftService = new ShiftService();
+            transportService = new TransportService(transportFacade, transportDAO, shiftService);
+        }
         return transportService;
     }
 
