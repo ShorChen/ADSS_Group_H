@@ -23,7 +23,10 @@ An integrated, end-to-end desktop application built for the **Super-Lee** superm
 * **Design & Modeling:** [draw.io](https://draw.io) (Used for all UML, Sequence, and Use-Case diagrams located in the `docs` folder)
 
 ## 🚀 How to Run the Application
-The system is packaged as a standalone executable JAR, requiring no external database installations.
+The system is packaged as a standalone executable JAR, requiring no external database installations. 
+
+## 📄 Documentation & Instructions
+Full project instructions and detailed requirements can be found in the [`docs/instructions.pdf`](docs/instructions.pdf) file.
 
 **Run via Command Line:**
 ```bash
