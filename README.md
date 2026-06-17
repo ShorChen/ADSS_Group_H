@@ -25,6 +25,9 @@ An integrated, end-to-end desktop application built for the **Super-Lee** superm
 ## 🚀 How to Run the Application
 The system is packaged as a standalone executable JAR, requiring no external database installations.
 
+## 📄 Documentation & Instructions
+Full project instructions and detailed requirements can be found in the [`docs/instructions.pdf`](docs/instructions.pdf) file.
+
 **Run via Command Line:**
 ```bash
 java -jar release/adss2025_v02.jar
