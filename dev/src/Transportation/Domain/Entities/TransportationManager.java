@@ -1,6 +1,6 @@
 package Transportation.Domain.Entities;
 
-@SuppressWarnings({"unused", "ClassCanBeRecord"})
+@SuppressWarnings({"ClassCanBeRecord"})
 public class TransportationManager {
     private final String managerId;
     private final String name;

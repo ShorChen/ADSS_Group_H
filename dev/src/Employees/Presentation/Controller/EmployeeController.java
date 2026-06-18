@@ -1,0 +1,51 @@
+package Employees.Presentation.Controller;
+
+import Employees.Domain.Entities.Employee;
+import Employees.Domain.Entities.Role;
+import Employees.Domain.Service.EmployeeService;
+import Employees.Presentation.Model.EmployeePL;
+
+public class EmployeeController {
+    private final EmployeeService service;
+
+    public EmployeeController() {
+        this.service = new EmployeeService();
+    }
+
+
+    public String addEmployee(EmployeePL employee) {
+        return service.addEmployee(employee.toEmployee());
+    }
+
+    public boolean updateEmployee(EmployeePL employee, String password) {
+        return service.updateEmployee(employee.toEmployee(), password);
+    }
+
+    public boolean deactivateEmployee(String id) {
+        if (id == null || id.trim().isEmpty()) return false;
+        return service.deactivateEmployee(id);
+    }
+
+    public EmployeePL getEmployeeDetails(String id) {
+        if (id == null || id.trim().isEmpty()) return null;
+    
+        Employee employee = service.getEmployeeDetails(id);
+        if (employee != null) {
+            return new EmployeePL(employee); 
+        }
+        return null;
+    }
+
+    public boolean grantQualifications(Employee employee, Role... roles) {
+        // Todo: implement
+        System.out.println("Method not yet implemented");
+        return false;
+    }
+
+    public boolean revokeQualifications(Employee employee, Role... roles) {
+        // Todo: implement
+        System.out.println("Method not yet implemented");
+        return false;
+    }
+
+}
