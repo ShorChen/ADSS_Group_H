@@ -1,8 +1,0 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<SequenceDiagram>
-    <Participants>
-        <Actor id="1" name="HR / Branch Manager" /> <Participant id="2" name="PlaceEmployeesController" /> <Participant id="3" name="ShiftService" /> <Participant id="4" name="Shift ShiftPool" /> </Participants>
-
-    <Messages>
-        <Message from="1" to="2" method="assignToShift(day, type, emp, rele)" /> <Message from="2" to="3" method="getShiftsOfWeek(branch Id, yr, wk)" /> <Message from="3" to="2" method="returns weekShifts map" type="reply" /> <Message from="2" to="4" method="assignEmployeeToRole(role, employee)" /> <Message from="2" to="3" method="updateShift(targetShift)" /> <Message from="3" to="4" method="addUpdateShift(entity)" /> </Messages>
-</SequenceDiagram>
