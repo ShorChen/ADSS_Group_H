@@ -1,24 +1,27 @@
 package Transportation.Service.Core;
 
 import Core.Service.Response;
+import Employees.Domain.Entities.Role;
+import Employees.Domain.Entities.Shift;
+import Employees.Domain.Entities.ShiftKey;
+import Employees.Shared.Enums.WeekDay;
+import Employees.Domain.Service.ShiftService;
+import Employees.Shared.Enums.ShiftType;
 import Transportation.DataAccess.TransportDAO;
 import Transportation.Domain.Entities.*;
 import Transportation.Domain.Facades.TransportFacade;
 import Transportation.Service.DTO.*;
+
 import java.time.LocalDate;
+import java.time.temporal.IsoFields;
 import java.util.List;
 import java.util.stream.Collectors;
-import Workers.Domain.Service.ShiftService;
-import Workers.Shared.Enums.ShiftType;
-
-import java.time.temporal.IsoFields;
 
 @SuppressWarnings("ClassCanBeRecord")
 public class TransportService {
     private final TransportFacade transportFacade;
     private final TransportDAO transportDAO;
     private final ShiftService shiftService;
-
 
     public TransportService(TransportFacade transportFacade, TransportDAO transportDAO, ShiftService shiftService) {
         this.transportDAO = transportDAO;
@@ -109,7 +112,7 @@ public class TransportService {
         try {
             Transportation.Domain.Entities.DeliveryDL delivery = transportDAO.getDelivery(deliveryId);
             if (delivery == null) {
-                throw new IllegalArgumentException( "Eror! delivery with id " + deliveryId + " does not exist in the system." );
+                throw new IllegalArgumentException("Error! delivery with id " + deliveryId + " does not exist in the system.");
             }
 
             verifyDriverLicenseForTruck(newDriverId, newTruckLicense);
@@ -137,65 +140,50 @@ public class TransportService {
         double weight = truck.getMaxWeight();
 
         if (license.equalsIgnoreCase("C1") && weight > 12.0) {
-            throw new IllegalArgumentException("Error! the driver " + driver.getName() + " not have the required license to to drive in this truck " );
+            throw new IllegalArgumentException("Error! the driver " + driver.getName() + " does not have the required license to drive this truck.");
         }
     }
 
     private void verifyDriverShift(String driverId, LocalDate date, String departureTime, List<Transportation.Domain.Entities.DestinationDL> destinations) {
         int year = date.getYear();
-        int week = date.get(java.time.temporal.IsoFields.WEEK_OF_WEEK_BASED_YEAR);
+        int week = date.get(IsoFields.WEEK_OF_WEEK_BASED_YEAR);
         int dayOfWeek = date.getDayOfWeek().getValue();
-        Workers.Shared.Enums.WeekDay day = Workers.Shared.Enums.WeekDay.fromInteger(dayOfWeek % 7);
+        WeekDay day = WeekDay.fromInteger(dayOfWeek % 7);
 
         int departureHour = Integer.parseInt(departureTime.split(":")[0]);
 
-        //assert that estimated duration is at least 2 hours
-        int estimatedDurationHours = destinations.size() * 2;
-        int arrivalHour = departureHour + estimatedDurationHours;
-
         int defaultBranchId = 1;
-        java.util.Map<Workers.Domain.Entities.ShiftKey, Workers.Domain.Entities.Shift> weekShifts = shiftService.getShiftsOfWeek(defaultBranchId, year, week);
+        java.util.Map<ShiftKey, Shift> weekShifts = shiftService.getShiftsOfWeek(defaultBranchId, year, week);
 
-        Workers.Shared.Enums.ShiftType startShiftType = (departureHour < 14) ? ShiftType.DAY : ShiftType.EVENING;
-        Workers.Domain.Entities.Shift startShift = weekShifts.get(new Workers.Domain.Entities.ShiftKey(day, startShiftType));
+        ShiftType startShiftType = (departureHour < 14) ? ShiftType.DAY : ShiftType.EVENING;
+        Shift startShift = weekShifts.get(new ShiftKey(day, startShiftType));
 
         if (startShift == null || !startShift.doesEmployeeWork(driverId)) {
             throw new IllegalArgumentException(" Error! the driver is not scheduled to work during the departure time of the delivery.");
-        }
-
-        if (departureHour < 14 && arrivalHour >= 14) {
-            Workers.Domain.Entities.Shift endShift = weekShifts.get(new Workers.Domain.Entities.ShiftKey(day, ShiftType.EVENING));
-
-            if (endShift == null || !endShift.doesEmployeeWork(driverId)) {
-                throw new IllegalArgumentException("Error: the driver is not assigned to the following evening shift to complete it.");
-            }
         }
     }
 
     private void verifyStorekeeperAtDestinations(LocalDate date, String departureTime, List<Transportation.Domain.Entities.DestinationDL> destinations) {
         int year = date.getYear();
-        int week = date.get(java.time.temporal.IsoFields.WEEK_OF_WEEK_BASED_YEAR);
+        int week = date.get(IsoFields.WEEK_OF_WEEK_BASED_YEAR);
         int dayOfWeek = date.getDayOfWeek().getValue();
-        Workers.Shared.Enums.WeekDay day = Workers.Shared.Enums.WeekDay.fromInteger(dayOfWeek % 7);
+        WeekDay day = WeekDay.fromInteger(dayOfWeek % 7);
 
         int departureHour = Integer.parseInt(departureTime.split(":")[0]);
-        int currentHour = departureHour;
 
         int defaultBranchId = 1;
-        java.util.Map<Workers.Domain.Entities.ShiftKey, Workers.Domain.Entities.Shift> weekShifts = shiftService.getShiftsOfWeek(defaultBranchId, year, week);
+        java.util.Map<ShiftKey, Shift> weekShifts = shiftService.getShiftsOfWeek(defaultBranchId, year, week);
+
+        ShiftType shiftType = (departureHour < 14) ? ShiftType.DAY : ShiftType.EVENING;
+        Shift destinationShift = weekShifts.get(new ShiftKey(day, shiftType));
 
         for (Transportation.Domain.Entities.DestinationDL dest : destinations) {
-            currentHour += 2;
-
-            Workers.Shared.Enums.ShiftType arrivalShiftType = (currentHour < 14) ? ShiftType.DAY : Workers.Shared.Enums.ShiftType.EVENING;
-            Workers.Domain.Entities.Shift destinationShift = weekShifts.get(new Workers.Domain.Entities.ShiftKey(day, arrivalShiftType));
-
             if (destinationShift == null) {
-                throw new IllegalArgumentException("Error: the destination site (" + dest.getDestinationSite() + ") does not have a shift scheduled during the estimated arrival time.");
+                throw new IllegalArgumentException("Error: the destination site (" + dest.getDestinationSite() + ") does not have a shift scheduled during the delivery time.");
             }
 
             boolean hasStorekeeper = false;
-            for (java.util.Map.Entry<Workers.Domain.Entities.Role, java.util.Set<String>> entry : destinationShift.getEmployees().entrySet()) {
+            for (java.util.Map.Entry<Role, java.util.Set<String>> entry : destinationShift.getEmployees().entrySet()) {
                 if (entry.getKey().getTag().equalsIgnoreCase("Storekeeper") && !entry.getValue().isEmpty()) {
                     hasStorekeeper = true;
                     break;
@@ -203,7 +191,7 @@ public class TransportService {
             }
 
             if (!hasStorekeeper) {
-                throw new IllegalArgumentException("the destination site (" + dest.getDestinationSite() + ") does not have a storekeeper scheduled to work during the estimated arrival time.");
+                throw new IllegalArgumentException("the destination site (" + dest.getDestinationSite() + ") does not have a storekeeper scheduled to work during the delivery time.");
             }
         }
     }

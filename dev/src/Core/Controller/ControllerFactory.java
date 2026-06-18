@@ -19,7 +19,7 @@ import Suppliers.DataAccess.SqlImpl.SqlOrderDAO;
 import Suppliers.DataAccess.SqlImpl.SqlSupplierDAO;
 import Inventory.DataAccess.SqlImpl.SqlInventoryDAO;
 import Transportation.DataAccess.SqlImpl.SqlTransportDAO;
-import Workers.Domain.Service.ShiftService;
+import Employees.Domain.Service.ShiftService;
 
 public class ControllerFactory {
     private static ControllerFactory instance;
