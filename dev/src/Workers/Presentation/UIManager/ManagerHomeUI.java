@@ -35,7 +35,6 @@ public class ManagerHomeUI extends ViewCLI {
         }
     }
 
-
     private void changePassword() {
         String oldPassword = getNextLine("Enter Old Password");
         String password = getNextLine("Enter New Password");

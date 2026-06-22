@@ -1,10 +1,13 @@
 package Workers.Presentation.Controller;
 
 import Workers.Context.SessionManager;
-import Workers.Domain.Entities.Store.Branch;
-import Workers.Domain.Service.BranchService;
-import Workers.Presentation.Model.BranchPL;
+import Workers.Domain.DTO.BranchSL;
+import Workers.Service.BranchService;
+import Workers.Presentation.DTO.BranchPL;
+import Workers.Shared.WeekConstants;
 
+import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.List;
 
 public class BranchController {
@@ -15,13 +18,19 @@ public class BranchController {
     }
 
     public List<BranchPL> getBranches() {
-        return service.getBranches();
+        List<BranchPL> branches = new ArrayList<>();
+        service.getBranches().forEach(b -> branches.add(new BranchPL(b)));
+        return branches;
     }
 
     public void addBranch(String location) {
-        service.addUpdateBranch(new Branch(-1,
-                SessionManager.getCurrentEmployee().getId()
-                ,location));
+        LocalDate targetDate = SessionManager.now().toLocalDate();
+
+        int year = targetDate.get(WeekConstants.WEEK_FIELDS.weekBasedYear());
+        int week = targetDate.get(WeekConstants.WEEK_FIELDS.weekOfWeekBasedYear());
+
+        service.addUpdateBranch(new BranchSL(-1, location,
+                SessionManager.getCurrentEmployee().getId(), year, week));
     }
 
     public boolean containsBranch(String location) {

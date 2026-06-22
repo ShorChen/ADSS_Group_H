@@ -1,9 +1,16 @@
 package Workers.DataAccess.Pools;
 
-import java.util.ArrayList;
-import java.util.List;
+import Workers.DataAccess.DAO.StoreDAO;
+import Workers.DataAccess.Entities.Keys.BranchKey;
+import Workers.DataAccess.Entities.Keys.WeekKey;
 
-public class StorePool {
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+public class StorePool implements StoreDAO {
+    private boolean firstStartUp;
     private List<String> closedDays;
     private static StorePool instance;
 
@@ -15,6 +22,7 @@ public class StorePool {
 
     private StorePool() {
         closedDays = new ArrayList<>();
+        firstStartUp = true;
     }
 
     public List<String> getClosedDays() {
@@ -25,7 +33,15 @@ public class StorePool {
         this.closedDays = new ArrayList<>(closedDays);
     }
 
-    public static void free(){
+    public boolean isFirstStartUp() {
+        return firstStartUp;
+    }
+
+    public void setFirstStartUp(boolean firstStartUp) {
+        this.firstStartUp = firstStartUp;
+    }
+
+    public static void free() {
         instance = null;
     }
 }

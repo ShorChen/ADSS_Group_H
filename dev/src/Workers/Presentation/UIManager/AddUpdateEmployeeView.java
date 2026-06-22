@@ -1,7 +1,8 @@
 package Workers.Presentation.UIManager;
 
+import Workers.Context.SessionManager;
 import Workers.Presentation.Controller.AddUpdateEmployeeController;
-import Workers.Presentation.Model.EmployeePL;
+import Workers.Presentation.DTO.EmployeePL;
 import Workers.Presentation.UIShared.ViewCLI;
 import Workers.Presentation.Utils.Option;
 import Workers.Shared.Enums.JobScope;
@@ -17,8 +18,6 @@ import java.util.Set;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 public class AddUpdateEmployeeView extends ViewCLI {
-
-
     private final AddUpdateEmployeeController controller;
     private EmployeePL.Builder builder;
     private boolean open;
@@ -47,9 +46,9 @@ public class AddUpdateEmployeeView extends ViewCLI {
             printSummary();
 
             displayMenu(new Option.Builder("--- Options ---")
-                            .append("Cancel", this::close)
-                            .append("Update a Field", this::updateFieldMenu)
-                            .append("Save Changes", this::saveChanges)
+                    .append("Cancel", this::close)
+                    .append("Update a Field", this::updateFieldMenu)
+                    .append("Save Changes", this::saveChanges)
             );
 
         }
@@ -81,8 +80,15 @@ public class AddUpdateEmployeeView extends ViewCLI {
         roles();
         constraints();
         yearlyRestDays();
+        branch();
         if (isNewEmployee)
             weeklyRestDay();
+    }
+
+    private void branch() {
+        builder.branchId(
+                SessionManager.getSelectedBranchId()
+        );
     }
 
     private void printSummary() {
@@ -105,7 +111,7 @@ public class AddUpdateEmployeeView extends ViewCLI {
         if (employee.getQualifiedRoles().isEmpty()) {
             System.out.println("None");
         } else {
-            employee.getQualifiedRoles().forEach(role -> System.out.print(role + " "));
+            employee.getQualifiedRoles().forEach(role -> System.out.print(role + ", "));
             System.out.println();
         }
     }
@@ -148,6 +154,10 @@ public class AddUpdateEmployeeView extends ViewCLI {
 
     private void id() {
         String id = getNextLine("Enter Employee Id:");
+        while(controller.existsEmployeeId(id)){
+            System.out.println("Employee with this id already exists in the system");
+            id = getNextLine("Enter Employee Id:");
+        }
         builder = new EmployeePL.Builder(id);
     }
 

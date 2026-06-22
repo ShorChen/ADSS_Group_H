@@ -1,9 +1,9 @@
 package Workers.Presentation.Controller;
 
 import Workers.Context.SessionManager;
-import Workers.Domain.Entities.Employee;
-import Workers.Domain.Service.AuthService;
-import Workers.Presentation.Model.EmployeePL;
+import Workers.Domain.DTO.EmployeeSL;
+import Workers.Service.AuthService;
+import Workers.Presentation.DTO.EmployeePL;
 
 public class AuthController {
     private final AuthService service;
@@ -13,7 +13,7 @@ public class AuthController {
     }
 
     public boolean login(String id, String password) {
-        Employee employee = service.login(id, password);
+        EmployeeSL employee = service.login(id, password);
         if (employee == null) return false;
 
         SessionManager.login(new EmployeePL(employee));
@@ -28,8 +28,15 @@ public class AuthController {
         return service.changePassword(SessionManager.getCurrentEmployee().getId(), oldPass, newPass);
     }
 
-    public boolean isManager(String id){
+    public boolean isManager(String id) {
         return service.isManager(id);
     }
 
+    public boolean isBranchManager(String id) {
+        return service.isBranchManager(id);
+    }
+
+    public void selectCurrentEmployeeBranch() {
+        SessionManager.setSelectedBranchId(SessionManager.getCurrentEmployee().getBranchId());
+    }
 }

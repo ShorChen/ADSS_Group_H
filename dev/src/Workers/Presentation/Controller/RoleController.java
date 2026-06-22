@@ -1,6 +1,6 @@
 package Workers.Presentation.Controller;
 
-import Workers.Domain.Service.RoleService;
+import Workers.Service.RoleService;
 
 import java.util.ArrayList;
 import java.util.List;

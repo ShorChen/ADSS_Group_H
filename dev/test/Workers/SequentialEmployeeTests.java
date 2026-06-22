@@ -2,15 +2,15 @@ package Workers;
 
 import Workers.Context.SessionManager;
 import Workers.DataAccess.Pools.EmployeePool;
-import Workers.Domain.Entities.Employee;
-import Workers.Domain.Entities.Role;
-import Workers.Domain.Entities.ShiftKey;
-import Workers.Domain.Service.EmployeeService;
-import org.junit.jupiter.api.*;
+import Workers.Domain.DTO.EmployeeSL;
+import Workers.Domain.DTO.RoleSL;
+import Workers.Domain.DTO.ShiftKey;
+import Workers.Service.EmployeeService;
 import Workers.Shared.Enums.JobScope;
 import Workers.Shared.Enums.SalaryType;
 import Workers.Shared.Enums.ShiftType;
 import Workers.Shared.Enums.WeekDay;
+import org.junit.jupiter.api.*;
 
 import java.util.*;
 
@@ -21,6 +21,7 @@ import static org.junit.jupiter.api.Assertions.*;
 public class SequentialEmployeeTests {
 
     private final EmployeeService employeeService = new EmployeeService();
+    private final int branchId = 1;
 
     @BeforeAll
     void setUp() {
@@ -35,7 +36,7 @@ public class SequentialEmployeeTests {
     @Test
     @Order(1)
     void step01_addEmployee_ValidNewEmployee() {
-        Employee emp = createTestEmployee("123", "Dani", true);
+        EmployeeSL emp = createTestEmployee("123", "Dani", true);
         String currentPassword = employeeService.addEmployee(emp);
         assertFalse(currentPassword.isEmpty(), "Password should not be empty");
         assertTrue(employeeService.containsEmployee("123"));
@@ -44,7 +45,7 @@ public class SequentialEmployeeTests {
     @Test
     @Order(2)
     void step02_addEmployee_ExistingId_ThrowsException() {
-        Employee emp2 = createTestEmployee("123", "Yossi", true);
+        EmployeeSL emp2 = createTestEmployee("123", "Yossi", true);
         assertThrows(IllegalArgumentException.class, () -> employeeService.addEmployee(emp2));
     }
 
@@ -52,7 +53,7 @@ public class SequentialEmployeeTests {
     @Order(3)
     void step03_deactivateEmployee_ActiveEmployee() {
         employeeService.addEmployee(createTestEmployee("111", "Rina", true));
-        employeeService.deactivateEmployee("111");
+        employeeService.deactivateEmployee(branchId,"111");
         assertFalse(employeeService.getEmployeeDetails("111").isActive(), "Employee status should be false");
     }
 
@@ -60,13 +61,13 @@ public class SequentialEmployeeTests {
     @Order(4)
     void step04_deactivateEmployee_AlreadyInactive_ThrowsException() {
         employeeService.addEmployee(createTestEmployee("222", "Bob", false));
-        assertThrows(IllegalArgumentException.class, () -> employeeService.deactivateEmployee("222"));
+        assertThrows(IllegalArgumentException.class, () -> employeeService.deactivateEmployee(branchId,"222"));
     }
 
     @Test
     @Order(5)
     void step05_deactivateEmployee_NonExistent_ReturnsFalse() {
-        boolean result = employeeService.deactivateEmployee("999");
+        boolean result = employeeService.deactivateEmployee(branchId,"999");
         assertFalse(result);
     }
 
@@ -77,7 +78,7 @@ public class SequentialEmployeeTests {
         Set<ShiftKey> unavailable = new HashSet<>();
         unavailable.add(new ShiftKey(WeekDay.SUNDAY, ShiftType.EVENING));
         assertDoesNotThrow(() -> employeeService.updateAvailability("333", unavailable, true));
-        Employee updated = employeeService.getEmployeeDetails("333");
+        EmployeeSL updated = employeeService.getEmployeeDetails("333");
         assertTrue(updated.isWorkingDoubles());
         assertTrue(updated.getUnavailableShifts().containsKey(WeekDay.SUNDAY));
     }
@@ -94,9 +95,9 @@ public class SequentialEmployeeTests {
     @Test
     @Order(8)
     void step08_getEmployeeDetails_ExistingEmployee() {
-        Employee emp = createTestEmployee("444", "Alice", true);
+        EmployeeSL emp = createTestEmployee("444", "Alice", true);
         employeeService.addEmployee(emp);
-        Employee retrieved = employeeService.getEmployeeDetails("444");
+        EmployeeSL retrieved = employeeService.getEmployeeDetails("444");
         assertNotNull(retrieved, "Employee should be found");
         assertEquals("444", retrieved.getId());
         assertEquals("Alice", retrieved.getName());
@@ -105,16 +106,16 @@ public class SequentialEmployeeTests {
     @Test
     @Order(9)
     void step09_getEmployeeDetails_NonExistent_ReturnsNull() {
-        Employee retrieved = employeeService.getEmployeeDetails("9999");
+        EmployeeSL retrieved = employeeService.getEmployeeDetails("9999");
         assertNull(retrieved, "Non-existent employee should return null");
     }
 
     @Test
     @Order(10)
     void step10_updateEmployee_ExistingEmployee() {
-        Employee emp = createTestEmployee("555", "Bob", true);
+        EmployeeSL emp = createTestEmployee("555", "Bob", true);
         String pass = employeeService.addEmployee(emp);
-        Employee updatedEmp = new Employee(
+        EmployeeSL updatedEmp = new EmployeeSL(
                 "555", "Bob Updated", "123456", 60.0, SalaryType.HOURLY,
                 SessionManager.now(), JobScope.FULL_TIME, new ArrayList<>(),
                 "None", 12, WeekDay.SUNDAY,
@@ -122,7 +123,7 @@ public class SequentialEmployeeTests {
         );
         boolean result = employeeService.updateEmployee(updatedEmp, pass);
         assertTrue(result, "Update should succeed");
-        Employee retrieved = employeeService.getEmployeeDetails("555");
+        EmployeeSL retrieved = employeeService.getEmployeeDetails("555");
         assertEquals("Bob Updated", retrieved.getName());
         assertEquals(60.0, retrieved.getSalary());
     }
@@ -130,7 +131,7 @@ public class SequentialEmployeeTests {
     @Test
     @Order(11)
     void step11_updateEmployee_NonExistent_ReturnsFalse() {
-        Employee emp = createTestEmployee("666", "Charlie", true);
+        EmployeeSL emp = createTestEmployee("666", "Charlie", true);
         boolean result = employeeService.updateEmployee(emp, "password");
         assertFalse(result, "Update should fail for non-existent employee");
     }
@@ -138,14 +139,14 @@ public class SequentialEmployeeTests {
     @Test
     @Order(12)
     void step12_getAvailableEmployees_WithRoles() {
-        Employee emp1 = createTestEmployeeWithRoles("777", "David", Role.Cashier);
-        Employee emp2 = createTestEmployeeWithRoles("888", "Eve", Role.Cashier);
+        EmployeeSL emp1 = createTestEmployeeWithRoles("777", "David", RoleSL.Cashier);
+        EmployeeSL emp2 = createTestEmployeeWithRoles("888", "Eve", RoleSL.Cashier);
         employeeService.addEmployee(emp1);
         employeeService.addEmployee(emp2);
         Set<ShiftKey> unavailable = new HashSet<>();
         unavailable.add(new ShiftKey(WeekDay.SUNDAY, ShiftType.DAY));
         employeeService.updateAvailability("888", unavailable, false);
-        List<Employee> available = employeeService.getAvailableEmployees(WeekDay.SUNDAY, ShiftType.DAY, Role.Cashier);
+        List<EmployeeSL> available = employeeService.getAvailableEmployees(WeekDay.SUNDAY, ShiftType.DAY, RoleSL.Cashier);
         assertEquals(1, available.size(), "Only one employee should be available");
         assertEquals("777", available.getFirst().getId());
     }
@@ -153,42 +154,42 @@ public class SequentialEmployeeTests {
     @Test
     @Order(13)
     void step13_getAvailableEmployees_NoEmployeesWithRole_ReturnsEmpty() {
-        List<Employee> available = employeeService.getAvailableEmployees(WeekDay.MONDAY, ShiftType.EVENING, Role.MANAGER);
+        List<EmployeeSL> available = employeeService.getAvailableEmployees(WeekDay.MONDAY, ShiftType.EVENING, RoleSL.MANAGER);
         assertTrue(available.isEmpty(), "No employees with manager role should be available");
     }
 
     @Test
     @Order(14)
     void step14_containsRole_EmployeeHasRole() {
-        Employee emp = createTestEmployeeWithRoles("999", "Frank", Role.Storekeeper);
+        EmployeeSL emp = createTestEmployeeWithRoles("999", "Frank", RoleSL.Storekeeper);
         employeeService.addEmployee(emp);
-        assertTrue(employeeService.containsRole("999", Role.Storekeeper), "Employee should have the storekeeper role");
+        assertTrue(employeeService.containsRole("999", RoleSL.Storekeeper), "Employee should have the storekeeper role");
     }
 
     @Test
     @Order(15)
     void step15_containsRole_EmployeeDoesNotHaveRole() {
-        Employee emp = createTestEmployeeWithRoles("101", "Grace", Role.Cashier);
+        EmployeeSL emp = createTestEmployeeWithRoles("101", "Grace", RoleSL.Cashier);
         employeeService.addEmployee(emp);
-        assertFalse(employeeService.containsRole("101", Role.MANAGER), "Employee should not have the manager role");
+        assertFalse(employeeService.containsRole("101", RoleSL.MANAGER), "Employee should not have the manager role");
     }
 
     @Test
     @Order(16)
     void step16_containsRole_NonExistentEmployee_ThrowsException() {
-        assertThrows(IllegalArgumentException.class, () -> employeeService.containsRole("202", Role.Cashier));
+        assertThrows(IllegalArgumentException.class, () -> employeeService.containsRole("202", RoleSL.Cashier));
     }
 
-    private Employee createTestEmployee(String id, String name, boolean isActive) {
-        return new Employee(
+    private EmployeeSL createTestEmployee(String id, String name, boolean isActive) {
+        return new EmployeeSL(
                 id, name, "123456", 50.0, SalaryType.HOURLY,
                 SessionManager.now(), JobScope.FULL_TIME, new ArrayList<>(),
                 "None", 12, WeekDay.SUNDAY, false, new HashMap<>(), isActive, 1
         );
     }
 
-    private Employee createTestEmployeeWithRoles(String id, String name, Role... roles) {
-        return new Employee(
+    private EmployeeSL createTestEmployeeWithRoles(String id, String name, RoleSL... roles) {
+        return new EmployeeSL(
                 id, name, "123456", 50.0, SalaryType.HOURLY,
                 SessionManager.now(), JobScope.FULL_TIME, Arrays.asList(roles),
                 "None", 12, WeekDay.SUNDAY, false, new HashMap<>(), true, 1

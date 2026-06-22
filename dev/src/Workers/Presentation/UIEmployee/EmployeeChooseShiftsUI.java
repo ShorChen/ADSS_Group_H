@@ -1,7 +1,7 @@
 package Workers.Presentation.UIEmployee;
 
 import Workers.Context.SessionManager;
-import Workers.Domain.Entities.ShiftKey;
+import Workers.Domain.DTO.ShiftKey;
 import Workers.Presentation.Controller.EmployeeShiftController;
 import Workers.Presentation.UIShared.ShiftsView;
 import Workers.Presentation.UIShared.ViewCLI;

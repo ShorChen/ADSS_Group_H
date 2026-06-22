@@ -1,5 +1,6 @@
 package Workers.DataAccess.Pools;
 
+import Workers.DataAccess.DAO.EmployeeDAO;
 import Workers.DataAccess.Entities.EmployeeEntity;
 import Workers.DataAccess.Entities.Keys.EmployeeKey;
 
@@ -8,7 +9,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-public class EmployeePool {
+public class EmployeePool implements EmployeeDAO {
     private final Map<EmployeeKey, EmployeeEntity> employees;
 
     private static EmployeePool instance;

@@ -1,18 +1,20 @@
 package Workers.Presentation.UIManager;
 
 import Workers.Presentation.Controller.PlaceEmployeesController;
-import Workers.Presentation.Model.EmployeePL;
+import Workers.Presentation.DTO.EmployeePL;
 import Workers.Presentation.UIEmployee.RequestReplacementUI;
 import Workers.Presentation.UIShared.ShiftsView;
 import Workers.Presentation.UIShared.ViewCLI;
 import Workers.Presentation.Utils.Option;
+import Workers.Shared.Enums.ShiftType;
+import Workers.Shared.Enums.WeekDay;
 
 import java.util.List;
 import java.util.Objects;
 
 public class PlaceEmployeesUI extends ViewCLI {
-
     private final PlaceEmployeesController controller;
+    private ShiftsView shiftsView;
 
     public PlaceEmployeesUI(Runnable onDismiss) {
         super(onDismiss);
@@ -21,16 +23,23 @@ public class PlaceEmployeesUI extends ViewCLI {
 
     @Override
     public void display() {
-        ShiftsView shiftsView = new ShiftsView(0);
-        shiftsView.selectShift((day, type) -> placeEmployeeFlow(
-                day.toString(),
-                type.toString()
-        ));
+        shiftsView = new ShiftsView(0);
+        if (controller.isFirstWeek()) onFirstWeek();
+
+        shiftsView.selectShift(this::placeEmployeeFlow);
         onDismiss.run();
 
     }
 
-    private void placeEmployeeFlow(String day, String type) {
+    private void onFirstWeek() {
+        Option.Builder builder = new Option.Builder("Select Week");
+        builder.append("Back", onDismiss);
+        builder.append("This Week", () -> shiftsView = new ShiftsView(0));
+        builder.append("Upcoming Week", () -> shiftsView = new ShiftsView(-1));
+        displayMenu(builder);
+    }
+
+    private void placeEmployeeFlow(WeekDay day, ShiftType type) {
 
         String selectedRole = selectionMenuOf("Roles", controller.getRoles(), Objects::toString, o -> o);
         EmployeePL selectedEmployee = selectEmployeeFromMenu(day, type, selectedRole);
@@ -45,7 +54,7 @@ public class PlaceEmployeesUI extends ViewCLI {
         }
     }
 
-    private EmployeePL selectEmployeeFromMenu(String day, String type, String role) {
+    private EmployeePL selectEmployeeFromMenu(WeekDay day, ShiftType type, String role) {
         List<EmployeePL> employees = controller.getAvailableEmployees(day, type, role);
         if (employees.isEmpty()) return null;
         return selectionMenuOf("---Available Employees---",

@@ -1,7 +1,8 @@
 package Workers.Presentation.UIManager;
 
+import Workers.Context.SessionManager;
 import Workers.Presentation.Controller.BranchController;
-import Workers.Presentation.Model.BranchPL;
+import Workers.Presentation.DTO.BranchPL;
 import Workers.Presentation.UIShared.ViewCLI;
 import Workers.Presentation.Utils.Option;
 
@@ -19,7 +20,10 @@ public class ManageBranchesUI extends ViewCLI {
         open = true;
         while (open) {
             Option.Builder builder = new Option.Builder(" --- Manage Branches --- ")
-                    .append("Back", onDismiss)
+                    .append("Back", () -> {
+                        SessionManager.unselectBranch();
+                        onDismiss.run();
+                    })
                     .append("Create Branch", this::createBranch);
             controller.getBranches().forEach(b ->
                     builder.append("Manage " + b.getLocation(), () -> gotoBranch(b))
@@ -29,7 +33,8 @@ public class ManageBranchesUI extends ViewCLI {
     }
 
     private void gotoBranch(BranchPL branch) {
-        ViewBranchUI viewBranchUI = new ViewBranchUI(branch, this::display);
+        ViewBranchUI viewBranchUI = new ViewBranchUI(this::display);
+        SessionManager.setSelectedBranchId(branch.getBranchId());
         close();
         viewBranchUI.display();
     }

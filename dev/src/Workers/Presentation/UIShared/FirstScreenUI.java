@@ -2,7 +2,7 @@ package Workers.Presentation.UIShared;
 
 import Workers.Presentation.Controller.FirstScreenController;
 
-public class FirstScreenUI extends View {
+public class FirstScreenUI extends ViewCLI {
     private final FirstScreenController controller;
 
     public FirstScreenUI() {

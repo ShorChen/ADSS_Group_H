@@ -1,16 +1,16 @@
 package Workers.Presentation.Controller;
 
 import Workers.Context.SessionManager;
-import Workers.Domain.Entities.Request;
-import Workers.Domain.Entities.Role;
-import Workers.Domain.Entities.Shift;
-import Workers.Domain.Entities.ShiftKey;
-import Workers.Domain.Service.EmployeeService;
-import Workers.Domain.Service.RequestReplacementService;
-import Workers.Domain.Service.ShiftService;
+import Workers.Domain.DTO.RequestSL;
+import Workers.Domain.DTO.RoleSL;
+import Workers.Domain.DTO.ShiftSL;
+import Workers.Domain.DTO.ShiftKey;
+import Workers.Service.EmployeeService;
+import Workers.Service.RequestReplacementService;
+import Workers.Service.ShiftService;
 import Workers.Domain.Utils.RequestStateMachine;
-import Workers.Presentation.Model.RequestPL;
-import Workers.Presentation.Model.ShiftPL;
+import Workers.Presentation.DTO.RequestPL;
+import Workers.Presentation.DTO.ShiftPL;
 import Workers.Shared.Enums.RequestStatus;
 import Workers.Shared.Enums.ShiftType;
 import Workers.Shared.WeekConstants;
@@ -39,19 +39,19 @@ public class RequestReplacementController {
         LocalDate targetDate = SessionManager.now().plusWeeks(1).toLocalDate();
         int year = targetDate.get(WeekConstants.WEEK_FIELDS.weekBasedYear());
         int week = targetDate.get(WeekConstants.WEEK_FIELDS.weekOfWeekBasedYear());
-        int branchId = SessionManager.getCurrentEmployee().getBranchId();
+        int branchId = SessionManager.getSelectedBranchId();
 
-        Map<ShiftKey, Shift> map = shiftService.getShiftsOfWeek(branchId, year, week);
-        Shift shift = map.get(new ShiftKey(day, type));
+        Map<ShiftKey, ShiftSL> map = shiftService.getShiftsOfWeek(branchId, year, week);
+        ShiftSL shift = map.get(new ShiftKey(day, type));
 
         if (shift.doesEmployeeWork(otherId))
             throw new IllegalArgumentException("Employee already in enrolled in that shift");
 
         String id = SessionManager.getCurrentEmployee().getId();
-        Role role = shift.getEmployeeShiftRole(id);
+        RoleSL role = shift.getEmployeeShiftRole(id);
 
         if (employeeService.containsRole(otherId, role)) {
-            Request r = new Request(shift, id, otherId);
+            RequestSL r = new RequestSL(shift, id, otherId);
             service.requestReplacement(r);
         }
         throw new IllegalArgumentException("other employee is not qualified for your job");
@@ -59,7 +59,7 @@ public class RequestReplacementController {
 
     public List<RequestPL> getCurrentEmployeePendingRequests() {
         String id = SessionManager.getCurrentEmployee().getId();
-        List<Request> requests = service.getPendingRequests(id);
+        List<RequestSL> requests = service.getPendingRequests(id);
         if (authController.isManager(id)) requests = service.getAllRequests();
 
         List<RequestPL> pendingRequests = new ArrayList<>();
@@ -111,7 +111,7 @@ public class RequestReplacementController {
     }
 
     @Deprecated
-    void t(Request request, RequestStatus status){
+    void t(RequestSL request, RequestStatus status){
         RequestStateMachine stateMachine = new RequestStateMachine();
         stateMachine.apply(new RequestStateMachine.State(request.getPrevStatus(),
                         request.getNewStatus(), request.getManagerStatus()),

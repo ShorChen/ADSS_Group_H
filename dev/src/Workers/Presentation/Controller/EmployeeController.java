@@ -1,9 +1,10 @@
 package Workers.Presentation.Controller;
 
-import Workers.Domain.Entities.Employee;
-import Workers.Domain.Entities.Role;
-import Workers.Domain.Service.EmployeeService;
-import Workers.Presentation.Model.EmployeePL;
+import Workers.Context.SessionManager;
+import Workers.Domain.DTO.EmployeeSL;
+import Workers.Domain.DTO.RoleSL;
+import Workers.Service.EmployeeService;
+import Workers.Presentation.DTO.EmployeePL;
 
 public class EmployeeController {
     private final EmployeeService service;
@@ -23,29 +24,32 @@ public class EmployeeController {
 
     public boolean deactivateEmployee(String id) {
         if (id == null || id.trim().isEmpty()) return false;
-        return service.deactivateEmployee(id);
+        return service.deactivateEmployee(SessionManager.getSelectedBranchId(), id);
     }
 
     public EmployeePL getEmployeeDetails(String id) {
         if (id == null || id.trim().isEmpty()) return null;
-    
-        Employee employee = service.getEmployeeDetails(id);
+
+        EmployeeSL employee = service.getEmployeeDetails(id);
         if (employee != null) {
-            return new EmployeePL(employee); 
+            return new EmployeePL(employee);
         }
         return null;
     }
 
-    public boolean grantQualifications(Employee employee, Role... roles) {
-        // Todo: implement
+    @Deprecated
+    public boolean grantQualifications(EmployeeSL employee, RoleSL... roles) {
         System.out.println("Method not yet implemented");
         return false;
     }
 
-    public boolean revokeQualifications(Employee employee, Role... roles) {
-        // Todo: implement
+    @Deprecated
+    public boolean revokeQualifications(EmployeeSL employee, RoleSL... roles) {
         System.out.println("Method not yet implemented");
         return false;
     }
 
+    public boolean exists(String id) {
+        return service.containsEmployee(id);
+    }
 }

@@ -4,6 +4,7 @@ import Workers.Context.SessionManager;
 import Workers.Presentation.Controller.AuthController;
 import Workers.Presentation.UIEmployee.EmployeeHomeUI;
 import Workers.Presentation.UIManager.ManagerHomeUI;
+import Workers.Presentation.UIManager.ViewBranchUI;
 
 public class LoginUI extends ViewCLI {
 
@@ -13,7 +14,6 @@ public class LoginUI extends ViewCLI {
     public LoginUI(Runnable onDismiss) {
         super(onDismiss);
     }
-
 
     @Override
     public void display() {
@@ -28,11 +28,15 @@ public class LoginUI extends ViewCLI {
             if (logged) {
                 System.out.println("Successfully Logged in");
                 close();
-                boolean manager = controller.isManager(id);
-                if (manager) {
+                if (controller.isManager(id)) {
                     ManagerHomeUI managerHomeUI = new ManagerHomeUI(this::display);
                     managerHomeUI.display();
+                } else if (controller.isBranchManager(id)) {
+                    controller.selectCurrentEmployeeBranch();
+                    ViewBranchUI viewBranchUI = new ViewBranchUI(this::display);
+                    viewBranchUI.display();
                 } else {
+                    controller.selectCurrentEmployeeBranch();
                     EmployeeHomeUI employeeHomeUI = new EmployeeHomeUI(this::display);
                     employeeHomeUI.display();
                 }

@@ -1,7 +1,7 @@
 package Workers.DataAccess.Entities;
 
-import org.jetbrains.annotations.NotNull;
 import Workers.Shared.WeekConstants;
+import org.jetbrains.annotations.NotNull;
 
 import java.time.LocalDateTime;
 import java.time.temporal.WeekFields;

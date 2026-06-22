@@ -1,12 +1,16 @@
 package Workers.DataAccess.Pools;
 
-import Workers.DataAccess.Entities.ShiftEntity;
+import Workers.DataAccess.DAO.ShiftDAO;
 import Workers.DataAccess.Entities.Keys.BranchWeekKey;
 import Workers.DataAccess.Entities.Keys.ShiftEntityKey;
+import Workers.DataAccess.Entities.ShiftEntity;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
-public class ShiftPool {
+public class ShiftPool implements ShiftDAO {
     private final Map<BranchWeekKey, Map<ShiftEntityKey, ShiftEntity>> shiftsTable;
     private static ShiftPool instance;
 
@@ -84,7 +88,11 @@ public class ShiftPool {
 
     public List<ShiftEntity> getShiftsByBranchAndWeek(int branchId, int year, int week) {
         List<ShiftEntity> shifts = new ArrayList<>();
-        shiftsTable.getOrDefault(createKey(branchId, year, week), new HashMap<>())
+        BranchWeekKey key = createKey(branchId, year, week);
+        if (!shiftsTable.containsKey(key))
+            shiftsTable.put(key, new HashMap<>());
+
+        shiftsTable.get(key)
                 .forEach((_, shift) ->
                         shifts.add(shift)
                 );
@@ -93,9 +101,10 @@ public class ShiftPool {
 
     public void addUpdateShift(BranchWeekKey branchWeekKey, ShiftEntityKey shiftEntityKey,
                                ShiftEntity shift) {
-        Map<ShiftEntityKey, ShiftEntity> week =
-                shiftsTable.computeIfAbsent(branchWeekKey, _ -> new HashMap<>());
-        week.put(shiftEntityKey, shift);
+        if (!shiftsTable.containsKey(branchWeekKey))
+            shiftsTable.put(branchWeekKey, new HashMap<>());
+
+        shiftsTable.get(branchWeekKey).put(shiftEntityKey, shift);
     }
 
     public void removeShift(int branchId, int year, int week, String day, String type) {

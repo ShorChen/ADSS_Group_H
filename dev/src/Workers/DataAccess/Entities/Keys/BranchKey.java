@@ -1,4 +1,4 @@
 package Workers.DataAccess.Entities.Keys;
 
-public record BranchKey(int branchId, String location) {
+public record BranchKey(int id) {
 }

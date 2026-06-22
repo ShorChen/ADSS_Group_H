@@ -1,16 +1,17 @@
 package Workers.Presentation.Controller;
 
 import Workers.Context.SessionManager;
-import Workers.Domain.Entities.Employee;
-import Workers.Domain.Entities.Role;
-import Workers.Domain.Entities.Store.Branch;
-import Workers.Domain.Service.*;
-import Workers.Presentation.Model.BranchPL;
-import Workers.Presentation.Model.StoreDetailsPL;
+import Workers.Domain.DTO.EmployeeSL;
+import Workers.Domain.DTO.RoleSL;
+import Workers.Domain.DTO.BranchSL;
+import Workers.Presentation.DTO.StoreDetailsPL;
+import Workers.Service.*;
 import Workers.Shared.Enums.JobScope;
 import Workers.Shared.Enums.SalaryType;
 import Workers.Shared.Enums.WeekDay;
+import Workers.Shared.WeekConstants;
 
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -32,13 +33,13 @@ public class CreateStoreController {
     }
 
     public String registerManager(String id, String name, String bankAccount, String weekDay) {
-        List<Role> roles = new ArrayList<>();
-        roles.add(Role.MANAGER);
-        return employeeService.addEmployee(new Employee(
+        List<RoleSL> roles = new ArrayList<>();
+        roles.add(RoleSL.MANAGER);
+        return employeeService.addEmployee(new EmployeeSL(
                 id, name, bankAccount, 0, SalaryType.GLOBALLY,
                 SessionManager.now(), JobScope.FULL_TIME,
-                roles, "", 24, WeekDay.valueOf(weekDay),
-                false, new HashMap<>(), true, Branch.ALL_BRANCHES
+                roles, "", 24, WeekDay.fromArgs(weekDay),
+                false, new HashMap<>(), true, BranchSL.ALL_BRANCHES
         ));
     }
 
@@ -56,8 +57,14 @@ public class CreateStoreController {
         storeDetailsService.addUpdateStoreDetails(storeDetailsPL);
     }
 
-    public void addBranch(BranchPL branchPL) {
-        branchService.addUpdateBranch(branchPL.toBranch());
+    public void addBranch(String managerId, String location) {
+        LocalDate targetDate = SessionManager.now().toLocalDate();
+
+        int year = targetDate.get(WeekConstants.WEEK_FIELDS.weekBasedYear());
+        int week = targetDate.get(WeekConstants.WEEK_FIELDS.weekOfWeekBasedYear());
+        BranchSL branch = new BranchSL(0, location,
+                managerId, year, week);
+        branchService.addUpdateBranch(branch);
     }
 
     public boolean containsBranch(String location) {

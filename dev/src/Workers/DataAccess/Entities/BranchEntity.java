@@ -1,5 +1,8 @@
 package Workers.DataAccess.Entities;
 
-public record BranchEntity(int branchId, String location) {
+import Workers.DataAccess.Entities.Keys.WeekKey;
+
+public record BranchEntity(int branchId, String location, String branchManagerId, WeekKey startDate) {
 
 }
+

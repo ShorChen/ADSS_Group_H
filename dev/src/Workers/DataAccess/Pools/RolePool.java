@@ -1,13 +1,14 @@
 package Workers.DataAccess.Pools;
 
-import Workers.Domain.Entities.Role;
+import Workers.DataAccess.DAO.RoleDAO;
+import Workers.Domain.DTO.RoleSL;
 
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-public class RolePool {
+public class RolePool implements RoleDAO {
     private final Set<String> roles;
 
     private static RolePool instance;
@@ -21,10 +22,11 @@ public class RolePool {
     private RolePool() {
         this.roles = new HashSet<>();
 
-        roles.add(Role.MANAGER.getTag());
-        roles.add(Role.Storekeeper.getTag());
-        roles.add(Role.ShiftManager.getTag());
-        roles.add(Role.Cashier.getTag());
+        roles.add(RoleSL.MANAGER.getTag());
+        roles.add(RoleSL.BRANCH_MANAGER.getTag());
+        roles.add(RoleSL.Storekeeper.getTag());
+        roles.add(RoleSL.ShiftManager.getTag());
+        roles.add(RoleSL.Cashier.getTag());
     }
 
     public static void free(){

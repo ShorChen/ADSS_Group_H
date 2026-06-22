@@ -1,7 +1,8 @@
 package Workers.Presentation.Controller;
 
-import Workers.Domain.Service.StoreDetailsService;
-import Workers.Presentation.Model.EmployeePL;
+import Workers.Service.StoreDetailsService;
+import Workers.Presentation.DTO.BranchPL;
+import Workers.Presentation.DTO.EmployeePL;
 import Workers.Shared.Enums.WeekDay;
 
 import java.util.List;
@@ -10,11 +11,13 @@ public class AddUpdateEmployeeController {
     private final EmployeeController employeeController;
     private final RoleController roleController;
     private final StoreDetailsService storeDetailsService;
+    private final BranchController branchController;
 
     public AddUpdateEmployeeController() {
         employeeController = new EmployeeController();
         roleController = new RoleController();
         storeDetailsService = new StoreDetailsService();
+        branchController = new BranchController();
     }
 
     public List<WeekDay> getClosedDays() {
@@ -35,5 +38,13 @@ public class AddUpdateEmployeeController {
 
     public List<String> getAllRoles() {
         return roleController.getAllRoles();
+    }
+
+    public List<BranchPL> getAllBranches() {
+        return branchController.getBranches();
+    }
+
+    public boolean existsEmployeeId(String id) {
+        return employeeController.exists(id);
     }
 }

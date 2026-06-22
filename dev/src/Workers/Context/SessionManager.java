@@ -1,6 +1,6 @@
 package Workers.Context;
 
-import Workers.Presentation.Model.EmployeePL;
+import Workers.Presentation.DTO.EmployeePL;
 
 import java.time.LocalDateTime;
 
@@ -10,6 +10,7 @@ public abstract class SessionManager {
     private static Debugger debugger;
     private static EmployeePL currentEmployee;
     private static LocalDateTime deadline;
+    private static Integer selectedBranchId;
 
     public static void login(EmployeePL user) {
         currentEmployee = user;
@@ -45,6 +46,18 @@ public abstract class SessionManager {
 
     public static void setDeadline(LocalDateTime deadline) {
         SessionManager.deadline = deadline;
+    }
+
+    public static void unselectBranch(){
+        selectedBranchId = null;
+    }
+
+    public static Integer getSelectedBranchId() {
+        return selectedBranchId;
+    }
+
+    public static void setSelectedBranchId(Integer selectedBranchId) {
+        SessionManager.selectedBranchId = selectedBranchId;
     }
 
     public static LocalDateTime getDeadline() {

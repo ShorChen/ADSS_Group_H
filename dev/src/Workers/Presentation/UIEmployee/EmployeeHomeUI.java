@@ -1,5 +1,6 @@
 package Workers.Presentation.UIEmployee;
 
+import Workers.Context.SessionManager;
 import Workers.Presentation.Controller.AuthController;
 import Workers.Presentation.UIShared.ViewCLI;
 import Workers.Presentation.Utils.Option;
@@ -19,11 +20,14 @@ public class EmployeeHomeUI extends ViewCLI {
         open = true;
         while (open) {
             displayMenu(new Option.Builder("Actions for Employee")
-                            .append("Logout", onDismiss)
-                            .append("Change Password", this::changePassword)
-                            .append("View Schedule & Submit Availability", this::chooseShifts)
-                            .append("Request Shift Replacement",
-                                    this::requestReplacement));
+                    .append("Logout", () -> {
+                        SessionManager.unselectBranch();
+                        onDismiss.run();
+                    })
+                    .append("Change Password", this::changePassword)
+                    .append("View Schedule & Submit Availability", this::chooseShifts)
+                    .append("Request Shift Replacement",
+                            this::requestReplacement));
         }
     }
 

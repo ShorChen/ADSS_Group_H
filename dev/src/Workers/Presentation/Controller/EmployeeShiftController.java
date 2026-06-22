@@ -1,9 +1,9 @@
 package Workers.Presentation.Controller;
 
 import Workers.Context.SessionManager;
-import Workers.Domain.Entities.ShiftKey;
+import Workers.Domain.DTO.ShiftKey;
 import org.jetbrains.annotations.NotNull;
-import Workers.Domain.Service.EmployeeService;
+import Workers.Service.EmployeeService;
 
 import java.util.Set;
 

@@ -1,7 +1,6 @@
 package Workers.Presentation.UIManager;
 
 import Workers.Presentation.Controller.ViewBranchController;
-import Workers.Presentation.Model.BranchPL;
 import Workers.Presentation.UIShared.ViewCLI;
 import Workers.Presentation.Utils.Option;
 
@@ -9,9 +8,9 @@ public class ViewBranchUI extends ViewCLI {
     private ViewBranchController controller;
     private boolean open;
 
-    public ViewBranchUI(BranchPL branch, Runnable onDismiss) {
+    public ViewBranchUI(Runnable onDismiss) {
         super(onDismiss);
-        controller = new ViewBranchController(branch);
+        controller = new ViewBranchController();
     }
 
     @Override

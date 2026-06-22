@@ -1,9 +1,9 @@
 package Workers.Presentation.UIShared;
 
-import Workers.Domain.Entities.ShiftKey;
+import Workers.Domain.DTO.ShiftKey;
 import Workers.Presentation.Controller.ShiftViewController;
-import Workers.Presentation.Model.EmployeePL;
-import Workers.Presentation.Model.ShiftPL;
+import Workers.Presentation.DTO.EmployeePL;
+import Workers.Presentation.DTO.ShiftPL;
 import Workers.Shared.Enums.ShiftType;
 import Workers.Shared.Enums.WeekDay;
 

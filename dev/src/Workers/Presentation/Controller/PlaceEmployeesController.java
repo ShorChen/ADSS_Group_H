@@ -1,10 +1,10 @@
 package Workers.Presentation.Controller;
 
-import Workers.Domain.Entities.Role;
-import Workers.Domain.Service.EmployeeService;
-import Workers.Domain.Service.RoleService;
-import Workers.Domain.Service.ShiftService;
-import Workers.Presentation.Model.EmployeePL;
+import Workers.Domain.DTO.RoleSL;
+import Workers.Service.EmployeeService;
+import Workers.Service.RoleService;
+import Workers.Service.ShiftService;
+import Workers.Presentation.DTO.EmployeePL;
 import Workers.Shared.Enums.ShiftType;
 import Workers.Shared.Enums.WeekDay;
 
@@ -28,16 +28,20 @@ public class PlaceEmployeesController {
         return roles;
     }
 
-    public List<EmployeePL> getAvailableEmployees(String day, String type, String role) {
+    public List<EmployeePL> getAvailableEmployees(WeekDay day, ShiftType type, String role) {
         List<EmployeePL> employeePLList = new ArrayList<>();
-        employeeService.getAvailableEmployees(WeekDay.fromArgs(day), ShiftType.fromType(type),
-                new Role(role)).forEach(e -> employeePLList.add(new EmployeePL(e)));
+        employeeService.getAvailableEmployees(day, type,
+                new RoleSL(role)).forEach(e -> employeePLList.add(new EmployeePL(e)));
         return employeePLList;
     }
 
-    public void assignToShift(String day, String type, EmployeePL selectedEmployee, String selectedRole) {
+    public void assignToShift(WeekDay day, ShiftType type, EmployeePL selectedEmployee, String selectedRole) {
 
         // todo
+    }
+
+    public boolean isFirstWeek() {
+        return false;
     }
 
 //    public void assignToShift(String day, String type, EmployeePL employeePL, String role) {

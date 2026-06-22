@@ -2,14 +2,16 @@ package Workers.Presentation.UIManager;
 
 import Workers.Context.SessionManager;
 import Workers.Presentation.Controller.HRManagerShiftController;
-import Workers.Presentation.Model.EmployeePL;
-import Workers.Presentation.UIEmployee.RequestReplacementUI;
+import Workers.Presentation.DTO.EmployeePL;
 import Workers.Presentation.UIShared.ShiftsView;
 import Workers.Presentation.UIShared.ViewCLI;
 import Workers.Presentation.Utils.Option;
 
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 public class ManageShiftsUI extends ViewCLI {
     private final HRManagerShiftController controller;
@@ -25,19 +27,53 @@ public class ManageShiftsUI extends ViewCLI {
     public void display() {
         open = true;
         while (open) {
-            shiftsView = new ShiftsView(0);
-            shiftsView.display();
-            displayMenu(new Option.Builder("--- Manage Shifts ---")
-                    .append("Back", onDismiss)
-                    .append("Open Shift", this::openShift)
-                    .append("Close Shift", this::closeShift)
-                    .append("Place Employee", this::placeEmployees)
-                    .append("Set Submission Deadline", this::setDeadline)
-                    .append("Handle Replacement Requests", this::handleReplacements)
-                    .append("Issue HR Report (Not Implemented)", this::issueReport)
+            if (controller.isFirstWeek()) onFirstWeek();
+            else shiftsView = new ShiftsView(0);
 
-            );
+            if (open) {
+                shiftsView.display();
+                displayMenu(new Option.Builder("--- Manage Shifts ---")
+                        .append("Back", onDismiss)
+                        .append("Open Shift", this::openShift)
+                        .append("Close Shift", this::closeShift)
+                        .append("Place Employee", this::placeEmployees)
+                        .append("Shift Staffing", this::shiftStaffing)
+                );
+            }
         }
+    }
+
+    private void onFirstWeek() {
+        Option.Builder builder = new Option.Builder("Select Week");
+        builder.append("Back", onDismiss);
+        builder.append("This Week", () -> shiftsView = new ShiftsView(0));
+        builder.append("Upcoming Week", () -> shiftsView = new ShiftsView(-1));
+        displayMenu(builder);
+    }
+
+    private void shiftStaffing() {
+        shiftsView.selectShift((day, type) -> {
+            Map<String, Integer> staffing = new HashMap<>();
+            AtomicBoolean keep = new AtomicBoolean(true);
+            while (keep.get()) {
+                displayMenu(new Option.Builder("")
+                        .append("Save", () ->
+                                controller.setShiftStaffing(day, type, staffing))
+                        .append("Cancel", () -> keep.set(false))
+                        .append("Set Staffing to Role", () -> selectRoleAndAmount(staffing))
+                );
+            }
+        });
+    }
+
+    private void selectRoleAndAmount(Map<String, Integer> staffing) {
+        String selectedRole = selectionMenuOf("Select Role", controller.getRoles());
+        int amount = getNextInteger("Enter Amount (or -1 to cancel)");
+        if (amount == -1)
+            System.out.println("Canceled");
+        else if (amount > 0)
+            staffing.put(selectedRole, amount);
+        else System.out.println("Amount Must be at least 1");
     }
 
     private void openShift() {
@@ -60,7 +96,8 @@ public class ManageShiftsUI extends ViewCLI {
         LocalDateTime deadline = SessionManager.getDeadline();
         LocalDateTime now = SessionManager.now();
 
-        if (now.isAfter(deadline)) {
+
+        if (controller.isFirstWeek() || now.isAfter(deadline)) {
             PlaceEmployeesUI placeEmployeesUI = new PlaceEmployeesUI(this::display);
             close();
             placeEmployeesUI.display();
@@ -71,35 +108,6 @@ public class ManageShiftsUI extends ViewCLI {
             System.out.println("Come back at " + deadlineString);
         }
 
-    }
-
-    private void setDeadline() {
-        boolean validDate = false;
-        while (!validDate) {
-            String date = getNextLine("Enter Date For Deadline (dd/MM/yyyy HH:mm) or type cancel to cancel: ");
-            if (date.equalsIgnoreCase("cancel")) {
-                System.out.println("Canceled");
-                return;
-            }
-            try {
-                controller.setDeadline(date);
-                validDate = true;
-                System.out.println("Deadline set to " + date);
-            } catch (Exception e) {
-                System.out.println(e.getMessage());
-            }
-        }
-
-    }
-
-    private void handleReplacements() {
-        RequestReplacementUI requestUI = new RequestReplacementUI(this::display);
-        close();
-        requestUI.display();
-    }
-
-    private void issueReport() {
-        System.out.println(controller.issueReport());
     }
 
     @Override

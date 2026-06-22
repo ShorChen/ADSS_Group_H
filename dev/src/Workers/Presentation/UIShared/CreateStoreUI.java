@@ -2,12 +2,11 @@ package Workers.Presentation.UIShared;
 
 import Workers.Context.Debugger;
 import Workers.Context.SessionManager;
-import Workers.Domain.Entities.Store.Branch;
-import Workers.Shared.Enums.WeekDay;
+import Workers.Domain.DTO.BranchSL;
 import Workers.Presentation.Controller.CreateStoreController;
-import Workers.Presentation.Model.BranchPL;
-import Workers.Presentation.Model.StoreDetailsPL;
+import Workers.Presentation.DTO.StoreDetailsPL;
 import Workers.Presentation.Utils.Option;
+import Workers.Shared.Enums.WeekDay;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -18,7 +17,7 @@ public class CreateStoreUI extends ViewCLI {
     private final CreateStoreController controller;
     private boolean open = false;
     private final List<WeekDay> closeDays = new ArrayList<>();
-    private final List<Branch> branches;
+    private final List<BranchSL> branches;
     private String id;
 
     public CreateStoreUI(Runnable onDismiss) {
@@ -111,9 +110,7 @@ public class CreateStoreUI extends ViewCLI {
         System.out.println("---Create Branch---");
         String location = getNextLine("Enter Location: ");
         if (!controller.containsBranch(location))
-            controller.addBranch(
-                    new BranchPL(id, location, new ArrayList<>())
-            );
+            controller.addBranch(id, location);
         else System.out.println("Store already has a branch is " + location);
     }
 

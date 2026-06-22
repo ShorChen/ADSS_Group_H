@@ -1,11 +1,12 @@
 package Workers.DataAccess.Pools;
 
+import Workers.DataAccess.DAO.RequestDAO;
 import Workers.DataAccess.Entities.RequestEntity;
 import Workers.DataAccess.Entities.Keys.RequestKey;
 
 import java.util.*;
 
-public class RequestsPool {
+public class RequestsPool implements RequestDAO {
     private final Map<RequestKey, RequestEntity> requests;
 
     private static RequestsPool instance;

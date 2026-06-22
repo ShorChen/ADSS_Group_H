@@ -1,6 +1,6 @@
 package Workers.Presentation.Controller;
 
-import Workers.Domain.Service.DataService;
+import Workers.Service.DataService;
 
 public class DataController {
     private final DataService service;
