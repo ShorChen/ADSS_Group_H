@@ -4,7 +4,7 @@ import Core.Controller.ControllerFactory;
 import Core.Navigation.AppNavigator;
 import Employees.Context.SessionManager;
 import Employees.Domain.Entities.Employee;
-import Employees.Domain.Service.EmployeeService;
+import Employees.Service.EmployeeService;
 import Employees.Shared.Enums.JobScope;
 import Employees.Shared.Enums.SalaryType;
 import Employees.Shared.Enums.WeekDay;
@@ -23,12 +23,12 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
-public class WorkersDashboard {
+public class EmployeesDashboard {
     private final Scene scene;
     private final AppNavigator appNavigator;
     private final EmployeeService employeeService;
 
-    public WorkersDashboard(AppNavigator appNavigator) {
+    public EmployeesDashboard(AppNavigator appNavigator) {
         this.appNavigator = appNavigator;
         this.employeeService = new EmployeeService();
         Button logoutBtn = new Button("Logout");

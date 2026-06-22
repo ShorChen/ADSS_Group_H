@@ -1,4 +1,4 @@
-package Employees.Domain.Service;
+package Employees.Service;
 
 import Employees.DataAccess.Pools.RolePool;
 import Employees.Domain.Entities.Role;

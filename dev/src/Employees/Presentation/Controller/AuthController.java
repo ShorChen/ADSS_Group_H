@@ -2,7 +2,7 @@ package Employees.Presentation.Controller;
 
 import Employees.Context.SessionManager;
 import Employees.Domain.Entities.Employee;
-import Employees.Domain.Service.AuthService;
+import Employees.Service.AuthService;
 import Employees.Presentation.Model.EmployeePL;
 
 public class AuthController {

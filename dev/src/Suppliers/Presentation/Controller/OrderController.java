@@ -1,6 +1,6 @@
 package Suppliers.Presentation.Controller;
 
-import Core.Domain.Role;
+import Core.Domain.Managers;
 import Suppliers.Domain.Security.SessionManager;
 import Suppliers.Presentation.DTO.*;
 import Suppliers.Service.Core.OrderService;
@@ -25,7 +25,7 @@ public class OrderController {
     }
 
     public List<SupplierPL> getAllSuppliers() throws Exception {
-        SessionManager.getInstance().requireRole(Role.ORDER_MANAGER);
+        SessionManager.getInstance().requireRole(Managers.ORDER_MANAGER);
         Response<List<SupplierSL>> response = orderService.getAllSuppliers();
         if (response.isSuccess()) return response.getData().stream().map(sl -> {
             List<ContactPersonPL> contacts = sl.contactPersonnel().stream().map(cp -> new ContactPersonPL(cp.name(), cp.phone(), cp.email())).collect(Collectors.toList());
@@ -37,7 +37,7 @@ public class OrderController {
     }
 
     public Map<String, Integer> placeOrders(List<OrderItemPL> currentOrder) throws Exception {
-        SessionManager.getInstance().requireRole(Role.ORDER_MANAGER);
+        SessionManager.getInstance().requireRole(Managers.ORDER_MANAGER);
         Map<String, List<OrderItemPL>> grouped = currentOrder.stream().collect(Collectors.groupingBy(OrderItemPL::supplierBusinessNumber));
         Map<String, Integer> generatedOrderIds = new HashMap<>();
         for (Map.Entry<String, List<OrderItemPL>> entry : grouped.entrySet()) {
@@ -55,7 +55,7 @@ public class OrderController {
     }
 
     public int executeAutomaticOrders() throws Exception {
-        SessionManager.getInstance().requireRole(Role.ORDER_MANAGER);
+        SessionManager.getInstance().requireRole(Managers.ORDER_MANAGER);
         Response<Integer> response = orderService.executeAutomaticOrders();
         if (response.isSuccess()) return response.getData();
         throw new Exception(response.getErrorMessage());
@@ -69,7 +69,7 @@ public class OrderController {
     }
 
     public List<OrderPL> getOrderHistory() throws Exception {
-        SessionManager.getInstance().requireRole(Role.ORDER_MANAGER);
+        SessionManager.getInstance().requireRole(Managers.ORDER_MANAGER);
         Response<List<OrderSL>> response = orderService.getOrderHistory();
         if (!response.isSuccess()) throw new Exception(response.getErrorMessage());
         return response.getData().stream().map(sl -> new OrderPL(

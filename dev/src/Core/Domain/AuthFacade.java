@@ -8,7 +8,7 @@ import java.util.NoSuchElementException;
 
 @SuppressWarnings("ClassCanBeRecord")
 public class AuthFacade {
-    private final Map<String, Role> validCodes;
+    private final Map<String, Managers> validCodes;
     // private final AuthDAO authDAO;
     // if we will implement a window for an admin
 
@@ -17,18 +17,18 @@ public class AuthFacade {
         validCodes = authDAO.getAllCodes();
     }
 
-    public Role login(String code) {
-        Role role = validCodes.get(code);
-        if (role == null) throw new NoSuchElementException("Invalid login code.");
-        SessionManager.getInstance().login(role);
-        return role;
+    public Managers login(String code) {
+        Managers managers = validCodes.get(code);
+        if (managers == null) throw new NoSuchElementException("Invalid login code.");
+        SessionManager.getInstance().login(managers);
+        return managers;
     }
 
     public void logout() {
         SessionManager.getInstance().logout();
     }
 
-    public Role getCurrentRole() {
+    public Managers getCurrentRole() {
         return SessionManager.getInstance().getCurrentRole();
     }
 }

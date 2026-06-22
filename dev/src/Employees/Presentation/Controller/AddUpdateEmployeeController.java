@@ -1,6 +1,6 @@
 package Employees.Presentation.Controller;
 
-import Employees.Domain.Service.StoreDetailsService;
+import Employees.Service.StoreDetailsService;
 import Employees.Presentation.Model.EmployeePL;
 import Employees.Shared.Enums.WeekDay;
 

@@ -5,7 +5,7 @@ import Employees.DataAccess.Pools.EmployeePool;
 import Employees.Domain.Entities.Employee;
 import Employees.Domain.Entities.Role;
 import Employees.Domain.Entities.ShiftKey;
-import Employees.Domain.Service.EmployeeService;
+import Employees.Service.EmployeeService;
 import org.junit.jupiter.api.*;
 import Employees.Shared.Enums.JobScope;
 import Employees.Shared.Enums.SalaryType;

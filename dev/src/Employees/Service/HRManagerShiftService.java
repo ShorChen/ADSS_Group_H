@@ -1,4 +1,4 @@
-package Employees.Domain.Service;
+package Employees.Service;
 
 import Employees.DataAccess.Pools.ShiftPool;
 import Employees.Shared.Enums.WeekDay;

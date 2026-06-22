@@ -1,4 +1,4 @@
-package Employees.Domain.Service;
+package Employees.Service;
 
 import Employees.DataAccess.Entities.Keys.BranchWeekKey;
 import Employees.DataAccess.Entities.Keys.ShiftEntityKey;

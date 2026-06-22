@@ -3,7 +3,7 @@ package Employees.Presentation.Controller;
 import Employees.Context.SessionManager;
 import Employees.Domain.Entities.ShiftKey;
 import org.jetbrains.annotations.NotNull;
-import Employees.Domain.Service.EmployeeService;
+import Employees.Service.EmployeeService;
 
 import java.util.Set;
 

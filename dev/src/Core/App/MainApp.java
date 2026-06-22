@@ -1,11 +1,11 @@
 package Core.App;
 
 import Core.Navigation.AppNavigator;
+import Employees.Presentation.GUI.EmployeesDashboard;
 import Inventory.Presentation.GUI.InventoryDashboard;
 import Suppliers.Presentation.GUI.OrderDashboard;
 import Suppliers.Presentation.GUI.SupplierDashboard;
 import Transportation.Presentation.GUI.TransportDashboard;
-import Employees.Presentation.GUI.WorkersDashboard;
 import Core.Controller.ControllerFactory;
 import javafx.application.Application;
 import javafx.scene.Parent;
@@ -54,14 +54,14 @@ public class MainApp extends Application implements AppNavigator {
     }
 
     @Override
-    public void showTransportManagerDashboard() {
+    public void showTransportationManagerDashboard() {
         TransportDashboard td = new TransportDashboard(this);
         switchScene(td.getScene());
     }
 
     @Override
-    public void showWorkersManagerDashboard() {
-        WorkersDashboard wd = new WorkersDashboard(this);
+    public void showEmployeesManagerDashboard() {
+        EmployeesDashboard wd = new EmployeesDashboard(this);
         switchScene(wd.getScene());
     }
 

@@ -3,7 +3,7 @@ package Employees;
 import Employees.DataAccess.Pools.ShiftPool;
 import Employees.Domain.Entities.Shift;
 import Employees.Domain.Entities.ShiftKey;
-import Employees.Domain.Service.ShiftService;
+import Employees.Service.ShiftService;
 import org.junit.jupiter.api.*;
 import Employees.Shared.Enums.ShiftType;
 import Employees.Shared.Enums.WeekDay;

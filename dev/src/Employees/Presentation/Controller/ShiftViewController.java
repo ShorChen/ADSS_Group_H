@@ -4,8 +4,8 @@ import Employees.Context.SessionManager;
 import Employees.Domain.Entities.Shift;
 import Employees.Domain.Entities.ShiftKey;
 import Employees.Shared.WeekConstants;
-import Employees.Domain.Service.EmployeeService;
-import Employees.Domain.Service.ShiftService;
+import Employees.Service.EmployeeService;
+import Employees.Service.ShiftService;
 import Employees.Presentation.Model.EmployeePL;
 import Employees.Presentation.Model.ShiftPL;
 

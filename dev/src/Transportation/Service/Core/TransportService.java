@@ -5,7 +5,7 @@ import Employees.Domain.Entities.Role;
 import Employees.Domain.Entities.Shift;
 import Employees.Domain.Entities.ShiftKey;
 import Employees.Shared.Enums.WeekDay;
-import Employees.Domain.Service.ShiftService;
+import Employees.Service.ShiftService;
 import Employees.Shared.Enums.ShiftType;
 import Transportation.DataAccess.TransportDAO;
 import Transportation.Domain.Entities.*;

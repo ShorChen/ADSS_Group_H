@@ -1,6 +1,6 @@
 package Suppliers;
 
-import Core.Domain.Role;
+import Core.Domain.Managers;
 import Suppliers.Domain.Entities.*;
 import Suppliers.Domain.Security.*;
 import Suppliers.Domain.ValidationUtils;
@@ -22,8 +22,8 @@ public class SequentialSuppliersTests {
     @Test
     @Order(1)
     void step01_loginAsSupplierManager() {
-        SessionManager.getInstance().login(Role.SUPPLIER_MANAGER);
-        assertEquals(Role.SUPPLIER_MANAGER, SessionManager.getInstance().getCurrentRole());
+        SessionManager.getInstance().login(Managers.SUPPLIER_MANAGER);
+        assertEquals(Managers.SUPPLIER_MANAGER, SessionManager.getInstance().getCurrentRole());
     }
 
     @Test

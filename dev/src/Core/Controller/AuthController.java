@@ -1,6 +1,6 @@
 package Core.Controller;
 
-import Core.Domain.Role;
+import Core.Domain.Managers;
 import Core.Service.AuthService;
 import Core.Service.Response;
 
@@ -12,8 +12,8 @@ public class AuthController {
         this.authService = authService;
     }
 
-    public Role login(String username) throws Exception {
-        Response<Role> response = authService.login(username);
+    public Managers login(String username) throws Exception {
+        Response<Managers> response = authService.login(username);
         if (!response.isSuccess()) throw new Exception(response.getErrorMessage());
         return response.getData();
     }
