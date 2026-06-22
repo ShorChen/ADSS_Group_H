@@ -3,8 +3,8 @@ package Workers.Presentation.Controller;
 import Workers.Context.SessionManager;
 import Workers.Domain.DTO.EmployeeSL;
 import Workers.Domain.DTO.RoleSL;
-import Workers.Domain.DTO.ShiftSL;
 import Workers.Domain.DTO.ShiftKey;
+import Workers.Domain.DTO.ShiftSL;
 import Workers.Presentation.DTO.EmployeePL;
 import Workers.Service.*;
 import Workers.Shared.Enums.ShiftType;
@@ -33,8 +33,9 @@ public class HRManagerShiftController {
         branchService = new BranchService();
     }
 
-    public void openShift(WeekDay day, ShiftType type, EmployeePL shiftManager) {
-        LocalDate targetDate = SessionManager.now().plusWeeks(1).toLocalDate();
+    public void openShift(WeekDay day, ShiftType type, EmployeePL shiftManager, boolean isFirstWeek) {
+        int weekOffset = isFirstWeek? 0 : 1;
+        LocalDate targetDate = SessionManager.now().plusWeeks(weekOffset).toLocalDate();
         int year = targetDate.get(WeekConstants.WEEK_FIELDS.weekBasedYear());
         int week = targetDate.get(WeekConstants.WEEK_FIELDS.weekOfWeekBasedYear());
         int branchId = SessionManager.getSelectedBranchId();
@@ -43,8 +44,9 @@ public class HRManagerShiftController {
                 new ShiftSL(day, type, shiftManager.getId()));
     }
 
-    public void closeShift(WeekDay day, ShiftType type) {
-        LocalDate targetDate = SessionManager.now().plusWeeks(1).toLocalDate();
+    public void closeShift(WeekDay day, ShiftType type, boolean isFirstWeek) {
+        int weekOffset = isFirstWeek? 0 : 1;
+        LocalDate targetDate = SessionManager.now().plusWeeks(weekOffset).toLocalDate();
         int year = targetDate.get(WeekConstants.WEEK_FIELDS.weekBasedYear());
         int week = targetDate.get(WeekConstants.WEEK_FIELDS.weekOfWeekBasedYear());
         int branchId = SessionManager.getSelectedBranchId();
@@ -57,12 +59,14 @@ public class HRManagerShiftController {
         if (employee == null) throw new IllegalArgumentException("Employee does not exist");
         if (!employee.getQualifiedRoles().contains(RoleSL.ShiftManager))
             throw new IllegalArgumentException("Employee is not a shift manager");
+        if(employee.getBranchId() != SessionManager.getSelectedBranchId())
+            throw  new IllegalArgumentException("Employee does not work in this branch");
         return new EmployeePL(employee);
     }
 
-    public void setShiftStaffing(WeekDay day, ShiftType type, Map<String, Integer> staffing) {
-        LocalDate targetDate = SessionManager.now().toLocalDate();
-
+    public void setShiftStaffing(WeekDay day, ShiftType type, Map<String, Integer> staffing, boolean isFirstWeek) {
+        int weekOffset = isFirstWeek? 0 : 1;
+        LocalDate targetDate = SessionManager.now().plusWeeks(weekOffset).toLocalDate();
         int year = targetDate.get(WeekConstants.WEEK_FIELDS.weekBasedYear());
         int week = targetDate.get(WeekConstants.WEEK_FIELDS.weekOfWeekBasedYear());
         int branchId = SessionManager.getSelectedBranchId();

@@ -3,20 +3,18 @@ package Workers.Presentation.UIEmployee;
 import Workers.Context.SessionManager;
 import Workers.Domain.DTO.ShiftKey;
 import Workers.Presentation.Controller.EmployeeShiftController;
+import Workers.Presentation.DTO.AvailabilitySubmissionPL;
 import Workers.Presentation.UIShared.ShiftsView;
 import Workers.Presentation.UIShared.ViewCLI;
 import Workers.Presentation.Utils.Option;
 import Workers.Shared.Enums.ShiftType;
 import Workers.Shared.Enums.WeekDay;
 
-import java.util.HashSet;
-import java.util.Set;
-
 public class EmployeeChooseShiftsUI extends ViewCLI {
     private final ShiftsView shiftsView = new ShiftsView(0);
     private boolean open = false;
     private final EmployeeShiftController controller;
-    private Set<ShiftKey> selectedShifts;
+    private AvailabilitySubmissionPL availabilitySubmission;
 
     public EmployeeChooseShiftsUI(Runnable onDismiss) {
         super(onDismiss);
@@ -26,7 +24,7 @@ public class EmployeeChooseShiftsUI extends ViewCLI {
     @Override
     public void display() {
         open = true;
-        selectedShifts = new HashSet<>();
+        availabilitySubmission = new AvailabilitySubmissionPL();
         while (open) {
             System.out.println("Viewing Schedule of next week");
             shiftsView.display();
@@ -53,8 +51,11 @@ public class EmployeeChooseShiftsUI extends ViewCLI {
     }
 
     private void submit() {
-        boolean isWorkingDoubles = getNextBoolean("Are you willing to work double shifts? (y/n)");
-        controller.setCurrentEmployeeShiftsAsUnavailable(selectedShifts, isWorkingDoubles);
+        availabilitySubmission.setWorkingDoubles(
+                getNextBoolean("Are you willing to work double shifts? (y/n)")
+        );
+
+        controller.setCurrentEmployeeShiftsAsUnavailable(availabilitySubmission);
         System.out.println("Availability Submitted");
         System.out.println("You can re-submit your availability again until the deadline: "
                            + SessionManager.getDeadline());
@@ -62,7 +63,7 @@ public class EmployeeChooseShiftsUI extends ViewCLI {
     }
 
     private void addSelectedShift(WeekDay day, ShiftType shift) {
-        selectedShifts.add(new ShiftKey(day, shift));
+        availabilitySubmission.setShift(new ShiftKey(day, shift), false);
     }
 
     @Override

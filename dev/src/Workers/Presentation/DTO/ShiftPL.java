@@ -16,18 +16,18 @@ public class ShiftPL {
     private WeekDay day;
     private ShiftType shiftType;
     private Map<String, Set<String>> employees;
-    private Map<RoleSL, Integer> capacities;
+    private Map<RoleSL, Integer> shiftStaffing;
     private Map<String, Float> additionalHours;
 
 
     public ShiftPL(LocalDateTime startDate, WeekDay day, ShiftType shiftType,
-                   Map<String, Set<String>> employees, Map<RoleSL, Integer> capacities,
+                   Map<String, Set<String>> employees, Map<RoleSL, Integer> shiftStaffing,
                    Map<String, Float> additionalHours) {
         this.startDate = startDate;
         this.day = day;
         this.shiftType = shiftType;
         setEmployees(employees);
-        setCapacities(capacities);
+        setShiftStaffing(shiftStaffing);
         setAdditionalHours(additionalHours);
 
     }
@@ -41,7 +41,7 @@ public class ShiftPL {
         );
         return new ShiftSL(
                 startDate, day, shiftType,
-                shiftEmployees, capacities, additionalHours
+                shiftEmployees, shiftStaffing, additionalHours
         );
     }
 
@@ -97,13 +97,13 @@ public class ShiftPL {
         );
     }
 
-    public Map<RoleSL, Integer> getCapacities() {
-        return new HashMap<>(capacities);
+    public Map<RoleSL, Integer> getShiftStaffing() {
+        return new HashMap<>(shiftStaffing);
     }
 
-    public void setCapacities(Map<RoleSL, Integer> capacities) {
-        this.capacities = new HashMap<>();
-        this.capacities.putAll(capacities);
+    public void setShiftStaffing(Map<RoleSL, Integer> shiftStaffing) {
+        this.shiftStaffing = new HashMap<>();
+        this.shiftStaffing.putAll(shiftStaffing);
     }
 
     public void setAdditionalHours(Map<String, Float> additionalHours) {

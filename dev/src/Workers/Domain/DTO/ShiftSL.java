@@ -75,8 +75,10 @@ public class ShiftSL {
     // convert ro doesEmployeeWork(Role role, String employeeId)
     public boolean doesEmployeeWork(String employeeId) {
         AtomicBoolean works = new AtomicBoolean(false);
-        employees.forEach((_, employeeIds) ->
-                works.set(works.get() || employeeIds.contains(employeeId)));
+        employees.forEach((role, employeeIds) -> {
+            if (Objects.equals(role, RoleSL.ShiftManager))
+                works.set(works.get() || employeeIds.contains(employeeId));
+        });
         return works.get();
     }
 

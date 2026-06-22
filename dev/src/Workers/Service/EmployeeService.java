@@ -1,16 +1,17 @@
 package Workers.Service;
 
-import java.util.*;
-
 import Workers.DataAccess.DAO.EmployeeDAO;
 import Workers.DataAccess.Entities.EmployeeEntity;
 import Workers.DataAccess.Pools.EmployeePool;
 import Workers.Domain.DTO.EmployeeSL;
 import Workers.Domain.DTO.RoleSL;
 import Workers.Domain.DTO.ShiftKey;
-import Workers.Shared.Enums.WeekDay;
 import Workers.Domain.Utils.PasswordGenerator;
+import Workers.Domain.DTO.AvailabilitySubmissionSL;
 import Workers.Shared.Enums.ShiftType;
+import Workers.Shared.Enums.WeekDay;
+
+import java.util.*;
 
 public class EmployeeService {
     private final EmployeeDAO employees;
@@ -61,23 +62,14 @@ public class EmployeeService {
         return true;
     }
 
-    public void updateAvailability(String id, Set<ShiftKey> shifts, boolean canWorkDoubleShifts) {
+    public void updateAvailability(AvailabilitySubmissionSL availabilitySubmission) {
+        String id = availabilitySubmission.getEmployeeId();
         if (!employees.exists(id)) {
             throw new IllegalArgumentException("Employee with ID " + id + " not found");
         }
         EmployeeEntity entity = employees.getEmployee(id);
 
-        Map<Integer, Set<Integer>> entityShifts = new HashMap<>();
-        shifts.forEach(shiftKey -> {
-
-            Set<Integer> defaultSet = new HashSet<>();
-            defaultSet.add(ShiftType.number(shiftKey.shiftType()));
-
-            entityShifts.put(WeekDay.number(shiftKey.day()),
-                    entityShifts.getOrDefault(WeekDay.number(shiftKey.day()), defaultSet)
-            );
-        });
-        entity = entity.changeAvailability(entityShifts, canWorkDoubleShifts);
+        entity = entity.changeAvailability(availabilitySubmission.toEntity());
         employees.addUpdateEmployee(entity);
     }
 
@@ -86,13 +78,14 @@ public class EmployeeService {
         employees.getEmployeesWithRole(role.getTag()).forEach(
                 e -> {
                     EmployeeSL employee = new EmployeeSL(e);
-                    if (!employee.getUnavailableShifts()
-                            .getOrDefault(weekDay, new HashSet<>()).contains(shiftType))
+                    if (employee.getAvailabilitySubmission()
+                            .getShift(new ShiftKey(weekDay, shiftType)))
                         employeeList.add(employee);
                 });
 
         return employeeList;
     }
+
 
     public boolean containsRole(String id, RoleSL role) {
         if (!employees.exists(id))

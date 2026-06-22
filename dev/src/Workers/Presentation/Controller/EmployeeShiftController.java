@@ -1,11 +1,8 @@
 package Workers.Presentation.Controller;
 
 import Workers.Context.SessionManager;
-import Workers.Domain.DTO.ShiftKey;
-import org.jetbrains.annotations.NotNull;
+import Workers.Presentation.DTO.AvailabilitySubmissionPL;
 import Workers.Service.EmployeeService;
-
-import java.util.Set;
 
 public class EmployeeShiftController {
     private final EmployeeService employeeService;
@@ -13,10 +10,10 @@ public class EmployeeShiftController {
     public EmployeeShiftController(){
         this.employeeService = new EmployeeService();
     }
-    public void setCurrentEmployeeShiftsAsUnavailable(@NotNull Set<ShiftKey> shifts,
-                                                      boolean canWorkDoubleShifts){
-        employeeService.updateAvailability(SessionManager.getCurrentEmployee().getId(),
-                shifts, canWorkDoubleShifts);
+    public void setCurrentEmployeeShiftsAsUnavailable(AvailabilitySubmissionPL availabilitySub){
+
+        employeeService.updateAvailability(availabilitySub.toAvailabilitySubmission(
+                SessionManager.getCurrentEmployee().toEmployee().getId()));
     }
 
 }

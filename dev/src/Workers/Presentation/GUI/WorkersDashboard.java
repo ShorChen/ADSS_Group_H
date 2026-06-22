@@ -3,6 +3,7 @@ package Workers.Presentation.GUI;
 import Core.Controller.ControllerFactory;
 import Core.Navigation.AppNavigator;
 import Workers.Context.SessionManager;
+import Workers.Domain.DTO.AvailabilitySubmissionSL;
 import Workers.Domain.DTO.EmployeeSL;
 import Workers.Service.EmployeeService;
 import Workers.Shared.Enums.JobScope;
@@ -178,7 +179,8 @@ public class WorkersDashboard {
             try {
                 EmployeeSL emp = new EmployeeSL(idField.getText().trim(), nameField.getText().trim(), "temp",
                         Double.parseDouble(salaryField.getText().trim()), salaryTypeBox.getValue(),
-                        SessionManager.now(), scopeBox.getValue(), new ArrayList<>(), "None", 12, WeekDay.SUNDAY, false, new HashMap<>(), true, 1);
+                        SessionManager.now(), scopeBox.getValue(), new ArrayList<>(), "None", 12, WeekDay.SUNDAY,
+                        new AvailabilitySubmissionSL(idField.getText().trim(), new HashMap<>(), false), true, 1);
 
                 if (existing == null) {
                     String genPass = employeeService.addEmployee(emp);

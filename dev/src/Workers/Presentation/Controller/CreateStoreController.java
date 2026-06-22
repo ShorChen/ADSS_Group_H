@@ -1,6 +1,7 @@
 package Workers.Presentation.Controller;
 
 import Workers.Context.SessionManager;
+import Workers.Domain.DTO.AvailabilitySubmissionSL;
 import Workers.Domain.DTO.EmployeeSL;
 import Workers.Domain.DTO.RoleSL;
 import Workers.Domain.DTO.BranchSL;
@@ -39,7 +40,9 @@ public class CreateStoreController {
                 id, name, bankAccount, 0, SalaryType.GLOBALLY,
                 SessionManager.now(), JobScope.FULL_TIME,
                 roles, "", 24, WeekDay.fromArgs(weekDay),
-                false, new HashMap<>(), true, BranchSL.ALL_BRANCHES
+                new AvailabilitySubmissionSL(
+                        id, new HashMap<>(), false
+                ), true, BranchSL.ALL_BRANCHES
         ));
     }
 

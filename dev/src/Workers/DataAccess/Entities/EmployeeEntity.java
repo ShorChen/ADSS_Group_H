@@ -1,7 +1,6 @@
 package Workers.DataAccess.Entities;
 
 import Workers.Context.SessionManager;
-import org.jetbrains.annotations.NotNull;
 
 import java.time.LocalDateTime;
 import java.util.*;
@@ -19,8 +18,7 @@ public record EmployeeEntity(
         int yearlyRestDays,
         String weeklyRestDay,
         String password,
-        boolean workingDoubles,
-        Map<Integer, Set<Integer>> unavailableShifts,
+        AvailabilitySubmissionEntity availabilitySubmission,
         boolean active,
         int branchId
 ) {
@@ -30,7 +28,9 @@ public record EmployeeEntity(
                 SessionManager.now(),
                 "FULL_TIME", new ArrayList<>(),
                 "not free on weekends", 24,
-                "SATURDAY", password, false, new HashMap<>(),
+                "SATURDAY", password,
+                new AvailabilitySubmissionEntity(id, new HashMap<>(),
+                        false),
                 true, 1
         );
     }
@@ -39,8 +39,8 @@ public record EmployeeEntity(
                           String salaryType, LocalDateTime dateOfEmployment,
                           String jobScope, List<String> qualifiedRoles,
                           String constraints, int yearlyRestDays,
-                          String weeklyRestDay, String password, boolean workingDoubles,
-                          @NotNull Map<Integer, Set<Integer>> unavailableShifts, boolean active, int branchId) {
+                          String weeklyRestDay, String password, AvailabilitySubmissionEntity availabilitySubmission,
+                          boolean active, int branchId) {
         this.id = id;
         this.name = name;
         this.bankAccount = bankAccount;
@@ -56,11 +56,8 @@ public record EmployeeEntity(
         this.yearlyRestDays = yearlyRestDays;
         this.weeklyRestDay = weeklyRestDay;
         this.password = password;
-        this.workingDoubles = workingDoubles;
-        this.unavailableShifts = new HashMap<>();
 
-        unavailableShifts.forEach((key, value) ->
-                this.unavailableShifts.put(key, new HashSet<>(value)));
+        this.availabilitySubmission = availabilitySubmission;
 
         this.active = active;
         this.branchId = branchId;
@@ -70,7 +67,7 @@ public record EmployeeEntity(
         return new EmployeeEntity(id, name, bankAccount, salary, salaryType,
                 dateOfEmployment, jobScope, qualifiedRoles,
                 constraints, yearlyRestDays, weeklyRestDay, password,
-                workingDoubles, unavailableShifts,
+                availabilitySubmission,
                 active, branchId);
     }
 
@@ -78,15 +75,15 @@ public record EmployeeEntity(
         return new EmployeeEntity(id, name, bankAccount, salary, salaryType,
                 dateOfEmployment, jobScope, qualifiedRoles,
                 constraints, yearlyRestDays, weeklyRestDay, password,
-                workingDoubles, unavailableShifts,
+                availabilitySubmission,
                 active, branchId);
     }
 
-    public EmployeeEntity changeAvailability(Map<Integer, Set<Integer>> unavailableShifts, boolean workingDoubles) {
+    public EmployeeEntity changeAvailability(AvailabilitySubmissionEntity availabilitySubmission) {
         return new EmployeeEntity(id, name, bankAccount, salary, salaryType,
                 dateOfEmployment, jobScope, qualifiedRoles,
                 constraints, yearlyRestDays, weeklyRestDay, password,
-                workingDoubles, unavailableShifts,
+                availabilitySubmission,
                 active, branchId);
     }
 
@@ -94,7 +91,7 @@ public record EmployeeEntity(
         return new EmployeeEntity(id, name, bankAccount, salary, salaryType,
                 dateOfEmployment, jobScope, qualifiedRoles,
                 constraints, yearlyRestDays, weeklyRestDay, password,
-                workingDoubles, unavailableShifts,
+                availabilitySubmission,
                 active, branchId);
     }
 
@@ -102,11 +99,13 @@ public record EmployeeEntity(
         return new ArrayList<>(qualifiedRoles);
     }
 
-    public Map<Integer, Set<Integer>> unavailableShifts() {
-        Map<Integer, Set<Integer>> map = new HashMap<>();
-        unavailableShifts.forEach((key, value) ->
-                map.put(key, new HashSet<>(value)));
-        return map;
+    @Override
+    public AvailabilitySubmissionEntity availabilitySubmission() {
+        return new AvailabilitySubmissionEntity(
+                id,
+                availabilitySubmission.shifts(),
+                availabilitySubmission.workingDoubles()
+        );
     }
 
     public boolean checkPassword(String password) {

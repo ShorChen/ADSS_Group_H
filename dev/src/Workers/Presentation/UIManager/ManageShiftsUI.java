@@ -17,6 +17,7 @@ public class ManageShiftsUI extends ViewCLI {
     private final HRManagerShiftController controller;
     private boolean open = false;
     private ShiftsView shiftsView;
+    private boolean isFirstWeek;
 
     public ManageShiftsUI(Runnable onDismiss) {
         super(onDismiss);
@@ -27,7 +28,8 @@ public class ManageShiftsUI extends ViewCLI {
     public void display() {
         open = true;
         while (open) {
-            if (controller.isFirstWeek()) onFirstWeek();
+            isFirstWeek = controller.isFirstWeek();
+            if (isFirstWeek) onFirstWeek();
             else shiftsView = new ShiftsView(0);
 
             if (open) {
@@ -58,8 +60,8 @@ public class ManageShiftsUI extends ViewCLI {
             while (keep.get()) {
                 displayMenu(new Option.Builder("")
                         .append("Save", () ->
-                                controller.setShiftStaffing(day, type, staffing))
-                        .append("Cancel", () -> keep.set(false))
+                                controller.setShiftStaffing(day, type, staffing, isFirstWeek))
+                        .append("Back (Cancels unsaved changes)", () -> keep.set(false))
                         .append("Set Staffing to Role", () -> selectRoleAndAmount(staffing))
                 );
             }
@@ -81,7 +83,7 @@ public class ManageShiftsUI extends ViewCLI {
             String id = getNextLine("Enter Shift Manager: ");
             try {
                 EmployeePL shiftManager = controller.getShiftManager(id);
-                controller.openShift(day, type, shiftManager);
+                controller.openShift(day, type, shiftManager, isFirstWeek);
             } catch (IllegalArgumentException e) {
                 System.out.println(e.getMessage());
             }
@@ -89,7 +91,8 @@ public class ManageShiftsUI extends ViewCLI {
     }
 
     private void closeShift() {
-        shiftsView.selectShift(controller::closeShift);
+        shiftsView.selectShift((day, type) ->
+                controller.closeShift(day, type, isFirstWeek));
     }
 
     private void placeEmployees() {

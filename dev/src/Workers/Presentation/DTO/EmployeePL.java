@@ -4,7 +4,6 @@ import Workers.Domain.DTO.EmployeeSL;
 import Workers.Domain.DTO.RoleSL;
 import Workers.Shared.Enums.JobScope;
 import Workers.Shared.Enums.SalaryType;
-import Workers.Shared.Enums.ShiftType;
 import Workers.Shared.Enums.WeekDay;
 import org.jetbrains.annotations.NotNull;
 
@@ -23,16 +22,15 @@ public class EmployeePL {
     private String constraints;
     private int yearlyRestDays;
     private WeekDay weeklyRestDay;
-    private boolean workingDoubles;
-    private Map<WeekDay, Set<ShiftType>> unavailableShifts;
+    private AvailabilitySubmissionPL availabilitySubmission;
     private boolean active = true;
     private int branchId;
 
     public EmployeePL(String id, String name, String bankAccount,
                       double salary, SalaryType salaryType, LocalDateTime dateOfEmployment,
                       JobScope jobScope, Set<String> qualifiedRoles, String constraints,
-                      int yearlyRestDays, WeekDay weeklyRestDay, boolean workingDoubles,
-                      Map<WeekDay, Set<ShiftType>> unavailableShifts, boolean active,
+                      int yearlyRestDays, WeekDay weeklyRestDay,
+                      AvailabilitySubmissionPL availabilitySubmission, boolean active,
                       int branchId) {
         this.id = id;
         this.name = name;
@@ -45,8 +43,7 @@ public class EmployeePL {
         this.constraints = constraints;
         this.yearlyRestDays = yearlyRestDays;
         this.weeklyRestDay = weeklyRestDay;
-        this.workingDoubles = workingDoubles;
-        setUnavailableShifts(unavailableShifts);
+        setAvailabilitySubmission(availabilitySubmission);
         this.active = active;
         this.branchId = branchId;
     }
@@ -61,8 +58,8 @@ public class EmployeePL {
                 employee.getSalary(), employee.getSalaryType(),
                 employee.getDateOfEmployment(), employee.getJobScope(),
                 new HashSet<>(), employee.getConstraints(),
-                employee.getYearlyRestDays(), employee.getWeeklyRestDay(), employee.isWorkingDoubles(),
-                new HashMap<>(), employee.isActive(), employee.getBranchId()
+                employee.getYearlyRestDays(), employee.getWeeklyRestDay(),
+                new AvailabilitySubmissionPL(), employee.isActive(), employee.getBranchId()
         );
         employee.getQualifiedRoles().forEach(role ->
                 qualifiedRoles.add(role.getTag()));
@@ -71,8 +68,8 @@ public class EmployeePL {
                 this.qualifiedRoles.add(r.getTag())
         );
 
-        employee.getUnavailableShifts().forEach((weekDay, shiftTypes) ->
-                unavailableShifts.put(weekDay, new HashSet<>(shiftTypes)));
+        availabilitySubmission.setShifts(employee.getAvailabilitySubmission().getShifts());
+        availabilitySubmission.setWorkingDoubles(employee.getAvailabilitySubmission().isWorkingDoubles());
     }
 
     /**
@@ -84,7 +81,8 @@ public class EmployeePL {
         return new EmployeeSL(
                 id, name, bankAccount, salary, salaryType, dateOfEmployment,
                 jobScope, roles, constraints, yearlyRestDays,
-                weeklyRestDay, workingDoubles, getUnavailableShifts(), active, branchId
+                weeklyRestDay, availabilitySubmission.toAvailabilitySubmission(id),
+                active, branchId
         );
     }
 
@@ -205,31 +203,13 @@ public class EmployeePL {
         this.weeklyRestDay = weeklyRestDay;
     }
 
-    public boolean isWorkingDoubles() {
-        return workingDoubles;
+    public void setAvailabilitySubmission(AvailabilitySubmissionPL availabilitySubmission) {
+        this.availabilitySubmission = availabilitySubmission;
     }
 
-    public void setWorkingDoubles(boolean workingDoubles) {
-        this.workingDoubles = workingDoubles;
-    }
-
-    /**
-     * @return a deep copy of the map of unavailable shifts of an employee
-     */
-    public Map<WeekDay, Set<ShiftType>> getUnavailableShifts() {
-        Map<WeekDay, Set<ShiftType>> map = new HashMap<>();
-        unavailableShifts.forEach((weekDay,
-                                   shiftTypes) -> {
-            Set<ShiftType> shiftTypesClone = new HashSet<>(shiftTypes);
-            map.put(weekDay, shiftTypesClone);
-        });
-        return map;
-    }
-
-    public void setUnavailableShifts(Map<WeekDay, Set<ShiftType>> unavailableShifts) {
-        this.unavailableShifts = new HashMap<>();
-        unavailableShifts.forEach((key, value) ->
-            this.unavailableShifts.put(key, new HashSet<>(value))
+    public AvailabilitySubmissionPL getAvailabilitySubmission() {
+        return new AvailabilitySubmissionPL(
+                availabilitySubmission.getShifts()
         );
     }
 
@@ -261,15 +241,12 @@ public class EmployeePL {
         private String constraints;
         private int yearlyRestDays;
         private WeekDay weeklyRestDay;
-        private boolean workingDoubles;
-        private Map<WeekDay, Set<ShiftType>> unavailableShifts;
         private boolean active = true;
         private int branchId;
 
         public Builder(String id) {
             this.id = id;
             this.qualifiedRoles = new HashSet<>();
-            this.unavailableShifts = new HashMap<>();
         }
 
         public Builder(@NotNull EmployeePL employee) {
@@ -284,8 +261,6 @@ public class EmployeePL {
             this.constraints = employee.getConstraints();
             this.yearlyRestDays = employee.getYearlyRestDays();
             this.weeklyRestDay = employee.getWeeklyRestDay();
-            this.workingDoubles = employee.isWorkingDoubles();
-            this.unavailableShifts = employee.getUnavailableShifts();
             this.branchId = employee.getBranchId();
         }
 
@@ -347,16 +322,6 @@ public class EmployeePL {
             return this;
         }
 
-        public Builder workingDoubles(boolean workingDoubles) {
-            this.workingDoubles = workingDoubles;
-            return this;
-        }
-
-        public Builder unavailableShifts(Map<WeekDay, Set<ShiftType>> unavailableShifts) {
-            this.unavailableShifts = unavailableShifts;
-            return this;
-        }
-
         public Builder active(boolean active) {
             this.active = active;
             return this;
@@ -370,7 +335,7 @@ public class EmployeePL {
         public EmployeePL build() {
             return new EmployeePL(id, name, bankAccount, salary, salaryType,
                     dateOfEmployment, jobScope, qualifiedRoles, constraints, yearlyRestDays,
-                    weeklyRestDay, workingDoubles, unavailableShifts, active, branchId);
+                    weeklyRestDay, new AvailabilitySubmissionPL(), active, branchId);
         }
 
         public HashSet<String> getQualifiedRoles() {

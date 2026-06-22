@@ -211,7 +211,7 @@ public class AddUpdateEmployeeView extends ViewCLI {
             Option.Builder rolesMenu = new Option.Builder("--- Select Qualified Roles ---")
                     .append("done", () -> stop.set(true));
 
-            controller.getAllRoles().forEach(role -> {
+            controller.getNonManagerRoles().forEach(role -> {
                 boolean hasRole = qualifiedRoles.contains(role);
                 rolesMenu.append(role + (hasRole ? " (Select to Delete) " : ""), () -> {
                     if (hasRole) {

@@ -15,6 +15,7 @@ import java.util.Objects;
 public class PlaceEmployeesUI extends ViewCLI {
     private final PlaceEmployeesController controller;
     private ShiftsView shiftsView;
+    boolean isFirstWeek;
 
     public PlaceEmployeesUI(Runnable onDismiss) {
         super(onDismiss);
@@ -23,8 +24,9 @@ public class PlaceEmployeesUI extends ViewCLI {
 
     @Override
     public void display() {
-        shiftsView = new ShiftsView(0);
-        if (controller.isFirstWeek()) onFirstWeek();
+        shiftsView = new ShiftsView(-1);
+        isFirstWeek = controller.isFirstWeek();
+        if (isFirstWeek) onFirstWeek();
 
         shiftsView.selectShift(this::placeEmployeeFlow);
         onDismiss.run();
@@ -46,7 +48,7 @@ public class PlaceEmployeesUI extends ViewCLI {
 
         try {
             if (selectedEmployee == null) displayOnEmptyMenu();
-            else controller.assignToShift(day, type, selectedEmployee, selectedRole);
+            else controller.assignToShift(day, type, selectedEmployee, selectedRole, isFirstWeek);
         } catch (UnsupportedOperationException e) {
             System.out.println(e.getMessage());
         } catch (Exception _) {

@@ -1,8 +1,9 @@
 package Workers.Presentation.Controller;
 
-import Workers.Service.StoreDetailsService;
+import Workers.Domain.DTO.RoleSL;
 import Workers.Presentation.DTO.BranchPL;
 import Workers.Presentation.DTO.EmployeePL;
+import Workers.Service.StoreDetailsService;
 import Workers.Shared.Enums.WeekDay;
 
 import java.util.List;
@@ -36,8 +37,10 @@ public class AddUpdateEmployeeController {
         return employeeController.updateEmployee(employee, password);
     }
 
-    public List<String> getAllRoles() {
-        return roleController.getAllRoles();
+    public List<String> getNonManagerRoles() {
+        List<String> roles = roleController.getAllRoles();
+        roles.remove(RoleSL.MANAGER.getTag());
+        return roles;
     }
 
     public List<BranchPL> getAllBranches() {
