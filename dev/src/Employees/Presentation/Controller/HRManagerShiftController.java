@@ -5,7 +5,6 @@ import Employees.Domain.Entities.Employee;
 import Employees.Domain.Entities.Role;
 import Employees.Domain.Entities.Shift;
 import Employees.Service.EmployeeService;
-import Employees.Service.HRManagerShiftService;
 import Employees.Service.ShiftService;
 import Employees.Presentation.Model.EmployeePL;
 import Employees.Shared.WeekConstants;

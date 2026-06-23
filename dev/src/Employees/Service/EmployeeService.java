@@ -2,8 +2,10 @@ package Employees.Service;
 
 import java.util.*;
 
+import Employees.DataAccess.EmployeeDAO;
 import Employees.DataAccess.Entities.EmployeeEntity;
 import Employees.DataAccess.Pools.EmployeePool;
+import Employees.DataAccess.SqlImpl.SqlEmployeeDAO;
 import Employees.Domain.Entities.Employee;
 import Employees.Domain.Entities.Role;
 import Employees.Domain.Entities.ShiftKey;
@@ -13,19 +15,20 @@ import Employees.Shared.Enums.ShiftType;
 
 public class EmployeeService {
 
-    private final EmployeePool employees;
+    private final EmployeeDAO employees;
 
     public EmployeeService() {
-        this.employees = EmployeePool.Instance();
+        this.employees = new SqlEmployeeDAO();
     }
 
     public String addEmployee(Employee employee) {
-        String pass = PasswordGenerator.generatePassword();
-        if (!employees.exists(employee.getId())) {
-            employees.addUpdateEmployee(employee.toEntity(pass));
-            return pass;
+        validateEmployeeData(employee);
+        if (employees.exists(employee.getId())) {
+            throw new IllegalArgumentException("Error: An employee with the given ID is already present in the system.");
         }
-        throw new IllegalArgumentException("An employee with the given id is already present in the system");
+        String pass = PasswordGenerator.generatePassword();
+        employees.addUpdateEmployee(employee.toEntity(pass));
+        return pass;
     }
 
     public boolean deactivateEmployee(String id) {
@@ -52,6 +55,7 @@ public class EmployeeService {
     }
 
     public boolean updateEmployee(Employee employee, String password) {
+        validateEmployeeData(employee);
         if (!employees.exists(employee.getId())) {
             return false;
         }
@@ -96,5 +100,20 @@ public class EmployeeService {
         if (!employees.exists(id))
             throw new IllegalArgumentException("Employee Not Found");
         return employees.getEmployee(id).qualifiedRoles().contains(role.getTag());
+    }
+
+    private void validateEmployeeData(Employee employee) {
+        if (employee.getSalary() <= 0) {
+            throw new IllegalArgumentException("Validation Error: Salary must be a positive number.");
+        }
+        if (employee.getBankAccount() == null || employee.getBankAccount().trim().isEmpty()) {
+            throw new IllegalArgumentException("Validation Error: Bank account cannot be empty.");
+        }
+        if (employee.getQualifiedRoles() == null || employee.getQualifiedRoles().isEmpty()) {
+            throw new IllegalArgumentException("Validation Error: An employee must be assigned to at least one Role upon onboarding.");
+        }
+        if (employee.getName() == null || employee.getName().trim().isEmpty()) {
+            throw new IllegalArgumentException("Validation Error: Employee name cannot be empty.");
+        }
     }
 }

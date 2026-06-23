@@ -1,6 +1,7 @@
 package Employees.Service;
 
-import Employees.DataAccess.Pools.BranchPool;
+import Employees.DataAccess.BranchDAO;
+import Employees.DataAccess.SqlImpl.SqlBranchDAO;
 import Employees.Domain.Entities.Store.Branch;
 import Employees.Presentation.Model.BranchPL;
 
@@ -8,24 +9,24 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class BranchService {
-    private final BranchPool branchPool;
+    private final BranchDAO branchDAO;
 
     public BranchService() {
-        branchPool = BranchPool.Instance();
+        branchDAO = new SqlBranchDAO();
     }
 
     public List<BranchPL> getBranches() {
         List<BranchPL> branches = new ArrayList<>();
-        branchPool.getAllBranches().forEach(branch ->
+        branchDAO.getAllBranches().forEach(branch ->
                 branches.add(new BranchPL(branch)));
         return branches;
     }
 
     public void addUpdateBranch(Branch branch) {
-        branchPool.addUpdateBranch(branch.toEntity());
+        branchDAO.addUpdateBranch(branch.toEntity());
     }
 
     public boolean containsBranchAtLocation(String location) {
-        return branchPool.getAllBranchLocations().contains(location);
+        return branchDAO.getAllBranchLocations().contains(location);
     }
 }
