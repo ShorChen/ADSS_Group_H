@@ -5,7 +5,7 @@ import Inventory.Presentation.GUI.InventoryDashboard;
 import Suppliers.Presentation.GUI.OrderDashboard;
 import Suppliers.Presentation.GUI.SupplierDashboard;
 import Transportation.Presentation.GUI.TransportDashboard;
-import Workers.Presentation.GUI.WorkersDashboard;
+import Employees.Presentation.GUI.WorkersDashboard;
 import Core.Controller.ControllerFactory;
 import javafx.application.Application;
 import javafx.scene.Parent;

@@ -11,7 +11,7 @@ module SuperLee {
     opens Inventory.Presentation.GUI to javafx.graphics;
     exports Transportation.Presentation.GUI to javafx.graphics;
     opens Transportation.Presentation.GUI to javafx.graphics;
-    exports Workers.Presentation.GUI to javafx.graphics;
-    opens Workers.Presentation.GUI to javafx.graphics;
+    exports Employees.Presentation.GUI to javafx.graphics;
+    opens Employees.Presentation.GUI to javafx.graphics;
     exports Core.Navigation;
 }
