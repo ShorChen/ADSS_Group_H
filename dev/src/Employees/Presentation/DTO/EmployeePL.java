@@ -1,7 +1,7 @@
 package Employees.Presentation.DTO;
 
-import Employees.Domain.Entities.Employee;
-import Employees.Domain.Entities.Role;
+import Employees.Domain.Entities.EmployeeSL;
+import Employees.Domain.Entities.RoleSL;
 import Employees.Shared.Enums.JobScope;
 import Employees.Shared.Enums.SalaryType;
 import Employees.Shared.Enums.ShiftType;
@@ -55,7 +55,7 @@ public class EmployeePL {
      * @param employee the domain layer employee to be transformed.
      * @apiNote The constructor makes a deep copy of the fields of {@code employee}
      */
-    public EmployeePL(Employee employee) {
+    public EmployeePL(EmployeeSL employee) {
         this(
                 employee.getId(), employee.getName(), employee.getBankAccount(),
                 employee.getSalary(), employee.getSalaryType(),
@@ -78,10 +78,10 @@ public class EmployeePL {
     /**
      * @return a domain layer employee transformed from {@code this}
      */
-    public Employee toEmployee() {
-        List<Role> roles = new ArrayList<>();
-        qualifiedRoles.forEach(r -> roles.add(new Role(r)));
-        return new Employee(
+    public EmployeeSL toEmployee() {
+        List<RoleSL> roles = new ArrayList<>();
+        qualifiedRoles.forEach(r -> roles.add(new RoleSL(r)));
+        return new EmployeeSL(
                 id, name, bankAccount, salary, salaryType, dateOfEmployment,
                 jobScope, roles, constraints, yearlyRestDays,
                 weeklyRestDay, workingDoubles, getUnavailableShifts(), active, branchId

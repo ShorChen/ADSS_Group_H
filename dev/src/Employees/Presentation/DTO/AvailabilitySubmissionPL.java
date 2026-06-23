@@ -2,7 +2,7 @@ package Employees.Presentation.DTO;
 
 import java.util.List;
 
-public class AvailabilitySubmission {
+public class AvailabilitySubmissionPL {
     String employeeId;
     List<ShiftPL> unavailableShifts;
 }

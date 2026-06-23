@@ -3,7 +3,7 @@ package Employees.Presentation.GUI;
 import Core.Controller.ControllerFactory;
 import Core.Navigation.AppNavigator;
 import Employees.Context.SessionManager;
-import Employees.Domain.Entities.Employee;
+import Employees.Domain.Entities.EmployeeSL;
 import Employees.Service.EmployeeService;
 import Employees.Shared.Enums.JobScope;
 import Employees.Shared.Enums.SalaryType;
@@ -71,18 +71,18 @@ public class EmployeesDashboard {
     }
 
     private VBox createEmployeesView() {
-        TableView<Employee> employeeTable = new TableView<>();
-        ObservableList<Employee> tableData = FXCollections.observableArrayList();
+        TableView<EmployeeSL> employeeTable = new TableView<>();
+        ObservableList<EmployeeSL> tableData = FXCollections.observableArrayList();
         HBox searchBox = getSearchBox(tableData);
-        TableColumn<Employee, String> idCol = new TableColumn<>("ID");
+        TableColumn<EmployeeSL, String> idCol = new TableColumn<>("ID");
         idCol.setCellValueFactory(data -> new SimpleStringProperty(data.getValue().getId()));
-        TableColumn<Employee, String> nameCol = new TableColumn<>("Name");
+        TableColumn<EmployeeSL, String> nameCol = new TableColumn<>("Name");
         nameCol.setCellValueFactory(data -> new SimpleStringProperty(data.getValue().getName()));
-        TableColumn<Employee, String> scopeCol = new TableColumn<>("Job Scope");
+        TableColumn<EmployeeSL, String> scopeCol = new TableColumn<>("Job Scope");
         scopeCol.setCellValueFactory(data -> new SimpleStringProperty(data.getValue().getJobScope().toString()));
-        TableColumn<Employee, String> salaryCol = new TableColumn<>("Salary/Hr");
+        TableColumn<EmployeeSL, String> salaryCol = new TableColumn<>("Salary/Hr");
         salaryCol.setCellValueFactory(data -> new SimpleStringProperty(String.valueOf(data.getValue().getSalary())));
-        TableColumn<Employee, String> statusCol = new TableColumn<>("Status");
+        TableColumn<EmployeeSL, String> statusCol = new TableColumn<>("Status");
         statusCol.setCellValueFactory(data -> new SimpleStringProperty(data.getValue().isActive() ? "Active" : "Inactive"));
         employeeTable.getColumns().addAll(List.of(idCol, nameCol, scopeCol, salaryCol, statusCol));
         employeeTable.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY);
@@ -94,7 +94,7 @@ public class EmployeesDashboard {
         return layout;
     }
 
-    private HBox getSearchBox(ObservableList<Employee> tableData) {
+    private HBox getSearchBox(ObservableList<EmployeeSL> tableData) {
         TextField searchField = new TextField();
         searchField.setPromptText("Enter Employee ID...");
         Button searchBtn = new Button("Search");
@@ -103,7 +103,7 @@ public class EmployeesDashboard {
                 showAlert(Alert.AlertType.WARNING, "Input Required", "Enter an ID.");
                 return;
             }
-            Employee emp = employeeService.getEmployeeDetails(searchField.getText().trim());
+            EmployeeSL emp = employeeService.getEmployeeDetails(searchField.getText().trim());
             tableData.clear();
             if (emp != null) tableData.add(emp);
             else showAlert(Alert.AlertType.INFORMATION, "Not Found", "No employee found.");
@@ -113,14 +113,14 @@ public class EmployeesDashboard {
         return searchBox;
     }
 
-    private HBox getHBox(ObservableList<Employee> tableData, TableView<Employee> employeeTable) {
+    private HBox getHBox(ObservableList<EmployeeSL> tableData, TableView<EmployeeSL> employeeTable) {
         Button addBtn = new Button("Add New Employee");
         addBtn.setStyle("-fx-background-color: #4CAF50; -fx-text-fill: white;");
         addBtn.setOnAction(e -> openEmployeeForm(null, tableData));
         Button updateBtn = new Button("Edit Selected");
         updateBtn.setStyle("-fx-background-color: #FF9800; -fx-text-fill: white;");
         updateBtn.setOnAction(e -> {
-            Employee selected = employeeTable.getSelectionModel().getSelectedItem();
+            EmployeeSL selected = employeeTable.getSelectionModel().getSelectedItem();
             if (selected != null) openEmployeeForm(selected, tableData);
             else showAlert(Alert.AlertType.WARNING, "Error", "Select an employee to edit.");
         });
@@ -130,11 +130,11 @@ public class EmployeesDashboard {
         return actionBox;
     }
 
-    private Button getDeactivateBtn(ObservableList<Employee> tableData, TableView<Employee> employeeTable) {
+    private Button getDeactivateBtn(ObservableList<EmployeeSL> tableData, TableView<EmployeeSL> employeeTable) {
         Button deactivateBtn = new Button("Deactivate Selected");
         deactivateBtn.setStyle("-fx-background-color: #F44336; -fx-text-fill: white;");
         deactivateBtn.setOnAction(e -> {
-            Employee selected = employeeTable.getSelectionModel().getSelectedItem();
+            EmployeeSL selected = employeeTable.getSelectionModel().getSelectedItem();
             if (selected != null) {
                 try {
                     if (employeeService.deactivateEmployee(selected.getId())) {
@@ -148,7 +148,7 @@ public class EmployeesDashboard {
         return deactivateBtn;
     }
 
-    private void openEmployeeForm(Employee existing, ObservableList<Employee> tableData) {
+    private void openEmployeeForm(EmployeeSL existing, ObservableList<EmployeeSL> tableData) {
         Stage stage = new Stage();
         stage.initModality(Modality.APPLICATION_MODAL);
         stage.setTitle(existing == null ? "Add Employee" : "Update Employee");
@@ -176,7 +176,7 @@ public class EmployeesDashboard {
         Button saveBtn = new Button("Save");
         saveBtn.setOnAction(e -> {
             try {
-                Employee emp = new Employee(idField.getText().trim(), nameField.getText().trim(), "temp",
+                EmployeeSL emp = new EmployeeSL(idField.getText().trim(), nameField.getText().trim(), "temp",
                         Double.parseDouble(salaryField.getText().trim()), salaryTypeBox.getValue(),
                         SessionManager.now(), scopeBox.getValue(), new ArrayList<>(), "None", 12, WeekDay.SUNDAY, false, new HashMap<>(), true, 1);
 

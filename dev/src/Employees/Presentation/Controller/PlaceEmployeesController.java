@@ -1,6 +1,6 @@
 package Employees.Presentation.Controller;
 
-import Employees.Domain.Entities.Role;
+import Employees.Domain.Entities.RoleSL;
 import Employees.Service.EmployeeService;
 import Employees.Service.RoleService;
 import Employees.Service.ShiftService;
@@ -31,7 +31,7 @@ public class PlaceEmployeesController {
     public List<EmployeePL> getAvailableEmployees(String day, String type, String role) {
         List<EmployeePL> employeePLList = new ArrayList<>();
         employeeService.getAvailableEmployees(WeekDay.fromArgs(day), ShiftType.fromType(type),
-                new Role(role)).forEach(e -> employeePLList.add(new EmployeePL(e)));
+                new RoleSL(role)).forEach(e -> employeePLList.add(new EmployeePL(e)));
         return employeePLList;
     }
 

@@ -1,9 +1,9 @@
 package Employees.Presentation.Controller;
 
 import Employees.Context.SessionManager;
-import Employees.Domain.Entities.Request;
-import Employees.Domain.Entities.Role;
-import Employees.Domain.Entities.Shift;
+import Employees.Domain.Entities.RequestSL;
+import Employees.Domain.Entities.RoleSL;
+import Employees.Domain.Entities.ShiftSL;
 import Employees.Domain.Entities.ShiftKey;
 import Employees.Service.EmployeeService;
 import Employees.Service.RequestReplacementService;
@@ -41,17 +41,17 @@ public class RequestReplacementController {
         int week = targetDate.get(WeekConstants.WEEK_FIELDS.weekOfWeekBasedYear());
         int branchId = SessionManager.getCurrentEmployee().getBranchId();
 
-        Map<ShiftKey, Shift> map = shiftService.getShiftsOfWeek(branchId, year, week);
-        Shift shift = map.get(new ShiftKey(day, type));
+        Map<ShiftKey, ShiftSL> map = shiftService.getShiftsOfWeek(branchId, year, week);
+        ShiftSL shift = map.get(new ShiftKey(day, type));
 
         if (shift.doesEmployeeWork(otherId))
             throw new IllegalArgumentException("Employee already in enrolled in that shift");
 
         String id = SessionManager.getCurrentEmployee().getId();
-        Role role = shift.getEmployeeShiftRole(id);
+        RoleSL role = shift.getEmployeeShiftRole(id);
 
         if (employeeService.containsRole(otherId, role)) {
-            Request r = new Request(shift, id, otherId);
+            RequestSL r = new RequestSL(shift, id, otherId);
             service.requestReplacement(r);
         }
         throw new IllegalArgumentException("other employee is not qualified for your job");
@@ -59,7 +59,7 @@ public class RequestReplacementController {
 
     public List<RequestPL> getCurrentEmployeePendingRequests() {
         String id = SessionManager.getCurrentEmployee().getId();
-        List<Request> requests = service.getPendingRequests(id);
+        List<RequestSL> requests = service.getPendingRequests(id);
         if (authController.isManager(id)) requests = service.getAllRequests();
 
         List<RequestPL> pendingRequests = new ArrayList<>();
@@ -111,7 +111,7 @@ public class RequestReplacementController {
     }
 
     @Deprecated
-    void t(Request request, RequestStatus status){
+    void t(RequestSL request, RequestStatus status){
         RequestStateMachine stateMachine = new RequestStateMachine();
         stateMachine.apply(new RequestStateMachine.State(request.getPrevStatus(),
                         request.getNewStatus(), request.getManagerStatus()),

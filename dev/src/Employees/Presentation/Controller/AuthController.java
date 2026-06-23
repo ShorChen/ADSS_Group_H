@@ -1,7 +1,7 @@
 package Employees.Presentation.Controller;
 
 import Employees.Context.SessionManager;
-import Employees.Domain.Entities.Employee;
+import Employees.Domain.Entities.EmployeeSL;
 import Employees.Service.AuthService;
 import Employees.Presentation.DTO.EmployeePL;
 
@@ -13,7 +13,7 @@ public class AuthController {
     }
 
     public boolean login(String id, String password) {
-        Employee employee = service.login(id, password);
+        EmployeeSL employee = service.login(id, password);
         if (employee == null) return false;
 
         SessionManager.login(new EmployeePL(employee));

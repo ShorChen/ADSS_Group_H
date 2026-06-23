@@ -3,7 +3,7 @@ package Employees.Service;
 import Employees.DataAccess.RequestDAO;
 import Employees.DataAccess.SqlImpl.SqlRequestDAO;
 import Employees.DataAccess.Entities.RequestEntity;
-import Employees.Domain.Entities.Request;
+import Employees.Domain.Entities.RequestSL;
 import Employees.Domain.Utils.RequestStateMachine;
 import org.jetbrains.annotations.NotNull;
 import Employees.Shared.Enums.RequestStatus;
@@ -18,22 +18,22 @@ public class RequestReplacementService {
         requestDAO = new SqlRequestDAO();
     }
 
-    public boolean requestReplacement(@NotNull Request request) {
+    public boolean requestReplacement(@NotNull RequestSL request) {
         RequestEntity entity = request.toEntity();
         boolean exists = requestDAO.exists(entity);
         requestDAO.addUpdateRequest(entity);
         return exists;
     }
 
-    public List<Request> getPendingRequests(String id) {
-        List<Request> pending = new ArrayList<>();
+    public List<RequestSL> getPendingRequests(String id) {
+        List<RequestSL> pending = new ArrayList<>();
         requestDAO.getPendingRequests(id).forEach(entity -> {
-            pending.add(new Request(entity));
+            pending.add(new RequestSL(entity));
         });
         return pending;
     }
 
-    public boolean approve(@NotNull Request request, String id) {
+    public boolean approve(@NotNull RequestSL request, String id) {
         RequestStateMachine stateMachine = new RequestStateMachine();
         RequestStateMachine.State startState = new RequestStateMachine.State(
                 request.getPrevStatus(),
@@ -49,20 +49,20 @@ public class RequestReplacementService {
         return statusChanged;
     }
 
-    public boolean deny(@NotNull Request request, String id) {
+    public boolean deny(@NotNull RequestSL request, String id) {
         request.deny(id);
         if (!request.isDenied()) return false;
         requestDAO.addUpdateRequest(request.toEntity());
         return true;
     }
 
-    public List<Request> getAllRequests() {
-        List<Request> list = new ArrayList<>();
-        requestDAO.getAll().forEach(r -> list.add(new Request(r)));
+    public List<RequestSL> getAllRequests() {
+        List<RequestSL> list = new ArrayList<>();
+        requestDAO.getAll().forEach(r -> list.add(new RequestSL(r)));
         return list;
     }
 
-    public boolean doAllSidesApprove(@NotNull Request request) {
+    public boolean doAllSidesApprove(@NotNull RequestSL request) {
         return request.isApproved();
     }
 }

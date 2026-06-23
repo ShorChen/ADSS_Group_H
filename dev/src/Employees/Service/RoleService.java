@@ -1,7 +1,7 @@
 package Employees.Service;
 
 import Employees.DataAccess.Pools.RolePool;
-import Employees.Domain.Entities.Role;
+import Employees.Domain.Entities.RoleSL;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -14,16 +14,16 @@ public class RoleService {
         this.pool = RolePool.Instance();
     }
 
-    public List<Role> getAllRoles() {
-        List<Role> roles = new ArrayList<>();
+    public List<RoleSL> getAllRoles() {
+        List<RoleSL> roles = new ArrayList<>();
         for (String s : pool.getAllRoles())
-            roles.add(new Role(s));
+            roles.add(new RoleSL(s));
         return roles;
     }
 
-    public Role getRole(String tag) {
+    public RoleSL getRole(String tag) {
         if (pool.containsRole(tag))
-            return new Role(tag);
+            return new RoleSL(tag);
         return null;
     }
 

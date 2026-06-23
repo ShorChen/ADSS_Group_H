@@ -1,7 +1,7 @@
 package Employees.Presentation.Controller;
 
-import Employees.Domain.Entities.Employee;
-import Employees.Domain.Entities.Role;
+import Employees.Domain.Entities.EmployeeSL;
+import Employees.Domain.Entities.RoleSL;
 import Employees.Service.EmployeeService;
 import Employees.Presentation.DTO.EmployeePL;
 
@@ -29,20 +29,20 @@ public class EmployeeController {
     public EmployeePL getEmployeeDetails(String id) {
         if (id == null || id.trim().isEmpty()) return null;
     
-        Employee employee = service.getEmployeeDetails(id);
+        EmployeeSL employee = service.getEmployeeDetails(id);
         if (employee != null) {
             return new EmployeePL(employee); 
         }
         return null;
     }
 
-    public boolean grantQualifications(Employee employee, Role... roles) {
+    public boolean grantQualifications(EmployeeSL employee, RoleSL... roles) {
         // Todo: implement
         System.out.println("Method not yet implemented");
         return false;
     }
 
-    public boolean revokeQualifications(Employee employee, Role... roles) {
+    public boolean revokeQualifications(EmployeeSL employee, RoleSL... roles) {
         // Todo: implement
         System.out.println("Method not yet implemented");
         return false;

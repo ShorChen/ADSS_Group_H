@@ -1,8 +1,8 @@
 package Employees.Presentation.Controller;
 
 import Employees.Context.SessionManager;
-import Employees.Domain.Entities.Employee;
-import Employees.Domain.Entities.Role;
+import Employees.Domain.Entities.EmployeeSL;
+import Employees.Domain.Entities.RoleSL;
 import Employees.Domain.Entities.Store.Branch;
 import Employees.Presentation.DTO.BranchPL;
 import Employees.Presentation.DTO.StoreDetailsPL;
@@ -32,9 +32,9 @@ public class CreateStoreController {
     }
 
     public String registerManager(String id, String name, String bankAccount, String weekDay) {
-        List<Role> roles = new ArrayList<>();
-        roles.add(Role.MANAGER);
-        return employeeService.addEmployee(new Employee(
+        List<RoleSL> roles = new ArrayList<>();
+        roles.add(RoleSL.MANAGER);
+        return employeeService.addEmployee(new EmployeeSL(
                 id, name, bankAccount, 0, SalaryType.GLOBALLY,
                 SessionManager.now(), JobScope.FULL_TIME,
                 roles, "", 24, WeekDay.valueOf(weekDay),

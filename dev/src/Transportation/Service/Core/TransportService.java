@@ -1,8 +1,8 @@
 package Transportation.Service.Core;
 
 import Core.Service.Response;
-import Employees.Domain.Entities.Role;
-import Employees.Domain.Entities.Shift;
+import Employees.Domain.Entities.RoleSL;
+import Employees.Domain.Entities.ShiftSL;
 import Employees.Domain.Entities.ShiftKey;
 import Employees.Shared.Enums.WeekDay;
 import Employees.Service.ShiftService;
@@ -153,10 +153,10 @@ public class TransportService {
         int departureHour = Integer.parseInt(departureTime.split(":")[0]);
 
         int defaultBranchId = 1;
-        java.util.Map<ShiftKey, Shift> weekShifts = shiftService.getShiftsOfWeek(defaultBranchId, year, week);
+        java.util.Map<ShiftKey, ShiftSL> weekShifts = shiftService.getShiftsOfWeek(defaultBranchId, year, week);
 
         ShiftType startShiftType = (departureHour < 14) ? ShiftType.DAY : ShiftType.EVENING;
-        Shift startShift = weekShifts.get(new ShiftKey(day, startShiftType));
+        ShiftSL startShift = weekShifts.get(new ShiftKey(day, startShiftType));
 
         if (startShift == null || !startShift.doesEmployeeWork(driverId)) {
             throw new IllegalArgumentException(" Error! the driver is not scheduled to work during the departure time of the delivery.");
@@ -172,10 +172,10 @@ public class TransportService {
         int departureHour = Integer.parseInt(departureTime.split(":")[0]);
 
         int defaultBranchId = 1;
-        java.util.Map<ShiftKey, Shift> weekShifts = shiftService.getShiftsOfWeek(defaultBranchId, year, week);
+        java.util.Map<ShiftKey, ShiftSL> weekShifts = shiftService.getShiftsOfWeek(defaultBranchId, year, week);
 
         ShiftType shiftType = (departureHour < 14) ? ShiftType.DAY : ShiftType.EVENING;
-        Shift destinationShift = weekShifts.get(new ShiftKey(day, shiftType));
+        ShiftSL destinationShift = weekShifts.get(new ShiftKey(day, shiftType));
 
         for (Transportation.Domain.Entities.DestinationDL dest : destinations) {
             if (destinationShift == null) {
@@ -183,7 +183,7 @@ public class TransportService {
             }
 
             boolean hasStorekeeper = false;
-            for (java.util.Map.Entry<Role, java.util.Set<String>> entry : destinationShift.getEmployees().entrySet()) {
+            for (java.util.Map.Entry<RoleSL, java.util.Set<String>> entry : destinationShift.getEmployees().entrySet()) {
                 if (entry.getKey().getTag().equalsIgnoreCase("Storekeeper") && !entry.getValue().isEmpty()) {
                     hasStorekeeper = true;
                     break;

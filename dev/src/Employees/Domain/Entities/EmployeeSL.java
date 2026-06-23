@@ -10,7 +10,7 @@ import Employees.Shared.Enums.WeekDay;
 import java.time.LocalDateTime;
 import java.util.*;
 
-public class Employee {
+public class EmployeeSL {
     private final String id;
     private String name;
     private String bankAccount;
@@ -18,7 +18,7 @@ public class Employee {
     private SalaryType salaryType;
     private LocalDateTime dateOfEmployment;
     private JobScope jobScope;
-    private List<Role> qualifiedRoles;
+    private List<RoleSL> qualifiedRoles;
     private String constraints;
     private int yearlyRestDays;
     private WeekDay weeklyRestDay;
@@ -27,12 +27,12 @@ public class Employee {
     private boolean active;
     private int branchId;
 
-    public Employee(String id, String name, String bankAccount,
-                    double salary, SalaryType salaryType, LocalDateTime dateOfEmployment,
-                    JobScope jobScope, List<Role> qualifiedRoles, String constraints,
-                    int yearlyRestDays, WeekDay weeklyRestDay, boolean workingDoubles,
-                    Map<WeekDay, Set<ShiftType>> unavailableShifts, boolean active,
-                    int branchId) {
+    public EmployeeSL(String id, String name, String bankAccount,
+                      double salary, SalaryType salaryType, LocalDateTime dateOfEmployment,
+                      JobScope jobScope, List<RoleSL> qualifiedRoles, String constraints,
+                      int yearlyRestDays, WeekDay weeklyRestDay, boolean workingDoubles,
+                      Map<WeekDay, Set<ShiftType>> unavailableShifts, boolean active,
+                      int branchId) {
         this.id = id;
         this.name = name;
         this.bankAccount = bankAccount;
@@ -51,7 +51,7 @@ public class Employee {
 
     }
 
-    public Employee(@NotNull EmployeeEntity e) {
+    public EmployeeSL(@NotNull EmployeeEntity e) {
         this(e.id(), e.name(), e.bankAccount(), e.salary(),
                 SalaryType.fromArgs(e.salaryType()), e.dateOfEmployment(),
                 JobScope.fromArgs(e.jobScope()),
@@ -63,7 +63,7 @@ public class Employee {
         );
 
         qualifiedRoles = new ArrayList<>();
-        e.qualifiedRoles().forEach(role -> qualifiedRoles.add(new Role(role)));
+        e.qualifiedRoles().forEach(role -> qualifiedRoles.add(new RoleSL(role)));
 
         unavailableShifts = new HashMap<>();
         e.unavailableShifts().forEach((key, value) -> {
@@ -92,19 +92,19 @@ public class Employee {
         );
     }
 
-    public List<Role> getQualifiedRoles() {
+    public List<RoleSL> getQualifiedRoles() {
         return new ArrayList<>(qualifiedRoles);
     }
 
-    public void addQualifiedRoles(Role... qualifiedRoles) {
-        for (Role qualifiedRole : qualifiedRoles) {
+    public void addQualifiedRoles(RoleSL... qualifiedRoles) {
+        for (RoleSL qualifiedRole : qualifiedRoles) {
             if (!this.qualifiedRoles.contains(qualifiedRole))
                 this.qualifiedRoles.add(qualifiedRole);
         }
 
     }
 
-    public void setQualifiedRoles(List<Role> qualifiedRoles) {
+    public void setQualifiedRoles(List<RoleSL> qualifiedRoles) {
         this.qualifiedRoles = new ArrayList<>();
         this.qualifiedRoles.addAll(qualifiedRoles);
     }

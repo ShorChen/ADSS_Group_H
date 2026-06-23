@@ -1,4 +1,4 @@
 package Employees.Domain.Entities;
 
-public class Report {
+public class ReportSL {
 }

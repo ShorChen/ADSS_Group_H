@@ -5,10 +5,10 @@ import Employees.Shared.Enums.RequestStatus;
 
 import java.util.Objects;
 
-public class Request {
+public class RequestSL {
     public static final int NO_ID = -1;
     private int requestId;
-    private Shift shift;
+    private ShiftSL shift;
     private String prevEmployee;
     private String newEmployee;
     private String manager;
@@ -16,14 +16,14 @@ public class Request {
     private RequestStatus newStatus;
     private RequestStatus managerStatus;
 
-    public Request(Shift shift, String prevEmployee, String newEmployee) {
+    public RequestSL(ShiftSL shift, String prevEmployee, String newEmployee) {
         this(NO_ID, shift, prevEmployee, newEmployee, "", RequestStatus.ACCEPT,
                 RequestStatus.PENDING, RequestStatus.PENDING);
     }
 
-    public Request(int requestId, Shift shift, String prevEmployee, String newEmployee,
-                   String manager, RequestStatus prevStatus, RequestStatus newStatus,
-                   RequestStatus managerStatus) {
+    public RequestSL(int requestId, ShiftSL shift, String prevEmployee, String newEmployee,
+                     String manager, RequestStatus prevStatus, RequestStatus newStatus,
+                     RequestStatus managerStatus) {
         this.requestId = requestId;
         this.shift = shift;
         this.prevEmployee = prevEmployee;
@@ -40,9 +40,9 @@ public class Request {
                 newStatus.toString(), managerStatus.toString(), isDenied());
     }
 
-    public Request(RequestEntity entity) {
+    public RequestSL(RequestEntity entity) {
         this(
-                entity.requestId(), new Shift(entity.shift()),
+                entity.requestId(), new ShiftSL(entity.shift()),
                 entity.prevEmployee(), entity.newEmployee(), entity.manager(),
                 RequestStatus.fromArgs(entity.prevApproved()),
                 RequestStatus.fromArgs(entity.newApproved()),
@@ -95,8 +95,8 @@ public class Request {
                managerStatus == RequestStatus.ACCEPT;
     }
 
-    public Shift getShift() {
-        return new Shift(shift);
+    public ShiftSL getShift() {
+        return new ShiftSL(shift);
     }
 
     public String getPrevEmployee() {

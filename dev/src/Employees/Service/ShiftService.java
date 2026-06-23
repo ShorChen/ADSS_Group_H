@@ -4,7 +4,7 @@ import Employees.DataAccess.Entities.Keys.BranchWeekKey;
 import Employees.DataAccess.Entities.Keys.ShiftEntityKey;
 import Employees.DataAccess.ShiftDAO;
 import Employees.DataAccess.SqlImpl.SqlShiftDAO;
-import Employees.Domain.Entities.Shift;
+import Employees.Domain.Entities.ShiftSL;
 import Employees.Domain.Entities.ShiftKey;
 import org.jetbrains.annotations.NotNull;
 
@@ -18,10 +18,10 @@ public class ShiftService {
         shiftDAO = new SqlShiftDAO();
     }
 
-    public Map<ShiftKey, Shift> getShiftsOfWeek(int branchId, int year, int week) {
-        Map<ShiftKey, Shift> weekMap = new HashMap<>();
+    public Map<ShiftKey, ShiftSL> getShiftsOfWeek(int branchId, int year, int week) {
+        Map<ShiftKey, ShiftSL> weekMap = new HashMap<>();
         shiftDAO.getShiftsByBranchAndWeek(branchId, year, week).forEach(shiftEntity -> {
-            Shift shift = new Shift(shiftEntity);
+            ShiftSL shift = new ShiftSL(shiftEntity);
             weekMap.put(new ShiftKey(shift.getDay(), shift.getShiftType()), shift);
         });
         return weekMap;
@@ -29,7 +29,7 @@ public class ShiftService {
 
     public void addUpdateShift(int branchId, int year, int week,
                                String day, String type,
-                               @NotNull Shift shift) {
+                               @NotNull ShiftSL shift) {
         shiftDAO.addUpdateShift(new BranchWeekKey(branchId, year, week),
                 new ShiftEntityKey(day, type), shift.toEntity());
     }

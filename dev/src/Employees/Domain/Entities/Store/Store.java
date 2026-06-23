@@ -1,6 +1,6 @@
 package Employees.Domain.Entities.Store;
 
-import Employees.Domain.Entities.Employee;
+import Employees.Domain.Entities.EmployeeSL;
 import Employees.Shared.Enums.WeekDay;
 
 import java.util.List;
@@ -11,7 +11,7 @@ public class Store {
     private String name;
     private List<Branch> branches;
     private List<WeekDay> closedDays;
-    private Employee manager;
+    private EmployeeSL manager;
 
     public String getName() {
         return name;

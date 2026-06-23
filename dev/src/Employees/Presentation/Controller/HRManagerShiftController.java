@@ -1,9 +1,9 @@
 package Employees.Presentation.Controller;
 
 import Employees.Context.SessionManager;
-import Employees.Domain.Entities.Employee;
-import Employees.Domain.Entities.Role;
-import Employees.Domain.Entities.Shift;
+import Employees.Domain.Entities.EmployeeSL;
+import Employees.Domain.Entities.RoleSL;
+import Employees.Domain.Entities.ShiftSL;
 import Employees.Service.EmployeeService;
 import Employees.Service.ShiftService;
 import Employees.Presentation.DTO.EmployeePL;
@@ -28,7 +28,7 @@ public class HRManagerShiftController {
         this.employeeService = new EmployeeService();
     }
 
-    public void setJobsToShift(Shift shift, Map<Role, Integer> jobs) {
+    public void setJobsToShift(ShiftSL shift, Map<RoleSL, Integer> jobs) {
         try {
             //hrService.setJobsToShift(shift, jobs);
         } catch (IllegalArgumentException e) {
@@ -36,13 +36,13 @@ public class HRManagerShiftController {
         }
     }
 
-    public void createShiftTemplate(String name, Map<Role, Integer> jobs) {
+    public void createShiftTemplate(String name, Map<RoleSL, Integer> jobs) {
     }
 
     public void setShiftTemplateAsDefault(String templateName) {
     }
 
-    public void placeToShifts(List<Employee> employees, List<Shift> shifts) {
+    public void placeToShifts(List<EmployeeSL> employees, List<ShiftSL> shifts) {
         try {
             //hrService.placeToShifts(employees, shifts);
         } catch (Exception e) {
@@ -75,7 +75,7 @@ public class HRManagerShiftController {
         int branchId = SessionManager.getCurrentEmployee().getBranchId();
 
         service.addUpdateShift(branchId, year, week, day.toString(), type.toString(),
-                new Shift(day, type, shiftManager.getId()));
+                new ShiftSL(day, type, shiftManager.getId()));
     }
 
     public void closeShift(WeekDay day, ShiftType type) {
@@ -88,9 +88,9 @@ public class HRManagerShiftController {
     }
 
     public EmployeePL getShiftManager(String id) {
-        Employee employee = employeeService.getEmployeeDetails(id);
+        EmployeeSL employee = employeeService.getEmployeeDetails(id);
         if (employee == null) throw new IllegalArgumentException("Employee does not exist");
-        if (!employee.getQualifiedRoles().contains(Role.ShiftManager))
+        if (!employee.getQualifiedRoles().contains(RoleSL.ShiftManager))
             throw new IllegalArgumentException("Employee is not a shift manager");
         return new EmployeePL(employee);
     }

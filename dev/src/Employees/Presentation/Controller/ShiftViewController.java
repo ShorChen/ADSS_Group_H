@@ -1,7 +1,7 @@
 package Employees.Presentation.Controller;
 
 import Employees.Context.SessionManager;
-import Employees.Domain.Entities.Shift;
+import Employees.Domain.Entities.ShiftSL;
 import Employees.Domain.Entities.ShiftKey;
 import Employees.Shared.WeekConstants;
 import Employees.Service.EmployeeService;
@@ -28,7 +28,7 @@ public class ShiftViewController {
         int week = targetDate.get(WeekConstants.WEEK_FIELDS.weekOfWeekBasedYear());
         int branchId = SessionManager.getCurrentEmployee().getBranchId();
 
-        Map<ShiftKey, Shift> map = shiftService.getShiftsOfWeek(branchId, year, week);
+        Map<ShiftKey, ShiftSL> map = shiftService.getShiftsOfWeek(branchId, year, week);
         Map<ShiftKey, ShiftPL> weekShifts = new HashMap<>();
         map.forEach((key, value) ->
                 weekShifts.put(key, new ShiftPL(value))

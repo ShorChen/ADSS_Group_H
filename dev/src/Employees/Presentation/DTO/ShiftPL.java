@@ -1,7 +1,7 @@
 package Employees.Presentation.DTO;
 
-import Employees.Domain.Entities.Role;
-import Employees.Domain.Entities.Shift;
+import Employees.Domain.Entities.RoleSL;
+import Employees.Domain.Entities.ShiftSL;
 import Employees.Shared.Enums.ShiftType;
 import Employees.Shared.Enums.WeekDay;
 
@@ -16,12 +16,12 @@ public class ShiftPL {
     private WeekDay day;
     private ShiftType shiftType;
     private Map<String, Set<String>> employees;
-    private Map<Role, Integer> capacities;
+    private Map<RoleSL, Integer> capacities;
     private Map<String, Float> additionalHours;
 
 
     public ShiftPL(LocalDateTime startDate, WeekDay day, ShiftType shiftType,
-                   Map<String, Set<String>> employees, Map<Role, Integer> capacities,
+                   Map<String, Set<String>> employees, Map<RoleSL, Integer> capacities,
                    Map<String, Float> additionalHours) {
         this.startDate = startDate;
         this.day = day;
@@ -32,21 +32,21 @@ public class ShiftPL {
 
     }
 
-    public Shift toShift() {
-        Map<Role, Set<String>> shiftEmployees = new HashMap<>();
+    public ShiftSL toShift() {
+        Map<RoleSL, Set<String>> shiftEmployees = new HashMap<>();
         employees.forEach((role, idSet) ->
-                shiftEmployees.put(new Role(role),
+                shiftEmployees.put(new RoleSL(role),
                         new HashSet<>(idSet)
                 )
         );
-        return new Shift(
+        return new ShiftSL(
                 startDate, day, shiftType,
                 shiftEmployees, capacities, additionalHours
         );
     }
 
 
-    public ShiftPL(Shift shift) {
+    public ShiftPL(ShiftSL shift) {
         this(shift.getStartDate(), shift.getDay(), shift.getShiftType(),
                 new HashMap<>(), shift.getCapacities(), shift.getAdditionalHours());
 
@@ -97,11 +97,11 @@ public class ShiftPL {
         );
     }
 
-    public Map<Role, Integer> getCapacities() {
+    public Map<RoleSL, Integer> getCapacities() {
         return new HashMap<>(capacities);
     }
 
-    public void setCapacities(Map<Role, Integer> capacities) {
+    public void setCapacities(Map<RoleSL, Integer> capacities) {
         this.capacities = new HashMap<>();
         this.capacities.putAll(capacities);
     }

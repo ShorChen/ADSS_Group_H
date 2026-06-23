@@ -4,10 +4,9 @@ import java.util.*;
 
 import Employees.DataAccess.EmployeeDAO;
 import Employees.DataAccess.Entities.EmployeeEntity;
-import Employees.DataAccess.Pools.EmployeePool;
 import Employees.DataAccess.SqlImpl.SqlEmployeeDAO;
-import Employees.Domain.Entities.Employee;
-import Employees.Domain.Entities.Role;
+import Employees.Domain.Entities.EmployeeSL;
+import Employees.Domain.Entities.RoleSL;
 import Employees.Domain.Entities.ShiftKey;
 import Employees.Shared.Enums.WeekDay;
 import Employees.Domain.Utils.PasswordGenerator;
@@ -21,7 +20,7 @@ public class EmployeeService {
         this.employees = new SqlEmployeeDAO();
     }
 
-    public String addEmployee(Employee employee) {
+    public String addEmployee(EmployeeSL employee) {
         validateEmployeeData(employee);
         if (employees.exists(employee.getId())) {
             throw new IllegalArgumentException("Error: An employee with the given ID is already present in the system.");
@@ -42,10 +41,10 @@ public class EmployeeService {
         return false;
     }
 
-    public Employee getEmployeeDetails(String id) {
+    public EmployeeSL getEmployeeDetails(String id) {
         if (employees.exists(id)) {
             EmployeeEntity entity = employees.getEmployee(id);
-            return new Employee(entity);
+            return new EmployeeSL(entity);
         }
         return null;
     }
@@ -54,7 +53,7 @@ public class EmployeeService {
         return employees.exists(id);
     }
 
-    public boolean updateEmployee(Employee employee, String password) {
+    public boolean updateEmployee(EmployeeSL employee, String password) {
         validateEmployeeData(employee);
         if (!employees.exists(employee.getId())) {
             return false;
@@ -83,11 +82,11 @@ public class EmployeeService {
         employees.addUpdateEmployee(entity);
     }
 
-    public List<Employee> getAvailableEmployees(WeekDay weekDay, ShiftType shiftType, Role role) {
-        List<Employee> employeeList = new ArrayList<>();
+    public List<EmployeeSL> getAvailableEmployees(WeekDay weekDay, ShiftType shiftType, RoleSL role) {
+        List<EmployeeSL> employeeList = new ArrayList<>();
         employees.getEmployeesWithRole(role.getTag()).forEach(
                 e -> {
-                    Employee employee = new Employee(e);
+                    EmployeeSL employee = new EmployeeSL(e);
                     if (!employee.getUnavailableShifts()
                             .getOrDefault(weekDay, new HashSet<>()).contains(shiftType))
                         employeeList.add(employee);
@@ -96,13 +95,13 @@ public class EmployeeService {
         return employeeList;
     }
 
-    public boolean containsRole(String id, Role role) {
+    public boolean containsRole(String id, RoleSL role) {
         if (!employees.exists(id))
             throw new IllegalArgumentException("Employee Not Found");
         return employees.getEmployee(id).qualifiedRoles().contains(role.getTag());
     }
 
-    private void validateEmployeeData(Employee employee) {
+    private void validateEmployeeData(EmployeeSL employee) {
         if (employee.getSalary() <= 0) {
             throw new IllegalArgumentException("Validation Error: Salary must be a positive number.");
         }

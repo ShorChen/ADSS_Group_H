@@ -1,6 +1,6 @@
 package Employees.Presentation.DTO;
 
-import Employees.Domain.Entities.Request;
+import Employees.Domain.Entities.RequestSL;
 import Employees.Shared.Enums.RequestStatus;
 
 public class RequestPL {
@@ -25,7 +25,7 @@ public class RequestPL {
         this.managerStatus = managerStatus;
     }
 
-    public RequestPL(Request request) {
+    public RequestPL(RequestSL request) {
         this(new ShiftPL(request.getShift()),
                 request.getPrevEmployee(),
                 request.getNewEmployee(),
@@ -40,8 +40,8 @@ public class RequestPL {
         return shift;
     }
 
-    public Request toRequest() {
-        return new Request(Request.NO_ID,
+    public RequestSL toRequest() {
+        return new RequestSL(RequestSL.NO_ID,
                 shift.toShift(), prevEmployee, newEmployee, manager,
                 prevStatus, newStatus, managerStatus
         );

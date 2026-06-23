@@ -2,16 +2,16 @@ package Employees.Domain.Entities;
 
 import java.util.Objects;
 
-public class Role {
-    public static final Role MANAGER = new Role("Manager");
-    public static final Role Storekeeper = new Role("Storekeeper");
-    public static final Role ShiftManager = new Role("Shift Manager");
-    public static final Role Cashier = new Role("Cashier");
-    public static final Role Driver = new Role("Driver");
+public class RoleSL {
+    public static final RoleSL MANAGER = new RoleSL("Manager");
+    public static final RoleSL Storekeeper = new RoleSL("Storekeeper");
+    public static final RoleSL ShiftManager = new RoleSL("Shift Manager");
+    public static final RoleSL Cashier = new RoleSL("Cashier");
+    public static final RoleSL Driver = new RoleSL("Driver");
 
 
     private final String tag;
-    public Role(String tag) {
+    public RoleSL(String tag) {
         this.tag = tag;
     }
 
@@ -28,7 +28,7 @@ public class Role {
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
-        Role role = (Role) o;
+        RoleSL role = (RoleSL) o;
         return Objects.equals(this.tag, role.tag); 
     }
 

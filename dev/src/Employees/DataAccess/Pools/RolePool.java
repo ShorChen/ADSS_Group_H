@@ -1,6 +1,6 @@
 package Employees.DataAccess.Pools;
 
-import Employees.Domain.Entities.Role;
+import Employees.Domain.Entities.RoleSL;
 
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -21,10 +21,10 @@ public class RolePool {
     private RolePool() {
         this.roles = new HashSet<>();
 
-        roles.add(Role.MANAGER.getTag());
-        roles.add(Role.Storekeeper.getTag());
-        roles.add(Role.ShiftManager.getTag());
-        roles.add(Role.Cashier.getTag());
+        roles.add(RoleSL.MANAGER.getTag());
+        roles.add(RoleSL.Storekeeper.getTag());
+        roles.add(RoleSL.ShiftManager.getTag());
+        roles.add(RoleSL.Cashier.getTag());
     }
 
     public static void free(){

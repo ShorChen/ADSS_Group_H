@@ -2,8 +2,8 @@ package Employees.Service;
 
 import Employees.DataAccess.Entities.EmployeeEntity;
 import Employees.DataAccess.Pools.EmployeePool;
-import Employees.Domain.Entities.Employee;
-import Employees.Domain.Entities.Role;
+import Employees.Domain.Entities.EmployeeSL;
+import Employees.Domain.Entities.RoleSL;
 import Employees.Domain.Utils.PasswordGenerator;
 
 public class AuthService {
@@ -22,11 +22,11 @@ public class AuthService {
                 " character !@#$%^&*()-_=+[]{}|;:,.<>?\"");
     }
 
-    public Employee login(String id, String password) {
+    public EmployeeSL login(String id, String password) {
         EmployeeEntity entity = employees.getEmployee(id);
         if (entity == null || !entity.active()) return null;
         if (entity.checkPassword(password))
-            return new Employee(entity);
+            return new EmployeeSL(entity);
         return null;
     }
 
@@ -36,7 +36,7 @@ public class AuthService {
 
     public boolean isManager(String id) {
         if (employees.exists(id))
-            return employees.getEmployee(id).qualifiedRoles().contains(Role.MANAGER.getTag());
+            return employees.getEmployee(id).qualifiedRoles().contains(RoleSL.MANAGER.getTag());
         throw new IllegalArgumentException("No employee found");
     }
 

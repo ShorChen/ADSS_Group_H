@@ -9,17 +9,17 @@ import java.time.LocalDateTime;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicBoolean;
 
-public class Shift {
+public class ShiftSL {
     private LocalDateTime startDate;
     private WeekDay day;
     private ShiftType shiftType;
-    private Map<Role, Set<String>> employees;
-    private Map<Role, Integer> capacities;
+    private Map<RoleSL, Set<String>> employees;
+    private Map<RoleSL, Integer> capacities;
     private Map<String, Float> additionalHours;
 
-    public Shift(LocalDateTime startDate, WeekDay day, ShiftType shiftType,
-                 Map<Role, Set<String>> employees, Map<Role, Integer> capacities,
-                 Map<String, Float> additionalHours) {
+    public ShiftSL(LocalDateTime startDate, WeekDay day, ShiftType shiftType,
+                   Map<RoleSL, Set<String>> employees, Map<RoleSL, Integer> capacities,
+                   Map<String, Float> additionalHours) {
         this.startDate = startDate;
         this.day = day;
         this.shiftType = shiftType;
@@ -28,9 +28,9 @@ public class Shift {
         setCapacities(capacities);
     }
 
-    public Shift(LocalDateTime startDate, WeekDay day, ShiftType shiftType,
-                 Map<Role, Set<String>> employees,
-                 Map<String, Float> additionalHours) {
+    public ShiftSL(LocalDateTime startDate, WeekDay day, ShiftType shiftType,
+                   Map<RoleSL, Set<String>> employees,
+                   Map<String, Float> additionalHours) {
 
         this(startDate, day, shiftType, employees, new HashMap<>(), additionalHours);
         employees.forEach((role, employeeIds) ->
@@ -39,26 +39,26 @@ public class Shift {
     }
 
 
-    public Shift(WeekDay day, ShiftType type, String shiftManagerId) {
+    public ShiftSL(WeekDay day, ShiftType type, String shiftManagerId) {
         this(null, day, type, new HashMap<>(), new HashMap<>());
 
         HashSet<String> shiftManager = new HashSet<>();
         shiftManager.add(shiftManagerId);
 
-        employees.put(Role.ShiftManager, shiftManager);
+        employees.put(RoleSL.ShiftManager, shiftManager);
     }
 
-    public Shift(@NotNull Shift o) {
+    public ShiftSL(@NotNull ShiftSL o) {
         this(o.startDate, o.day, o.shiftType, o.employees, o.capacities, o.additionalHours);
     }
 
-    public Shift (ShiftEntity entity) {
+    public ShiftSL(ShiftEntity entity) {
         this(entity.startDate(), WeekDay.fromArgs(entity.day()),
                 ShiftType.fromType(entity.shiftType()), new HashMap<>(),
                 entity.additionalHours()
         );
         entity.employees().forEach((role, employeeIds) ->
-                employees.put(new Role(role), new HashSet<>(employeeIds)));
+                employees.put(new RoleSL(role), new HashSet<>(employeeIds)));
     }
 
     public ShiftEntity toEntity() {
@@ -82,31 +82,31 @@ public class Shift {
 
     // can be moved to the controller that would use it
     // convert to canEmployeeWork(Role, String)
-    public boolean canEmployeeWork(Role role, String employeeId) {
+    public boolean canEmployeeWork(RoleSL role, String employeeId) {
         return !doesEmployeeWork(employeeId) &&
                capacities.getOrDefault(role, 1) >=
                employees.getOrDefault(role, new HashSet<>()).size();
 
     }
 
-    public Role getEmployeeShiftRole(String id) {
-        for (Map.Entry<Role, Set<String>> entry : employees.entrySet()) {
+    public RoleSL getEmployeeShiftRole(String id) {
+        for (Map.Entry<RoleSL, Set<String>> entry : employees.entrySet()) {
             if (entry.getValue().contains(id)) return entry.getKey();
         }
         return null;
     }
 
-    public void assignEmployeeToRole(Role role, Employee employee) {
+    public void assignEmployeeToRole(RoleSL role, EmployeeSL employee) {
         if (!canEmployeeWork(role, employee.getId()))
             throw new IllegalArgumentException("Employee can not work in this shift");
         employees.get(role).add(employee.getId());
     }
 
-    public boolean shiftRequiresRole(Role role) {
+    public boolean shiftRequiresRole(RoleSL role) {
         return !employees.getOrDefault(role, new HashSet<>()).isEmpty();
     }
 
-    public void addRole(Role role, int capacity) {
+    public void addRole(RoleSL role, int capacity) {
         if (employees.getOrDefault(role, new HashSet<>()).size() < capacity) {
             capacities.put(role, capacity);
         }
@@ -136,14 +136,14 @@ public class Shift {
         this.shiftType = shiftType;
     }
 
-    public Map<Role, Set<String>> getEmployees() {
-        Map<Role, Set<String>> result = new HashMap<>();
+    public Map<RoleSL, Set<String>> getEmployees() {
+        Map<RoleSL, Set<String>> result = new HashMap<>();
         employees.forEach((role, employeeIds) ->
                 result.put(role, new HashSet<>(employeeIds)));
         return result;
     }
 
-    public void setEmployees(Map<Role, Set<String>> employees) {
+    public void setEmployees(Map<RoleSL, Set<String>> employees) {
         this.employees = new HashMap<>();
         employees.forEach((role, employeeIds) ->
                 this.employees.put(role, new HashSet<>(employeeIds)));
@@ -159,14 +159,14 @@ public class Shift {
     }
 
     public String getShiftManager() {
-        return employees.get(Role.ShiftManager).toArray(String[]::new)[0];
+        return employees.get(RoleSL.ShiftManager).toArray(String[]::new)[0];
     }
 
-    public int getCapacity(Role role) {
+    public int getCapacity(RoleSL role) {
         return capacities.getOrDefault(role, 0);
     }
 
-    public void setCapacity(Role role, int cap) {
+    public void setCapacity(RoleSL role, int cap) {
         if (cap < 1) throw new IllegalArgumentException("Capacity must be at least 1");
         if (capacities.containsKey(role) &&
             cap < capacities.get(role))
@@ -174,12 +174,12 @@ public class Shift {
         this.capacities.put(role, cap);
     }
 
-    public void setCapacities(Map<Role, Integer> capacities) {
+    public void setCapacities(Map<RoleSL, Integer> capacities) {
         this.capacities = new HashMap<>();
         this.capacities.putAll(capacities);
     }
 
-    public Map<Role, Integer> getCapacities() {
+    public Map<RoleSL, Integer> getCapacities() {
         return new HashMap<>(capacities);
     }
 }
