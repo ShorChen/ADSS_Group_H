@@ -1,8 +1,6 @@
 package Employees.Presentation.DTO;
-
 import Employees.Domain.DTO.BranchSL;
 import Employees.Shared.Enums.WeekDay;
-
 import java.util.ArrayList;
 import java.util.List;
 

@@ -1,8 +1,6 @@
 package Employees.DataAccess.Pools;
-
 import Employees.DataAccess.RoleDAO;
 import Employees.Domain.DTO.RoleSL;
-
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
@@ -24,6 +22,7 @@ public class RolePool implements RoleDAO {
 
         roles.add(RoleSL.MANAGER.getTag());
         roles.add(RoleSL.BRANCH_MANAGER.getTag());
+        roles.add(RoleSL.Driver.getTag());
         roles.add(RoleSL.Storekeeper.getTag());
         roles.add(RoleSL.ShiftManager.getTag());
         roles.add(RoleSL.Cashier.getTag());

@@ -31,6 +31,7 @@ public class EmployeeSL {
                       JobScope jobScope, List<RoleSL> qualifiedRoles, String constraints,
                       int yearlyRestDays, WeekDay weeklyRestDay,
                       AvailabilitySubmissionSL availabilitySubmission, boolean active,
+
                       int branchId) {
         this.id = id;
         this.name = name;
@@ -61,6 +62,7 @@ public class EmployeeSL {
 
         qualifiedRoles = new ArrayList<>();
         e.qualifiedRoles().forEach(role -> qualifiedRoles.add(new RoleSL(role)));
+
     }
 
     public EmployeeEntity toEntity(String password) {

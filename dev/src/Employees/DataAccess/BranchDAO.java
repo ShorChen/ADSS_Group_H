@@ -14,4 +14,5 @@ public interface BranchDAO {
     void addUpdateBranch(BranchEntity branch);
 
     BranchEntity get(int branchId);
+
 }

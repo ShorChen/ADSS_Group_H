@@ -3,6 +3,7 @@ package Employees.Presentation.UIManager;
 import Employees.Context.SessionManager;
 import Employees.Presentation.Controller.HRManagerShiftController;
 import Employees.Presentation.DTO.EmployeePL;
+import Employees.Presentation.UIEmployee.RequestReplacementUI;
 import Employees.Presentation.UIShared.ShiftsView;
 import Employees.Presentation.UIShared.ViewCLI;
 import Employees.Presentation.Utils.Option;
@@ -99,8 +100,8 @@ public class ManageShiftsUI extends ViewCLI {
         LocalDateTime deadline = SessionManager.getDeadline();
         LocalDateTime now = SessionManager.now();
 
-
         if (controller.isFirstWeek() || now.isAfter(deadline)) {
+
             PlaceEmployeesUI placeEmployeesUI = new PlaceEmployeesUI(this::display);
             close();
             placeEmployeesUI.display();

@@ -1,6 +1,6 @@
 package Core.Domain;
 
-public enum Role {
+public enum Managers {
     ORDER_MANAGER,
     INVENTORY_MANAGER,
     SUPPLIER_MANAGER,

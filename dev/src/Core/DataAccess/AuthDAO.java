@@ -1,18 +1,18 @@
 package Core.DataAccess;
 
-import Core.Domain.Role;
+import Core.Domain.Managers;
 
 import java.util.Map;
 
 @SuppressWarnings("unused")
 public interface AuthDAO {
-    void addCode(String code, Role role);
+    void addCode(String code, Managers managers);
 
     void removeCode(String code);
 
-    void updateCode(String code, Role role);
+    void updateCode(String code, Managers managers);
 
-    Role getRole(String code);
+    Managers getRole(String code);
 
-    Map<String, Role> getAllCodes();
+    Map<String, Managers> getAllCodes();
 }

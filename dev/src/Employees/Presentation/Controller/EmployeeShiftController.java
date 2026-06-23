@@ -3,7 +3,6 @@ package Employees.Presentation.Controller;
 import Employees.Context.SessionManager;
 import Employees.Presentation.DTO.AvailabilitySubmissionPL;
 import Employees.Service.EmployeeService;
-
 public class EmployeeShiftController {
     private final EmployeeService employeeService;
 
@@ -15,5 +14,4 @@ public class EmployeeShiftController {
         employeeService.updateAvailability(availabilitySub.toAvailabilitySubmission(
                 SessionManager.getCurrentEmployee().toEmployee().getId()));
     }
-
 }

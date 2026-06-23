@@ -3,13 +3,13 @@ package Employees.Presentation.Controller;
 import Employees.Context.SessionManager;
 import Employees.Domain.DTO.ShiftSL;
 import Employees.Domain.DTO.ShiftKey;
+import Employees.Shared.WeekConstants;
 import Employees.Service.EmployeeService;
 import Employees.Service.ShiftService;
 import Employees.Presentation.DTO.EmployeePL;
 import Employees.Presentation.DTO.ShiftPL;
 import Employees.Shared.Enums.ShiftType;
 import Employees.Shared.Enums.WeekDay;
-import Employees.Shared.WeekConstants;
 
 import java.time.LocalDate;
 import java.util.LinkedHashMap;
@@ -39,7 +39,6 @@ public class ShiftViewController {
                         ShiftType.fromInteger(j)), null);
             }
         }
-
         map.forEach((key, value) ->
                 weekShifts.put(key, new ShiftPL(value))
         );

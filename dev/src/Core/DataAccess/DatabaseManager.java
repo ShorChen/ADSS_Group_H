@@ -38,6 +38,16 @@ public class DatabaseManager {
         String deliveriesTable = "CREATE TABLE IF NOT EXISTS Deliveries (deliveryId INTEGER PRIMARY KEY AUTOINCREMENT, date TEXT NOT NULL, departureTime TEXT NOT NULL, status TEXT NOT NULL, truckLicense TEXT NOT NULL, driverId TEXT NOT NULL, originSite TEXT NOT NULL, FOREIGN KEY(truckLicense) REFERENCES Trucks(licenseNumber), FOREIGN KEY(driverId) REFERENCES Drivers(employeeId), FOREIGN KEY(originSite) REFERENCES Sites(siteName));";
         String deliveryDestinationsTable = "CREATE TABLE IF NOT EXISTS DeliveryDestinations (destId INTEGER PRIMARY KEY AUTOINCREMENT, deliveryId INTEGER NOT NULL, destinationSite TEXT NOT NULL, routeOrder INTEGER NOT NULL, FOREIGN KEY(deliveryId) REFERENCES Deliveries(deliveryId) ON DELETE CASCADE, FOREIGN KEY(destinationSite) REFERENCES Sites(siteName));";
         String cargoItemsTable = "CREATE TABLE IF NOT EXISTS CargoItems (cargoId INTEGER PRIMARY KEY AUTOINCREMENT, destId INTEGER NOT NULL, itemName TEXT NOT NULL, weight REAL NOT NULL, quantity INTEGER NOT NULL, FOREIGN KEY(destId) REFERENCES DeliveryDestinations(destId) ON DELETE CASCADE);";
+
+        String employeesTable = "CREATE TABLE IF NOT EXISTS Employees (employeeId TEXT PRIMARY KEY, name TEXT NOT NULL, bankAccount TEXT NOT NULL, salary REAL NOT NULL, salaryType TEXT NOT NULL, dateOfEmployment TEXT NOT NULL, jobScope TEXT NOT NULL, constraints TEXT, yearlyRestDays INTEGER NOT NULL, weeklyRestDay TEXT NOT NULL, password TEXT NOT NULL, workingDoubles INTEGER NOT NULL, active INTEGER NOT NULL, branchId INTEGER NOT NULL);";
+        String employeeRolesTable = "CREATE TABLE IF NOT EXISTS EmployeeRoles (employeeId TEXT, roleName TEXT, PRIMARY KEY(employeeId, roleName), FOREIGN KEY(employeeId) REFERENCES Employees(employeeId) ON DELETE CASCADE);";
+        String employeeShiftsTable = "CREATE TABLE IF NOT EXISTS EmployeeUnavailableShifts (employeeId TEXT, weekDay INTEGER, shiftType INTEGER, PRIMARY KEY(employeeId, weekDay, shiftType), FOREIGN KEY(employeeId) REFERENCES Employees(employeeId) ON DELETE CASCADE);";
+        String branchesTable = "CREATE TABLE IF NOT EXISTS Branches (branchId INTEGER PRIMARY KEY, location TEXT NOT NULL);";
+        String shiftsTable = "CREATE TABLE IF NOT EXISTS Shifts (shiftId INTEGER PRIMARY KEY AUTOINCREMENT, branchId INTEGER, year INTEGER, week INTEGER, startDate TEXT, day TEXT, shiftType TEXT);";
+        String shiftEmployeesTable = "CREATE TABLE IF NOT EXISTS ShiftEmployees (shiftId INTEGER, mapKey TEXT, mapValue TEXT, FOREIGN KEY(shiftId) REFERENCES Shifts(shiftId) ON DELETE CASCADE);";
+        String shiftAdditionalHoursTable = "CREATE TABLE IF NOT EXISTS ShiftAdditionalHours (shiftId INTEGER, employeeId TEXT, hours REAL, FOREIGN KEY(shiftId) REFERENCES Shifts(shiftId) ON DELETE CASCADE);";
+        String requestsTable = "CREATE TABLE IF NOT EXISTS Requests (requestId INTEGER PRIMARY KEY AUTOINCREMENT, shiftId INTEGER, prevEmployee TEXT, newEmployee TEXT, manager TEXT, prevApproved TEXT, newApproved TEXT, managerApproved TEXT, denied INTEGER, FOREIGN KEY(shiftId) REFERENCES Shifts(shiftId) ON DELETE CASCADE);";
+
         try (Connection conn = getConnection(); Statement stmt = conn.createStatement()) {
             stmt.execute(suppliersTable);
             stmt.execute(contactsTable);
@@ -58,6 +68,15 @@ public class DatabaseManager {
             stmt.execute(deliveriesTable);
             stmt.execute(deliveryDestinationsTable);
             stmt.execute(cargoItemsTable);
+            stmt.execute(employeesTable);
+            stmt.execute(employeeRolesTable);
+            stmt.execute(employeeShiftsTable);
+            stmt.execute(branchesTable);
+            stmt.execute(shiftsTable);
+            stmt.execute(shiftEmployeesTable);
+            stmt.execute(shiftAdditionalHoursTable);
+            stmt.execute(requestsTable);
+
         } catch (SQLException e) {
             e.printStackTrace();
         }

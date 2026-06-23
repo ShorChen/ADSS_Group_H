@@ -1,10 +1,10 @@
 package Suppliers.Domain.Security;
 
-import Core.Domain.Role;
+import Core.Domain.Managers;
 
 public class SessionManager {
     private static SessionManager instance;
-    private Role currentRole;
+    private Managers currentManagers;
 
     private SessionManager() {
     }
@@ -15,23 +15,23 @@ public class SessionManager {
         return instance;
     }
 
-    public void login(Role role) {
-        if (currentRole != null) throw new IllegalStateException("Someone is already logged in.");
-        currentRole = role;
+    public void login(Managers managers) {
+        if (currentManagers != null) throw new IllegalStateException("Someone is already logged in.");
+        currentManagers = managers;
     }
 
     public void logout() {
-        if (currentRole == null) throw new IllegalStateException("No one is currently logged in.");
-        currentRole = null;
+        if (currentManagers == null) throw new IllegalStateException("No one is currently logged in.");
+        currentManagers = null;
     }
 
-    public Role getCurrentRole() {
-        if (currentRole == null) throw new SecurityException("Access Denied: You must log in first.");
-        return currentRole;
+    public Managers getCurrentRole() {
+        if (currentManagers == null) throw new SecurityException("Access Denied: You must log in first.");
+        return currentManagers;
     }
 
-    public void requireRole(Role requiredRole) {
-        if (getCurrentRole() != requiredRole)
-            throw new SecurityException("Access Denied: Requires " + requiredRole + " role.");
+    public void requireRole(Managers requiredManagers) {
+        if (getCurrentRole() != requiredManagers)
+            throw new SecurityException("Access Denied: Requires " + requiredManagers + " role.");
     }
 }

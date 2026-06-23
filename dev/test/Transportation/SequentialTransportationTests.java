@@ -1,6 +1,6 @@
 package Transportation;
 
-import Core.Domain.Role;
+import Core.Domain.Managers;
 import Suppliers.Domain.Security.SessionManager;
 import Transportation.Domain.Entities.*;
 import org.junit.jupiter.api.*;
@@ -21,8 +21,8 @@ public class SequentialTransportationTests {
     @Test
     @Order(1)
     void step01_loginAsTransportManager() {
-        SessionManager.getInstance().login(Role.TRANSPORTATION_MANAGER);
-        assertEquals(Role.TRANSPORTATION_MANAGER, SessionManager.getInstance().getCurrentRole());
+        SessionManager.getInstance().login(Managers.TRANSPORTATION_MANAGER);
+        assertEquals(Managers.TRANSPORTATION_MANAGER, SessionManager.getInstance().getCurrentRole());
     }
 
     @Test

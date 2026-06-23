@@ -1,7 +1,7 @@
 package Core.App;
 
 import Core.Controller.ControllerFactory;
-import Core.Domain.Role;
+import Core.Domain.Managers;
 import Core.Navigation.AppNavigator;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
@@ -28,8 +28,8 @@ public class LoginScreen {
         errorLabel.setStyle("-fx-text-fill: red;");
         loginBtn.setOnAction(e -> {
             try {
-                Role role = ControllerFactory.getInstance().getAuthController().login(codeField.getText());
-                routeUser(role);
+                Managers managers = ControllerFactory.getInstance().getAuthController().login(codeField.getText());
+                routeUser(managers);
             } catch (Exception ex) {
                 errorLabel.setText(ex.getMessage());
             }
@@ -38,14 +38,14 @@ public class LoginScreen {
         scene = new Scene(layout, 400, 300);
     }
 
-    private void routeUser(Role role) {
-        switch (role) {
+    private void routeUser(Managers managers) {
+        switch (managers) {
             case ORDER_MANAGER -> appNavigator.showOrderManagerDashboard();
             case INVENTORY_MANAGER -> appNavigator.showInventoryManagerDashboard();
             case SUPPLIER_MANAGER -> appNavigator.showSupplierManagerDashboard();
-            case TRANSPORTATION_MANAGER -> appNavigator.showTransportManagerDashboard();
-            case HR_MANAGER -> appNavigator.showWorkersManagerDashboard();
-            default -> throw new IllegalStateException("Unexpected role: " + role);
+            case TRANSPORTATION_MANAGER -> appNavigator.showTransportationManagerDashboard();
+            case HR_MANAGER -> appNavigator.showEmployeesManagerDashboard();
+            default -> throw new IllegalStateException("Unexpected role: " + managers);
         }
     }
 

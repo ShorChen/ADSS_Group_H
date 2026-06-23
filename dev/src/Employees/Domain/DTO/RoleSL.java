@@ -8,6 +8,7 @@ public class RoleSL {
     public static final RoleSL Storekeeper = new RoleSL("Storekeeper");
     public static final RoleSL ShiftManager = new RoleSL("Shift Manager");
     public static final RoleSL Cashier = new RoleSL("Cashier");
+    public static final RoleSL Driver = new RoleSL("Driver");
 
     private final String tag;
     public RoleSL(String tag) {

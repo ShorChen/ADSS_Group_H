@@ -1,7 +1,7 @@
 package Core.Service;
 
 import Core.Domain.AuthFacade;
-import Core.Domain.Role;
+import Core.Domain.Managers;
 
 @SuppressWarnings("ClassCanBeRecord")
 public class AuthService {
@@ -11,10 +11,10 @@ public class AuthService {
         this.authFacade = authFacade;
     }
 
-    public Response<Role> login(String code) {
+    public Response<Managers> login(String code) {
         try {
-            Role role = authFacade.login(code);
-            return new Response<>(role);
+            Managers managers = authFacade.login(code);
+            return new Response<>(managers);
         } catch (Exception ex) {
             return new Response<>(ex.getMessage());
         }
@@ -30,7 +30,7 @@ public class AuthService {
     }
 
     @SuppressWarnings("unused")
-    public Response<Role> getCurrentRole() {
+    public Response<Managers> getCurrentRole() {
         try {
             return new Response<>(authFacade.getCurrentRole());
         } catch (Exception ex) {

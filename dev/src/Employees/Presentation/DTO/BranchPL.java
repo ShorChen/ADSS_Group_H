@@ -33,6 +33,7 @@ public class BranchPL {
 
     public void setBranchId(int branchId) {
         this.branchId = branchId;
+
     }
 
     public String getLocation() {
@@ -65,5 +66,6 @@ public class BranchPL {
 
     public void setStartWeek(int startWeek) {
         this.startWeek = startWeek;
+
     }
 }

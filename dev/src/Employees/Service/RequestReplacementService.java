@@ -1,8 +1,10 @@
 package Employees.Service;
 
 import Employees.DataAccess.RequestDAO;
+
+import Employees.DataAccess.SqlImpl.SqlRequestDAO;
 import Employees.DataAccess.Entities.RequestEntity;
-import Employees.DataAccess.Pools.RequestsPool;
+
 import Employees.Domain.DTO.RequestSL;
 import Employees.Domain.Utils.RequestStateMachine;
 import org.jetbrains.annotations.NotNull;
@@ -12,22 +14,24 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class RequestReplacementService {
-    private final RequestDAO requestsPool;
+    private final RequestDAO requestDAO;
 
     public RequestReplacementService() {
-        requestsPool = RequestsPool.Instance();
+        requestDAO = new SqlRequestDAO();
+
     }
 
     public boolean requestReplacement(@NotNull RequestSL request) {
         RequestEntity entity = request.toEntity();
-        boolean exists = requestsPool.exists(entity);
-        requestsPool.addUpdateRequest(entity);
+        boolean exists = requestDAO.exists(entity);
+        requestDAO.addUpdateRequest(entity);
         return exists;
     }
 
     public List<RequestSL> getPendingRequests(String id) {
         List<RequestSL> pending = new ArrayList<>();
-        requestsPool.getPendingRequests(id).forEach(entity -> {
+        requestDAO.getPendingRequests(id).forEach(entity -> {
+
             pending.add(new RequestSL(entity));
         });
         return pending;
@@ -45,23 +49,21 @@ public class RequestReplacementService {
         );
         boolean statusChanged = endState.equals(startState);
 
-        requestsPool.addUpdateRequest(request.toEntity());
+        requestDAO.addUpdateRequest(request.toEntity());
         return statusChanged;
-
-
-        // TODO: this does not work
     }
 
     public boolean deny(@NotNull RequestSL request, String id) {
         request.deny(id);
         if (!request.isDenied()) return false;
-        requestsPool.addUpdateRequest(request.toEntity());
+
+        requestDAO.addUpdateRequest(request.toEntity());
         return true;
     }
 
     public List<RequestSL> getAllRequests() {
         List<RequestSL> list = new ArrayList<>();
-        requestsPool.getAll().forEach(r -> list.add(new RequestSL(r)));
+        requestDAO.getAll().forEach(r -> list.add(new RequestSL(r)));
         return list;
     }
 
@@ -69,3 +71,4 @@ public class RequestReplacementService {
         return request.isApproved();
     }
 }
+

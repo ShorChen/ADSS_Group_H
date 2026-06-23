@@ -1,7 +1,8 @@
 package Employees.Service;
 
-import Employees.DataAccess.StoreDAO;
+
 import Employees.DataAccess.Pools.StorePool;
+import Employees.DataAccess.StoreDAO;
 import Employees.Presentation.DTO.StoreDetailsPL;
 import Employees.Shared.Enums.WeekDay;
 

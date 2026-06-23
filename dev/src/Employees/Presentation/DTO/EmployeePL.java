@@ -6,7 +6,6 @@ import Employees.Shared.Enums.JobScope;
 import Employees.Shared.Enums.SalaryType;
 import Employees.Shared.Enums.WeekDay;
 import org.jetbrains.annotations.NotNull;
-
 import java.time.LocalDateTime;
 import java.util.*;
 

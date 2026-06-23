@@ -39,7 +39,6 @@ public class HRManagerShiftController {
         int year = targetDate.get(WeekConstants.WEEK_FIELDS.weekBasedYear());
         int week = targetDate.get(WeekConstants.WEEK_FIELDS.weekOfWeekBasedYear());
         int branchId = SessionManager.getSelectedBranchId();
-
         service.addUpdateShift(branchId, year, week, day.toString(), type.toString(),
                 new ShiftSL(day, type, shiftManager.getId()));
     }
@@ -93,4 +92,5 @@ public class HRManagerShiftController {
         roleService.getAllRoles().forEach(r -> roles.add(r.getTag()));
         return roles;
     }
+
 }

@@ -29,24 +29,11 @@ public class EmployeeController {
 
     public EmployeePL getEmployeeDetails(String id) {
         if (id == null || id.trim().isEmpty()) return null;
-
         EmployeeSL employee = service.getEmployeeDetails(id);
         if (employee != null) {
             return new EmployeePL(employee);
         }
         return null;
-    }
-
-    @Deprecated
-    public boolean grantQualifications(EmployeeSL employee, RoleSL... roles) {
-        System.out.println("Method not yet implemented");
-        return false;
-    }
-
-    @Deprecated
-    public boolean revokeQualifications(EmployeeSL employee, RoleSL... roles) {
-        System.out.println("Method not yet implemented");
-        return false;
     }
 
     public boolean exists(String id) {

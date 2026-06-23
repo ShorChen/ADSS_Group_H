@@ -112,6 +112,11 @@ public class ShiftPool implements ShiftDAO {
                 .remove(new ShiftEntityKey(day, type));
     }
 
+    @Override
+    public ShiftEntity getShiftById(int shiftId) {
+        return null;
+    }
+
     private BranchWeekKey createKey(int branchId, int year, int week) {
         return new BranchWeekKey(branchId, year, week);
     }

@@ -11,6 +11,5 @@ public interface RequestDAO {
 
     List<RequestEntity> getPendingRequests(String id);
 
-
     List<RequestEntity> getAll();
 }

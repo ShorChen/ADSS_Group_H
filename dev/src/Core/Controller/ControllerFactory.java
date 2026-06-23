@@ -1,6 +1,5 @@
 package Core.Controller;
 
-import Core.Service.SystemIntegrationService;
 import Inventory.Presentation.Controller.InventoryController;
 import Suppliers.Presentation.Controller.OrderController;
 import Suppliers.Presentation.Controller.SupplierController;
@@ -14,12 +13,11 @@ import Core.Domain.AuthFacade;
 import Suppliers.Domain.Facades.OrderFacade;
 import Suppliers.Domain.Facades.SupplierFacade;
 import Inventory.Domain.Facades.InventoryFacade;
-import Transportation.Domain.Facades.TransportFacade;
 import Core.DataAccess.SqlImpl.SqlAuthDAO;
 import Suppliers.DataAccess.SqlImpl.SqlOrderDAO;
 import Suppliers.DataAccess.SqlImpl.SqlSupplierDAO;
 import Inventory.DataAccess.SqlImpl.SqlInventoryDAO;
-import Transportation.DataAccess.SqlImpl.SqlTransportDAO;
+import Employees.Service.ShiftService;
 
 public class ControllerFactory {
     private static ControllerFactory instance;
@@ -28,7 +26,6 @@ public class ControllerFactory {
     private OrderController orderController;
     private InventoryController inventoryController;
     private TransportController transportController;
-    private SystemIntegrationController systemIntegrationController;
     private SupplierFacade supplierFacade;
     private SupplierService supplierService;
     private OrderService orderService;
@@ -73,7 +70,10 @@ public class ControllerFactory {
     }
 
     private InventoryService getInventoryService() {
-        if (inventoryService == null) inventoryService = new InventoryService(new InventoryFacade(new SqlInventoryDAO()));
+        if (inventoryService == null) {
+            inventoryService = new InventoryService(new InventoryFacade(new SqlInventoryDAO()));
+            inventoryService.setOrderService(getOrderService());
+        }
         return inventoryService;
     }
 
@@ -83,17 +83,17 @@ public class ControllerFactory {
     }
 
     private TransportService getTransportService() {
-        if (transportService == null) transportService = new TransportService(new TransportFacade(new SqlTransportDAO()));
+        if (transportService == null) {
+            Transportation.DataAccess.TransportDAO transportDAO = new Transportation.DataAccess.SqlImpl.SqlTransportDAO();
+            Transportation.Domain.Facades.TransportFacade transportFacade = new Transportation.Domain.Facades.TransportFacade(transportDAO);
+            ShiftService shiftService = new ShiftService();
+            transportService = new TransportService(transportFacade, transportDAO, shiftService);
+        }
         return transportService;
     }
 
     public TransportController getTransportController() {
         if (transportController == null) transportController = new TransportController(getTransportService());
         return transportController;
-    }
-
-    public SystemIntegrationController getSystemIntegrationController() {
-        if (systemIntegrationController == null) systemIntegrationController = new SystemIntegrationController(new SystemIntegrationService(getInventoryService(), getOrderService(), getTransportService()));
-        return systemIntegrationController;
     }
 }

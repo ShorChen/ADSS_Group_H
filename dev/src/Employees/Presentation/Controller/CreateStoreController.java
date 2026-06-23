@@ -11,7 +11,6 @@ import Employees.Shared.Enums.JobScope;
 import Employees.Shared.Enums.SalaryType;
 import Employees.Shared.Enums.WeekDay;
 import Employees.Shared.WeekConstants;
-
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.HashMap;

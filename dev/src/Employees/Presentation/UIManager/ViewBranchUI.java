@@ -1,16 +1,13 @@
 package Employees.Presentation.UIManager;
 
-import Employees.Presentation.Controller.ViewBranchController;
 import Employees.Presentation.UIShared.ViewCLI;
 import Employees.Presentation.Utils.Option;
 
 public class ViewBranchUI extends ViewCLI {
-    private ViewBranchController controller;
     private boolean open;
 
     public ViewBranchUI(Runnable onDismiss) {
         super(onDismiss);
-        controller = new ViewBranchController();
     }
 
     @Override
