@@ -1,37 +1,37 @@
 package Employees.Service;
 
 import Employees.DataAccess.RoleDAO;
-import Employees.DataAccess.Pools.RolePool;
+import Employees.DataAccess.SqlImpl.SqlRoleDAO;
 import Employees.Domain.DTO.RoleSL;
 
 import java.util.ArrayList;
 import java.util.List;
 
 public class RoleService {
-    private final RoleDAO pool;
+    private final RoleDAO roleDAO;
 
     public RoleService() {
-        this.pool = RolePool.Instance();
+        this.roleDAO = new SqlRoleDAO();
     }
 
     public List<RoleSL> getAllRoles() {
         List<RoleSL> roles = new ArrayList<>();
-        for (String s : pool.getAllRoles())
+        for (String s : roleDAO.getAllRoles())
             roles.add(new RoleSL(s));
         return roles;
     }
 
     public RoleSL getRole(String tag) {
-        if (pool.containsRole(tag))
+        if (roleDAO.containsRole(tag))
             return new RoleSL(tag);
         return null;
     }
 
     public boolean containsRole(String tag) {
-        return pool.containsRole(tag);
+        return roleDAO.containsRole(tag);
     }
 
     public void createRole(String s) {
-        pool.addRole(s);
+        roleDAO.addRole(s);
     }
 }

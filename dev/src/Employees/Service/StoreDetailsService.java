@@ -1,8 +1,7 @@
 package Employees.Service;
 
-
-import Employees.DataAccess.Pools.StorePool;
 import Employees.DataAccess.StoreDAO;
+import Employees.DataAccess.SqlImpl.SqlStoreDAO;
 import Employees.Presentation.DTO.StoreDetailsPL;
 import Employees.Shared.Enums.WeekDay;
 
@@ -10,10 +9,10 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class StoreDetailsService {
-    private final StoreDAO storePool;
+    private final StoreDAO storeDAO;
 
     public StoreDetailsService() {
-        storePool = StorePool.Instance();
+        this.storeDAO = new SqlStoreDAO();
     }
 
     public void addUpdateStoreDetails(StoreDetailsPL storeDetailsPL) {
@@ -21,17 +20,16 @@ public class StoreDetailsService {
         storeDetailsPL.getClosedDays().forEach(day ->
                 closedDays.add(day.toString())
         );
-        storePool.setClosedDays(closedDays);
+        storeDAO.setClosedDays(closedDays);
     }
 
-
     public void setClosedDays(List<String> closed) {
-        storePool.setClosedDays(closed);
+        storeDAO.setClosedDays(closed);
     }
 
     public List<WeekDay> getClosedDays() {
         List<WeekDay> closedDays = new ArrayList<>();
-        storePool.getClosedDays().forEach(s
+        storeDAO.getClosedDays().forEach(s
                 -> closedDays.add(WeekDay.fromArgs(s)));
         return closedDays;
     }

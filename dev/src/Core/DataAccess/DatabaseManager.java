@@ -41,12 +41,14 @@ public class DatabaseManager {
 
         String employeesTable = "CREATE TABLE IF NOT EXISTS Employees (employeeId TEXT PRIMARY KEY, name TEXT NOT NULL, bankAccount TEXT NOT NULL, salary REAL NOT NULL, salaryType TEXT NOT NULL, dateOfEmployment TEXT NOT NULL, jobScope TEXT NOT NULL, constraints TEXT, yearlyRestDays INTEGER NOT NULL, weeklyRestDay TEXT NOT NULL, password TEXT NOT NULL, workingDoubles INTEGER NOT NULL, active INTEGER NOT NULL, branchId INTEGER NOT NULL);";
         String employeeRolesTable = "CREATE TABLE IF NOT EXISTS EmployeeRoles (employeeId TEXT, roleName TEXT, PRIMARY KEY(employeeId, roleName), FOREIGN KEY(employeeId) REFERENCES Employees(employeeId) ON DELETE CASCADE);";
-        String employeeShiftsTable = "CREATE TABLE IF NOT EXISTS EmployeeUnavailableShifts (employeeId TEXT, weekDay INTEGER, shiftType INTEGER, PRIMARY KEY(employeeId, weekDay, shiftType), FOREIGN KEY(employeeId) REFERENCES Employees(employeeId) ON DELETE CASCADE);";
-        String branchesTable = "CREATE TABLE IF NOT EXISTS Branches (branchId INTEGER PRIMARY KEY, location TEXT NOT NULL);";
+        String employeeAvailabilityTable = "CREATE TABLE IF NOT EXISTS EmployeeAvailability (employeeId TEXT, day TEXT, shiftType TEXT, isAvailable INTEGER, PRIMARY KEY(employeeId, day, shiftType), FOREIGN KEY(employeeId) REFERENCES Employees(employeeId) ON DELETE CASCADE);";        String branchesTable = "CREATE TABLE IF NOT EXISTS Branches (branchId INTEGER PRIMARY KEY, location TEXT NOT NULL);";
         String shiftsTable = "CREATE TABLE IF NOT EXISTS Shifts (shiftId INTEGER PRIMARY KEY AUTOINCREMENT, branchId INTEGER, year INTEGER, week INTEGER, startDate TEXT, day TEXT, shiftType TEXT);";
         String shiftEmployeesTable = "CREATE TABLE IF NOT EXISTS ShiftEmployees (shiftId INTEGER, mapKey TEXT, mapValue TEXT, FOREIGN KEY(shiftId) REFERENCES Shifts(shiftId) ON DELETE CASCADE);";
         String shiftAdditionalHoursTable = "CREATE TABLE IF NOT EXISTS ShiftAdditionalHours (shiftId INTEGER, employeeId TEXT, hours REAL, FOREIGN KEY(shiftId) REFERENCES Shifts(shiftId) ON DELETE CASCADE);";
         String requestsTable = "CREATE TABLE IF NOT EXISTS Requests (requestId INTEGER PRIMARY KEY AUTOINCREMENT, shiftId INTEGER, prevEmployee TEXT, newEmployee TEXT, manager TEXT, prevApproved TEXT, newApproved TEXT, managerApproved TEXT, denied INTEGER, FOREIGN KEY(shiftId) REFERENCES Shifts(shiftId) ON DELETE CASCADE);";
+        String rolesTable = "CREATE TABLE IF NOT EXISTS Roles (roleName TEXT PRIMARY KEY);";
+        String storeSettingsTable = "CREATE TABLE IF NOT EXISTS StoreSettings (id INTEGER PRIMARY KEY CHECK (id = 1), firstStartUp INTEGER NOT NULL);";
+        String storeClosedDaysTable = "CREATE TABLE IF NOT EXISTS StoreClosedDays (day TEXT PRIMARY KEY);";
 
         try (Connection conn = getConnection(); Statement stmt = conn.createStatement()) {
             stmt.execute(suppliersTable);
@@ -70,12 +72,14 @@ public class DatabaseManager {
             stmt.execute(cargoItemsTable);
             stmt.execute(employeesTable);
             stmt.execute(employeeRolesTable);
-            stmt.execute(employeeShiftsTable);
-            stmt.execute(branchesTable);
+            stmt.execute(employeeAvailabilityTable);            stmt.execute(branchesTable);
             stmt.execute(shiftsTable);
             stmt.execute(shiftEmployeesTable);
             stmt.execute(shiftAdditionalHoursTable);
             stmt.execute(requestsTable);
+            stmt.execute(rolesTable);
+            stmt.execute(storeSettingsTable);
+            stmt.execute(storeClosedDaysTable);
 
         } catch (SQLException e) {
             e.printStackTrace();

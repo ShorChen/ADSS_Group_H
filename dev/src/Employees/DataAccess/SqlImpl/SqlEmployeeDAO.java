@@ -2,7 +2,9 @@ package Employees.DataAccess.SqlImpl;
 
 import Core.DataAccess.DatabaseManager;
 import Employees.DataAccess.EmployeeDAO;
+import Employees.DataAccess.Entities.AvailabilitySubmissionEntity;
 import Employees.DataAccess.Entities.EmployeeEntity;
+import Employees.DataAccess.Entities.Keys.ShiftEntityKey;
 
 import java.sql.*;
 import java.time.LocalDateTime;
@@ -29,7 +31,7 @@ public class SqlEmployeeDAO implements EmployeeDAO {
                 pstmt.setInt(9, employee.yearlyRestDays());
                 pstmt.setString(10, employee.weeklyRestDay());
                 pstmt.setString(11, employee.password());
-                pstmt.setInt(12, employee.workingDoubles() ? 1 : 0);
+                pstmt.setInt(12, employee.availabilitySubmission().workingDoubles() ? 1 : 0);
                 pstmt.setInt(13, employee.active() ? 1 : 0);
                 pstmt.setInt(14, employee.branchId());
                 pstmt.executeUpdate();
@@ -49,19 +51,18 @@ public class SqlEmployeeDAO implements EmployeeDAO {
                     }
                 }
 
-                try (PreparedStatement delShifts = conn.prepareStatement("DELETE FROM EmployeeUnavailableShifts WHERE employeeId=?")) {
+                try (PreparedStatement delShifts = conn.prepareStatement("DELETE FROM EmployeeAvailability WHERE employeeId=?")) {
                     delShifts.setString(1, employee.id());
                     delShifts.executeUpdate();
                 }
-                if (employee.unavailableShifts() != null && !employee.unavailableShifts().isEmpty()) {
-                    try (PreparedStatement insShift = conn.prepareStatement("INSERT INTO EmployeeUnavailableShifts(employeeId, weekDay, shiftType) VALUES(?,?,?)")) {
-                        for (Map.Entry<Integer, Set<Integer>> entry : employee.unavailableShifts().entrySet()) {
-                            for (Integer shiftType : entry.getValue()) {
-                                insShift.setString(1, employee.id());
-                                insShift.setInt(2, entry.getKey());
-                                insShift.setInt(3, shiftType);
-                                insShift.addBatch();
-                            }
+                if (employee.availabilitySubmission() != null && employee.availabilitySubmission().shifts() != null) {
+                    try (PreparedStatement insShift = conn.prepareStatement("INSERT INTO EmployeeAvailability(employeeId, day, shiftType, isAvailable) VALUES(?,?,?,?)")) {
+                        for (Map.Entry<ShiftEntityKey, Boolean> entry : employee.availabilitySubmission().shifts().entrySet()) {
+                            insShift.setString(1, employee.id());
+                            insShift.setString(2, entry.getKey().day());
+                            insShift.setString(3, entry.getKey().type());
+                            insShift.setInt(4, Boolean.TRUE.equals(entry.getValue()) ? 1 : 0);
+                            insShift.addBatch();
                         }
                         insShift.executeBatch();
                     }
@@ -91,17 +92,21 @@ public class SqlEmployeeDAO implements EmployeeDAO {
                     while (rsRoles.next()) roles.add(rsRoles.getString("roleName"));
                 }
 
-                Map<Integer, Set<Integer>> shifts = new HashMap<>();
-                try (PreparedStatement pstmtShifts = conn.prepareStatement("SELECT weekDay, shiftType FROM EmployeeUnavailableShifts WHERE employeeId=?")) {
+                Map<ShiftEntityKey, Boolean> shifts = new HashMap<>();
+                try (PreparedStatement pstmtShifts = conn.prepareStatement("SELECT day, shiftType, isAvailable FROM EmployeeAvailability WHERE employeeId=?")) {
                     pstmtShifts.setString(1, id);
                     ResultSet rsShifts = pstmtShifts.executeQuery();
                     while (rsShifts.next()) {
-                        int day = rsShifts.getInt("weekDay");
-                        int type = rsShifts.getInt("shiftType");
-                        shifts.putIfAbsent(day, new HashSet<>());
-                        shifts.get(day).add(type);
+                        shifts.put(
+                                new ShiftEntityKey(rsShifts.getString("day"), rsShifts.getString("shiftType")),
+                                rsShifts.getInt("isAvailable") == 1
+                        );
                     }
                 }
+
+                AvailabilitySubmissionEntity availability = new AvailabilitySubmissionEntity(
+                        id, shifts, rs.getInt("workingDoubles") == 1
+                );
 
                 return new EmployeeEntity(
                         rs.getString("employeeId"),
@@ -116,8 +121,7 @@ public class SqlEmployeeDAO implements EmployeeDAO {
                         rs.getInt("yearlyRestDays"),
                         rs.getString("weeklyRestDay"),
                         rs.getString("password"),
-                        rs.getInt("workingDoubles") == 1,
-                        shifts,
+                        availability,
                         rs.getInt("active") == 1,
                         rs.getInt("branchId")
                 );
