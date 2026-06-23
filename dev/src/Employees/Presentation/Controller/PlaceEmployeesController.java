@@ -4,7 +4,7 @@ import Employees.Domain.Entities.Role;
 import Employees.Service.EmployeeService;
 import Employees.Service.RoleService;
 import Employees.Service.ShiftService;
-import Employees.Presentation.Model.EmployeePL;
+import Employees.Presentation.DTO.EmployeePL;
 import Employees.Shared.Enums.ShiftType;
 import Employees.Shared.Enums.WeekDay;
 

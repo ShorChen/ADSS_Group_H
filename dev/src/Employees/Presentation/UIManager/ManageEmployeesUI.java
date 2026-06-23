@@ -1,7 +1,7 @@
 package Employees.Presentation.UIManager;
 
 import Employees.Presentation.Controller.EmployeeController;
-import Employees.Presentation.Model.EmployeePL;
+import Employees.Presentation.DTO.EmployeePL;
 import Employees.Presentation.UIShared.ViewCLI;
 import Employees.Presentation.Utils.Option;
 

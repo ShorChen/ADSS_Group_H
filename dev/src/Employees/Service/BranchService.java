@@ -3,7 +3,7 @@ package Employees.Service;
 import Employees.DataAccess.BranchDAO;
 import Employees.DataAccess.SqlImpl.SqlBranchDAO;
 import Employees.Domain.Entities.Store.Branch;
-import Employees.Presentation.Model.BranchPL;
+import Employees.Presentation.DTO.BranchPL;
 
 import java.util.ArrayList;
 import java.util.List;

@@ -1,4 +1,4 @@
-package Employees.Presentation.Model;
+package Employees.Presentation.DTO;
 
 import Employees.Domain.Entities.Role;
 import Employees.Domain.Entities.Shift;

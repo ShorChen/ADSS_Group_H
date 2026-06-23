@@ -1,7 +1,7 @@
 package Employees.Presentation.Controller;
 
 import Employees.Service.StoreDetailsService;
-import Employees.Presentation.Model.EmployeePL;
+import Employees.Presentation.DTO.EmployeePL;
 import Employees.Shared.Enums.WeekDay;
 
 import java.util.List;

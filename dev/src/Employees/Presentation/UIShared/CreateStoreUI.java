@@ -5,8 +5,8 @@ import Employees.Context.SessionManager;
 import Employees.Domain.Entities.Store.Branch;
 import Employees.Shared.Enums.WeekDay;
 import Employees.Presentation.Controller.CreateStoreController;
-import Employees.Presentation.Model.BranchPL;
-import Employees.Presentation.Model.StoreDetailsPL;
+import Employees.Presentation.DTO.BranchPL;
+import Employees.Presentation.DTO.StoreDetailsPL;
 import Employees.Presentation.Utils.Option;
 
 import java.util.ArrayList;

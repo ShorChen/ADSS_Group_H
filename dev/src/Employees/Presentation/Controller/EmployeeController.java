@@ -3,7 +3,7 @@ package Employees.Presentation.Controller;
 import Employees.Domain.Entities.Employee;
 import Employees.Domain.Entities.Role;
 import Employees.Service.EmployeeService;
-import Employees.Presentation.Model.EmployeePL;
+import Employees.Presentation.DTO.EmployeePL;
 
 public class EmployeeController {
     private final EmployeeService service;

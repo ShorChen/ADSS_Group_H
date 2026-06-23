@@ -1,4 +1,4 @@
-package Employees.Presentation.Model;
+package Employees.Presentation.DTO;
 
 import java.util.List;
 

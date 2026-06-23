@@ -1,7 +1,7 @@
 package Employees.Presentation.UIManager;
 
 import Employees.Presentation.Controller.ViewBranchController;
-import Employees.Presentation.Model.BranchPL;
+import Employees.Presentation.DTO.BranchPL;
 import Employees.Presentation.UIShared.ViewCLI;
 import Employees.Presentation.Utils.Option;
 

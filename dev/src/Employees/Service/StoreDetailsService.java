@@ -1,7 +1,7 @@
 package Employees.Service;
 
 import Employees.DataAccess.Pools.StorePool;
-import Employees.Presentation.Model.StoreDetailsPL;
+import Employees.Presentation.DTO.StoreDetailsPL;
 import Employees.Shared.Enums.WeekDay;
 
 import java.util.ArrayList;

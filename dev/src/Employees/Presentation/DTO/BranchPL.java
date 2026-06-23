@@ -1,4 +1,4 @@
-package Employees.Presentation.Model;
+package Employees.Presentation.DTO;
 
 import Employees.DataAccess.Entities.BranchEntity;
 import Employees.Domain.Entities.Store.Branch;

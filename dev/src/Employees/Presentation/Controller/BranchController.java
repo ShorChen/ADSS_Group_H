@@ -3,7 +3,7 @@ package Employees.Presentation.Controller;
 import Employees.Context.SessionManager;
 import Employees.Domain.Entities.Store.Branch;
 import Employees.Service.BranchService;
-import Employees.Presentation.Model.BranchPL;
+import Employees.Presentation.DTO.BranchPL;
 
 import java.util.List;
 

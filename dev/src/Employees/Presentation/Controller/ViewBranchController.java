@@ -1,6 +1,6 @@
 package Employees.Presentation.Controller;
 
-import Employees.Presentation.Model.BranchPL;
+import Employees.Presentation.DTO.BranchPL;
 
 public class ViewBranchController {
     private final BranchPL branch;

@@ -1,4 +1,4 @@
-package Employees.Presentation.Model;
+package Employees.Presentation.DTO;
 
 import Employees.Domain.Entities.Store.Branch;
 import Employees.Shared.Enums.WeekDay;

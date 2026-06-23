@@ -6,8 +6,8 @@ import Employees.Domain.Entities.ShiftKey;
 import Employees.Shared.WeekConstants;
 import Employees.Service.EmployeeService;
 import Employees.Service.ShiftService;
-import Employees.Presentation.Model.EmployeePL;
-import Employees.Presentation.Model.ShiftPL;
+import Employees.Presentation.DTO.EmployeePL;
+import Employees.Presentation.DTO.ShiftPL;
 
 import java.time.LocalDate;
 import java.util.HashMap;

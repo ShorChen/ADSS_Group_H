@@ -2,7 +2,7 @@ package Employees.Presentation.UIManager;
 
 import Employees.Context.SessionManager;
 import Employees.Presentation.Controller.HRManagerShiftController;
-import Employees.Presentation.Model.EmployeePL;
+import Employees.Presentation.DTO.EmployeePL;
 import Employees.Presentation.UIEmployee.RequestReplacementUI;
 import Employees.Presentation.UIShared.ShiftsView;
 import Employees.Presentation.UIShared.ViewCLI;

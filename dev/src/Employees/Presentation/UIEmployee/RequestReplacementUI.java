@@ -1,7 +1,7 @@
 package Employees.Presentation.UIEmployee;
 
 import Employees.Presentation.Controller.RequestReplacementController;
-import Employees.Presentation.Model.RequestPL;
+import Employees.Presentation.DTO.RequestPL;
 import Employees.Presentation.UIShared.ShiftsView;
 import Employees.Presentation.UIShared.ViewCLI;
 import Employees.Presentation.Utils.Option;
