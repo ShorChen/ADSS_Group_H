@@ -1,6 +1,7 @@
 package Employees.DataAccess.SqlImpl;
 
 import Core.DataAccess.DatabaseManager;
+import Employees.DataAccess.Entities.Keys.BranchWeekKey;
 import Employees.DataAccess.Entities.RequestEntity;
 import Employees.DataAccess.Entities.ShiftEntity;
 import Employees.DataAccess.RequestDAO;
@@ -19,7 +20,8 @@ public class SqlRequestDAO implements RequestDAO {
         String sql = "INSERT OR REPLACE INTO Requests(requestId, shiftId, prevEmployee, newEmployee, manager, prevApproved, newApproved, managerApproved, denied) VALUES(?,?,?,?,?,?,?,?,?)";
         try (Connection conn = DatabaseManager.getConnection(); PreparedStatement pstmt = conn.prepareStatement(sql)) {
             // אם זו בקשה חדשה (נניח ש-0 זה ללא ID), נוכל להשתמש ב-INSERT רגיל, אבל REPLACE יטפל בזה.
-            if(request.requestId() > 0) pstmt.setInt(1, request.requestId()); else pstmt.setNull(1, Types.INTEGER);
+            if (request.requestId() > 0) pstmt.setInt(1, request.requestId());
+            else pstmt.setNull(1, Types.INTEGER);
             pstmt.setInt(2, request.shift().shiftId());
             pstmt.setString(3, request.prevEmployee());
             pstmt.setString(4, request.newEmployee());
@@ -29,7 +31,9 @@ public class SqlRequestDAO implements RequestDAO {
             pstmt.setString(8, request.managerApproved());
             pstmt.setInt(9, request.denied() ? 1 : 0);
             pstmt.executeUpdate();
-        } catch (SQLException e) { throw new RuntimeException("Error saving request", e); }
+        } catch (SQLException e) {
+            throw new RuntimeException("Error saving request", e);
+        }
     }
 
     @Override
@@ -41,7 +45,9 @@ public class SqlRequestDAO implements RequestDAO {
             pstmt.setString(3, request.prevEmployee());
             pstmt.setString(4, request.newEmployee());
             return pstmt.executeQuery().next();
-        } catch (SQLException e) { throw new RuntimeException("Error checking request", e); }
+        } catch (SQLException e) {
+            throw new RuntimeException("Error checking request", e);
+        }
     }
 
     @Override
@@ -49,10 +55,14 @@ public class SqlRequestDAO implements RequestDAO {
         List<RequestEntity> list = new ArrayList<>();
         String sql = "SELECT * FROM Requests WHERE prevEmployee=? OR newEmployee=? OR manager=?";
         try (Connection conn = DatabaseManager.getConnection(); PreparedStatement pstmt = conn.prepareStatement(sql)) {
-            pstmt.setString(1, id); pstmt.setString(2, id); pstmt.setString(3, id);
+            pstmt.setString(1, id);
+            pstmt.setString(2, id);
+            pstmt.setString(3, id);
             ResultSet rs = pstmt.executeQuery();
             while (rs.next()) list.add(mapResultSetToEntity(rs));
-        } catch (SQLException e) { throw new RuntimeException("Error loading pending requests", e); }
+        } catch (SQLException e) {
+            throw new RuntimeException("Error loading pending requests", e);
+        }
         return list;
     }
 
@@ -62,7 +72,9 @@ public class SqlRequestDAO implements RequestDAO {
         String sql = "SELECT * FROM Requests";
         try (Connection conn = DatabaseManager.getConnection(); Statement stmt = conn.createStatement(); ResultSet rs = stmt.executeQuery(sql)) {
             while (rs.next()) list.add(mapResultSetToEntity(rs));
-        } catch (SQLException e) { throw new RuntimeException("Error loading all requests", e); }
+        } catch (SQLException e) {
+            throw new RuntimeException("Error loading all requests", e);
+        }
         return list;
     }
 
@@ -73,12 +85,18 @@ public class SqlRequestDAO implements RequestDAO {
         return new RequestEntity(
                 rs.getInt("requestId"),
                 shift,
-                rs.getString("prevEmployee"),
+                new BranchWeekKey(
+                        rs.getInt("branchId"),
+                        rs.getInt("year"),
+                        rs.getInt("week")
+                ),
+        rs.getString("prevEmployee"),
                 rs.getString("newEmployee"),
                 rs.getString("manager"),
                 rs.getString("prevApproved"),
                 rs.getString("newApproved"),
                 rs.getString("managerApproved"),
+                rs.getString("role"),
                 rs.getInt("denied") == 1
         );
     }

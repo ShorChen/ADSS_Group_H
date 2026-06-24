@@ -1,13 +1,17 @@
 package Transportation.Service.Core;
 
 import Core.Service.Response;
-import Employees.Domain.Entities.RoleSL;
-import Employees.Domain.Entities.ShiftSL;
-import Employees.Shared.Enums.WeekDay;
+import Employees.Domain.DTO.RoleSL;
+import Employees.Domain.DTO.ShiftKey;
+import Employees.Domain.DTO.ShiftSL;
 import Employees.Service.ShiftService;
 import Employees.Shared.Enums.ShiftType;
+import Employees.Shared.Enums.WeekDay;
 import Transportation.DataAccess.TransportDAO;
-import Transportation.Domain.Entities.*;
+import Transportation.Domain.Entities.CargoItemDL;
+import Transportation.Domain.Entities.DestinationDL;
+import Transportation.Domain.Entities.DriverDL;
+import Transportation.Domain.Entities.TruckDL;
 import Transportation.Domain.Facades.TransportFacade;
 import Transportation.Service.DTO.*;
 
