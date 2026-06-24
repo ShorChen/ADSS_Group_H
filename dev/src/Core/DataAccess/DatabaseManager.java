@@ -158,6 +158,20 @@ public class DatabaseManager {
             stmt.execute("INSERT OR IGNORE INTO CargoItems(cargoId, destId, itemName, weight, quantity) VALUES(2, 1, 'Cheese Boxes', 200.0, 5)");
             stmt.execute("INSERT OR IGNORE INTO CargoItems(cargoId, destId, itemName, weight, quantity) VALUES(3, 2, 'Bamba Crates', 150.0, 20)");
             stmt.execute("INSERT OR IGNORE INTO CargoItems(cargoId, destId, itemName, weight, quantity) VALUES(4, 3, 'Bread Trays', 300.0, 15)");
+
+            stmt.execute("INSERT OR IGNORE INTO Roles(roleName) VALUES('Manager'), ('Branch Manager'), ('Driver'), ('Storekeeper'), ('Shift Manager'), ('Cashier')");
+            stmt.execute("INSERT OR IGNORE INTO StoreSettings(id, firstStartUp) VALUES(1, 0)");
+            stmt.execute("INSERT OR IGNORE INTO StoreClosedDays(day) VALUES('SATURDAY')");
+            stmt.execute("INSERT OR IGNORE INTO Branches(branchId, location) VALUES(1, 'Tel Aviv - Dizengoff')");
+            stmt.execute("INSERT OR IGNORE INTO Branches(branchId, location) VALUES(2, 'Haifa - Herzl')");
+            stmt.execute("INSERT OR IGNORE INTO Employees(employeeId, name, bankAccount, salary, salaryType, dateOfEmployment, jobScope, constraints, yearlyRestDays, weeklyRestDay, password, workingDoubles, active, branchId) VALUES('E001', 'Noa Chen', '12-345-678', 65.0, 'HOURLY', '2025-01-01T08:00:00', 'FULL_TIME', 'None', 14, 'SATURDAY', 'pass123', 1, 1, 1)");
+            stmt.execute("INSERT OR IGNORE INTO Employees(employeeId, name, bankAccount, salary, salaryType, dateOfEmployment, jobScope, constraints, yearlyRestDays, weeklyRestDay, password, workingDoubles, active, branchId) VALUES('E002', 'Raziel Zanati', '98-765-432', 55.0, 'HOURLY', '2025-06-15T08:00:00', 'PART_TIME', 'Only Morning Shifts', 10, 'SATURDAY', 'pass456', 0, 1, 1)");
+            stmt.execute("INSERT OR IGNORE INTO EmployeeRoles(employeeId, roleName) VALUES('E001', 'Manager')");
+            stmt.execute("INSERT OR IGNORE INTO EmployeeRoles(employeeId, roleName) VALUES('E001', 'Shift Manager')");
+            stmt.execute("INSERT OR IGNORE INTO EmployeeRoles(employeeId, roleName) VALUES('E002', 'Cashier')");
+            stmt.execute("INSERT OR IGNORE INTO Shifts(shiftId, branchId, year, week, startDate, day, shiftType) VALUES(1, 1, 2026, 26, '2026-06-25T08:00:00', 'THURSDAY', 'MORNING')");
+            stmt.execute("INSERT OR IGNORE INTO Requests(requestId, shiftId, prevEmployee, newEmployee, manager, prevApproved, newApproved, managerApproved, denied) VALUES(1, 1, 'E001', 'E002', 'M001', 'APPROVED', 'WAITING', 'WAITING', 0)");
+
         } catch (SQLException e) {
             e.printStackTrace();
         }
