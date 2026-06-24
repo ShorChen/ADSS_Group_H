@@ -1,5 +1,6 @@
 package Core.App;
 
+import Core.DataAccess.DatabaseManager;
 import Core.Navigation.AppNavigator;
 import Employees.Presentation.GUI.EmployeesDashboard;
 import Inventory.Presentation.GUI.InventoryDashboard;
@@ -91,4 +92,5 @@ public class MainApp extends Application implements AppNavigator {
             launch(args);
         }
     }
+
 }

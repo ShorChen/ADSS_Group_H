@@ -25,7 +25,7 @@ public class SqlBranchDAO implements BranchDAO {
 
     @Override
     public boolean exists(int branchId) {
-        String sql = "SELECT 1 FROM Branches WHERE branchId=? AND location=?";
+        String sql = "SELECT 1 FROM Branches WHERE branchId=?";
         try (Connection conn = DatabaseManager.getConnection(); PreparedStatement pstmt = conn.prepareStatement(sql)) {
             pstmt.setInt(1, branchId);
             return pstmt.executeQuery().next();
@@ -40,7 +40,12 @@ public class SqlBranchDAO implements BranchDAO {
         String sql = "SELECT * FROM Branches";
         try (Connection conn = DatabaseManager.getConnection(); Statement stmt = conn.createStatement(); ResultSet rs = stmt.executeQuery(sql)) {
             while (rs.next())
-                list.add(new BranchEntity(rs.getInt("branchId"), rs.getString("location"), rs.getString("branchManagerId"), new WeekKey(rs.getInt("year"), rs.getInt("week"))));
+                list.add(new BranchEntity(
+                        rs.getInt("branchId"),
+                        rs.getString("location"),
+                        rs.getString("branchManagerId"),
+                        new WeekKey(rs.getInt("year"), rs.getInt("week"))
+                ));
         } catch (SQLException e) {
             throw new RuntimeException("Error loading branches", e);
         }
@@ -49,10 +54,13 @@ public class SqlBranchDAO implements BranchDAO {
 
     @Override
     public void addUpdateBranch(BranchEntity branch) {
-        String sql = "INSERT OR REPLACE INTO Branches(branchId, location) VALUES(?,?)";
+        String sql = "INSERT OR REPLACE INTO Branches(branchId, location, branchManagerId, year, week) VALUES(?,?,?,?,?)";
         try (Connection conn = DatabaseManager.getConnection(); PreparedStatement pstmt = conn.prepareStatement(sql)) {
             pstmt.setInt(1, branch.branchId());
             pstmt.setString(2, branch.location());
+            pstmt.setString(3, branch.branchManagerId());
+            pstmt.setInt(4, branch.startDate().year());
+            pstmt.setInt(5, branch.startDate().week());
             pstmt.executeUpdate();
         } catch (SQLException e) {
             throw new RuntimeException("Error saving branch", e);
@@ -61,16 +69,20 @@ public class SqlBranchDAO implements BranchDAO {
 
     @Override
     public BranchEntity get(int branchId) {
-        List<BranchEntity> list = new ArrayList<>();
         String sql = "SELECT * FROM Branches WHERE branchId=?";
         try (Connection conn = DatabaseManager.getConnection(); PreparedStatement pstmt = conn.prepareStatement(sql)) {
             pstmt.setInt(1, branchId);
-            ResultSet rs = pstmt.executeQuery(sql);
+            ResultSet rs = pstmt.executeQuery();
             if (!rs.next()) return null;
-            list.add(new BranchEntity(rs.getInt("branchId"), rs.getString("location"), rs.getString("branchManagerId"), new WeekKey(rs.getInt("year"), rs.getInt("week"))));
+
+            return new BranchEntity(
+                    rs.getInt("branchId"),
+                    rs.getString("location"),
+                    rs.getString("branchManagerId"),
+                    new WeekKey(rs.getInt("year"), rs.getInt("week"))
+            );
         } catch (SQLException e) {
-            throw new RuntimeException("Error loading branches", e);
+            throw new RuntimeException("Error loading branch", e);
         }
-        return list.getFirst();
     }
 }
