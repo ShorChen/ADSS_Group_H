@@ -40,7 +40,7 @@ public class SqlEmployeeDAO implements EmployeeDAO {
                     delRoles.setString(1, employee.id());
                     delRoles.executeUpdate();
                 }
-                if (employee.qualifiedRoles() != null && !employee.qualifiedRoles().isEmpty()) {
+                if (!employee.qualifiedRoles().isEmpty()) {
                     try (PreparedStatement insRole = conn.prepareStatement("INSERT INTO EmployeeRoles(employeeId, roleName) VALUES(?,?)")) {
                         for (String role : employee.qualifiedRoles()) {
                             insRole.setString(1, employee.id());

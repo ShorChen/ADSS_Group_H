@@ -56,6 +56,24 @@ public abstract class ViewCLI extends View{
 
     }
 
+
+    public float getNextFloat(String message) {
+        while (true) {
+            System.out.println(message);
+            try {
+                float result = reader.nextFloat();
+                reader.nextLine();
+                return result;
+            } catch (InputMismatchException e) {
+                System.out.println("Expected a floating point number, try again");
+                reader.nextLine();
+            }
+        }
+
+
+    }
+
+
     public boolean getNextBoolean(String message) {
         while (true) {
             System.out.println(message);

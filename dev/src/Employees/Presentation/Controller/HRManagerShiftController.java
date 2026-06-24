@@ -11,7 +11,10 @@ import Employees.Shared.Enums.ShiftType;
 import Employees.Shared.Enums.WeekDay;
 import Employees.Shared.WeekConstants;
 
+import java.time.DayOfWeek;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.temporal.TemporalAdjusters;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -35,12 +38,19 @@ public class HRManagerShiftController {
 
     public void openShift(WeekDay day, ShiftType type, EmployeePL shiftManager, boolean isFirstWeek) {
         int weekOffset = isFirstWeek? 0 : 1;
-        LocalDate targetDate = SessionManager.now().plusWeeks(weekOffset).toLocalDate();
+        LocalDateTime targetDate = SessionManager.now().plusWeeks(weekOffset);
         int year = targetDate.get(WeekConstants.WEEK_FIELDS.weekBasedYear());
         int week = targetDate.get(WeekConstants.WEEK_FIELDS.weekOfWeekBasedYear());
         int branchId = SessionManager.getSelectedBranchId();
+
+        LocalDateTime startDate =
+                targetDate.with(TemporalAdjusters.previousOrSame(DayOfWeek.SUNDAY))
+                        .plusDays(day.toDayOfWeek().getValue() % 7)
+                        .withHour(ShiftSL.DAY_SHIFT_START)
+                        .withMinute(0);
+
         service.addUpdateShift(branchId, year, week, day.toString(), type.toString(),
-                new ShiftSL(day, type, shiftManager.getId()));
+                new ShiftSL(startDate, day, type, shiftManager.getId()));
     }
 
     public void closeShift(WeekDay day, ShiftType type, boolean isFirstWeek) {
@@ -92,5 +102,4 @@ public class HRManagerShiftController {
         roleService.getAllRoles().forEach(r -> roles.add(r.getTag()));
         return roles;
     }
-
 }

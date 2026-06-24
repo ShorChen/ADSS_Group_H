@@ -1,5 +1,6 @@
 package Employees.Domain.DTO;
 
+import Employees.DataAccess.Entities.Keys.BranchWeekKey;
 import Employees.DataAccess.Entities.RequestEntity;
 import Employees.Shared.Enums.RequestStatus;
 
@@ -9,9 +10,13 @@ public class RequestSL {
     public static final int NO_ID = -1;
     private int requestId;
     private ShiftSL shift;
+    private int branchId;
+    private int year;
+    private int week;
     private String prevEmployee;
     private String newEmployee;
     private String manager;
+    private RoleSL role;
     private RequestStatus prevStatus;
     private RequestStatus newStatus;
     private RequestStatus managerStatus;
@@ -35,9 +40,9 @@ public class RequestSL {
     }
 
     public RequestEntity toEntity() {
-        return new RequestEntity(requestId, shift.toEntity(), prevEmployee,
+        return new RequestEntity(requestId, shift.toEntity(),new BranchWeekKey(branchId, year, week), prevEmployee,
                 newEmployee, manager, prevStatus.toString(),
-                newStatus.toString(), managerStatus.toString(), isDenied());
+                newStatus.toString(), managerStatus.toString(),role.getTag(), isDenied());
     }
 
     public RequestSL(RequestEntity entity) {
@@ -125,5 +130,53 @@ public class RequestSL {
 
     public int getRequestId() {
         return requestId;
+    }
+
+    public void setRequestId(int requestId) {
+        this.requestId = requestId;
+    }
+
+    public void setShift(ShiftSL shift) {
+        this.shift = shift;
+    }
+
+    public void setPrevEmployee(String prevEmployee) {
+        this.prevEmployee = prevEmployee;
+    }
+
+    public void setNewEmployee(String newEmployee) {
+        this.newEmployee = newEmployee;
+    }
+
+    public void setManager(String manager) {
+        this.manager = manager;
+    }
+
+    public void setPrevStatus(RequestStatus prevStatus) {
+        this.prevStatus = prevStatus;
+    }
+
+    public void setNewStatus(RequestStatus newStatus) {
+        this.newStatus = newStatus;
+    }
+
+    public void setManagerStatus(RequestStatus managerStatus) {
+        this.managerStatus = managerStatus;
+    }
+
+    public int getBranchId() {
+        return branchId;
+    }
+
+    public int getYear() {
+        return year;
+    }
+
+    public int getWeek() {
+        return week;
+    }
+
+    public RoleSL getRole() {
+        return role;
     }
 }

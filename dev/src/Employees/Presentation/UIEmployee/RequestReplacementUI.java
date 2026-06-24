@@ -20,7 +20,11 @@ public class RequestReplacementUI extends ViewCLI {
     public void display() {
         open = true;
         while (open) {
-            shiftsView = new ShiftsView(0, controller::getCurrentEmployeeShiftsPredicate);
+
+            boolean isFirstWeek = controller.isFirstWeek();
+            if (isFirstWeek) onFirstWeek();
+            else shiftsView = new ShiftsView(0, controller::getCurrentEmployeeShiftsPredicate);
+
             shiftsView.display();
             System.out.println("X - You were not placed for this shift\n");
 
@@ -38,9 +42,10 @@ public class RequestReplacementUI extends ViewCLI {
 
     private void chooseAction(RequestPL request) {
         displayMenu(new Option.Builder("Request: " + request)
-                        .append("Back", () -> {})
-                        .append("Approve", () -> onRequestApproved(request))
-                        .append("Deny", () -> onRequestDenied(request)));
+                .append("Back", () -> {
+                })
+                .append("Approve", () -> onRequestApproved(request))
+                .append("Deny", () -> onRequestDenied(request)));
     }
 
     private void onRequestApproved(RequestPL request) {
@@ -72,6 +77,16 @@ public class RequestReplacementUI extends ViewCLI {
             }
 
         });
+    }
+
+    private void onFirstWeek() {
+        Option.Builder builder = new Option.Builder("Select Week");
+        builder.append("Back", onDismiss);
+        builder.append("This Week", () -> shiftsView = new ShiftsView(0,
+                controller::getCurrentEmployeeShiftsPredicate));
+        builder.append("Upcoming Week", () -> shiftsView = new ShiftsView(-1,
+                controller::getCurrentEmployeeShiftsPredicate));
+        displayMenu(builder);
     }
 
     @Override

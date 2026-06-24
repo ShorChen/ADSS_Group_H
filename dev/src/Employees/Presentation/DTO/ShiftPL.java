@@ -121,4 +121,7 @@ public class ShiftPL {
         return new HashMap<>(additionalHours);
     }
 
+    public boolean isAssigned(String id) {
+        return toShift().doesEmployeeWork(id);
+    }
 }

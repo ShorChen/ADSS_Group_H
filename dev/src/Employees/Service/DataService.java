@@ -62,9 +62,9 @@ public class DataService {
                 new ShiftEntityKey(WeekDay.MONDAY.toString(), ShiftType.EVENING.toString()), m2);
 
         requestsPool.addUpdateRequest(
-                new RequestEntity(-1, s1, "id 1", "id 4",
+                new RequestEntity(-1, s1, new BranchWeekKey(1, 2026, 26),"id 1", "id 4",
                         null, RequestStatus.ACCEPT.toString(), RequestStatus.PENDING.toString(),
-                        RequestStatus.PENDING.toString(), false));
+                        RequestStatus.PENDING.toString(), "Cashier",false));
     }
 
     private Map<String, Set<String>> empsOfShift() {

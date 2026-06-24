@@ -10,6 +10,7 @@ import java.util.*;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 public class ShiftSL {
+    public static final int DAY_SHIFT_START = 12 ;
     private LocalDateTime startDate;
     private WeekDay day;
     private ShiftType shiftType;
@@ -39,8 +40,8 @@ public class ShiftSL {
     }
 
 
-    public ShiftSL(WeekDay day, ShiftType type, String shiftManagerId) {
-        this(null, day, type, new HashMap<>(), new HashMap<>());
+    public ShiftSL(LocalDateTime startDate ,WeekDay day, ShiftType type, String shiftManagerId) {
+        this(startDate, day, type, new HashMap<>(), new HashMap<>());
 
         HashSet<String> shiftManager = new HashSet<>();
         shiftManager.add(shiftManagerId);
@@ -98,10 +99,17 @@ public class ShiftSL {
         return null;
     }
 
-    public void assignEmployeeToRole(RoleSL role, EmployeeSL employee) {
-        if (!canEmployeeWork(role, employee.getId()))
+    public void assignEmployeeToRole(RoleSL role, String employeeId) {
+        if (!canEmployeeWork(role, employeeId))
             throw new IllegalArgumentException("Employee can not work in this shift");
-        employees.get(role).add(employee.getId());
+        employees.get(role).add(employeeId);
+    }
+
+    public void replaceEmployees(RoleSL role, String prevEmployee, String newEmployee){
+        if(!doesEmployeeWork(prevEmployee))
+            throw new IllegalArgumentException("Employee does not work this shift");
+        employees.get(role).remove(prevEmployee);
+        assignEmployeeToRole(role, newEmployee);
     }
 
     public boolean shiftRequiresRole(RoleSL role) {

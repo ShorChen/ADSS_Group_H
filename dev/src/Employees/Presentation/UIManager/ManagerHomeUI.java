@@ -28,8 +28,6 @@ public class ManagerHomeUI extends ViewCLI {
                     .append("Manage Roles", this::manageRoles)
                     .append("Set Submission Deadline", this::setDeadline)
                     .append("Handle Replacement Requests", this::handleReplacements)
-                    .append("Issue HR Report (Not Implemented)", this::issueReport)
-
             );
 
         }
@@ -88,11 +86,6 @@ public class ManagerHomeUI extends ViewCLI {
         close();
         requestUI.display();
     }
-
-    private void issueReport() {
-        System.out.println(controller.issueReport());
-    }
-
 
     @Override
     public void close() {

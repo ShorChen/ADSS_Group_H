@@ -16,7 +16,6 @@ public class ShiftsView extends ViewCLI {
     private static final int INDEX_SUN_NIGHT = 188;
     private static final int MARGIN = 4;
     public static Character NO_SHIFT = 'X';
-    public static Character PARTIAL_SHIFT = 'P';
     private final ShiftViewController controller;
     private Map<ShiftKey, ShiftPL> weekShifts;
     private final Function<ShiftPL, Boolean> predicate;

@@ -5,6 +5,7 @@ import Employees.Domain.DTO.RequestSL;
 import Employees.Domain.DTO.RoleSL;
 import Employees.Domain.DTO.ShiftSL;
 import Employees.Domain.DTO.ShiftKey;
+import Employees.Service.BranchService;
 import Employees.Service.EmployeeService;
 import Employees.Service.RequestReplacementService;
 import Employees.Service.ShiftService;
@@ -26,12 +27,14 @@ public class RequestReplacementController {
     private final EmployeeService employeeService;
     private final ShiftService shiftService;
     private final AuthController authController;
+    private final BranchService branchService;
 
     public RequestReplacementController() {
         service = new RequestReplacementService();
         employeeService = new EmployeeService();
         shiftService = new ShiftService();
         authController = new AuthController();
+        branchService = new BranchService();
     }
 
     public void currentEmployeeRequestShiftReplacement(WeekDay day, ShiftType type, String otherId) {
@@ -60,7 +63,8 @@ public class RequestReplacementController {
     public List<RequestPL> getCurrentEmployeePendingRequests() {
         String id = SessionManager.getCurrentEmployee().getId();
         List<RequestSL> requests = service.getPendingRequests(id);
-        if (authController.isManager(id)) requests = service.getAllRequests();
+        if (authController.isManager(id) || authController.isBranchManager(id))
+            requests = service.getAllRequests();
 
         List<RequestPL> pendingRequests = new ArrayList<>();
         requests.forEach(request -> pendingRequests.add(new RequestPL(request)));
@@ -111,7 +115,7 @@ public class RequestReplacementController {
     }
 
     @Deprecated
-    void t(RequestSL request, RequestStatus status){
+    void t(RequestSL request, RequestStatus status) {
         RequestStateMachine stateMachine = new RequestStateMachine();
         stateMachine.apply(new RequestStateMachine.State(request.getPrevStatus(),
                         request.getNewStatus(), request.getManagerStatus()),
@@ -119,7 +123,29 @@ public class RequestReplacementController {
                         RequestStatus.ACCEPT));
     }
 
-    public void completeRequest(RequestPL request) {
-        // todo: implement
+    public void completeRequest(RequestPL requestPL) {
+        RequestSL request = requestPL.toRequest();
+        ShiftSL s = request.getShift();
+        s.replaceEmployees(request.getRole(), request.getPrevEmployee(),
+                request.getNewEmployee());
+
+        shiftService.addUpdateShift(
+                request.getBranchId(),
+                request.getYear(),
+                request.getWeek(),
+                request.getShift().getDay().toString(),
+                request.getShift().getShiftType().toString(),
+                s
+        );
+    }
+
+    public boolean isFirstWeek() {
+        LocalDate targetDate = SessionManager.now().toLocalDate();
+
+        int year = targetDate.get(WeekConstants.WEEK_FIELDS.weekBasedYear());
+        int week = targetDate.get(WeekConstants.WEEK_FIELDS.weekOfWeekBasedYear());
+        int branchId = SessionManager.getSelectedBranchId();
+
+        return branchService.isFirstWeek(branchId, year, week);
     }
 }

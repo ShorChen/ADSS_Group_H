@@ -11,7 +11,7 @@ import Employees.Shared.Enums.ShiftType;
 import Employees.Shared.Enums.WeekDay;
 
 public class EmployeeChooseShiftsUI extends ViewCLI {
-    private final ShiftsView shiftsView = new ShiftsView(0);
+    private final ShiftsView shiftsView = new ShiftsView(-1);
     private boolean open = false;
     private final EmployeeShiftController controller;
     private AvailabilitySubmissionPL availabilitySubmission;

@@ -1,13 +1,20 @@
 package Employees.DataAccess.Entities;
 
+import Employees.DataAccess.Entities.Keys.BranchWeekKey;
+
 import java.util.Objects;
 
 public record RequestEntity(
-        int requestId, ShiftEntity shift, String prevEmployee, String newEmployee,
+        int requestId, ShiftEntity shift,
+        BranchWeekKey key,
+        String prevEmployee,
+        String newEmployee,
         String manager,
         String prevApproved,
         String newApproved,
-        String managerApproved, boolean denied) {
+        String managerApproved,
+        String role,
+        boolean denied) {
 
     @Override
     public boolean equals(Object o) {

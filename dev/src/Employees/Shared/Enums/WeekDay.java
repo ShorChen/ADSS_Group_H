@@ -1,5 +1,7 @@
 package Employees.Shared.Enums;
 
+import java.time.DayOfWeek;
+
 // ordinal() method is being used in code!
 // DO NOT CHANGE THE ORDER OF ENTRIES!
 public enum WeekDay{
@@ -24,7 +26,9 @@ public enum WeekDay{
     public static WeekDay fromInteger(int ordinal){
         return values()[ordinal];
     }
-
+    public DayOfWeek toDayOfWeek(){
+        return DayOfWeek.valueOf(day.toUpperCase());
+    }
     public static int number(WeekDay day) {
         return day.ordinal();
     }

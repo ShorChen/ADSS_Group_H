@@ -9,6 +9,7 @@ public class RequestPL {
     private String prevEmployee;
     private String newEmployee;
     private String manager;
+    private String role;
     private RequestStatus prevStatus;
     private RequestStatus newStatus;
     private RequestStatus managerStatus;

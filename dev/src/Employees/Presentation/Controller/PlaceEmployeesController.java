@@ -51,7 +51,7 @@ public class PlaceEmployeesController {
         if (s.doesEmployeeWork(selectedEmployee.getId()))
             throw new UnsupportedOperationException("Employee is already in the shift");
 
-        s.assignEmployeeToRole(new RoleSL(selectedRole), selectedEmployee.toEmployee());
+        s.assignEmployeeToRole(new RoleSL(selectedRole), selectedEmployee.getId());
 
         LocalDate targetDate = SessionManager.now().toLocalDate();
 

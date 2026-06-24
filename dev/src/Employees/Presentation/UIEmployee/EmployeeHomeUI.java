@@ -26,9 +26,15 @@ public class EmployeeHomeUI extends ViewCLI {
                     })
                     .append("Change Password", this::changePassword)
                     .append("View Schedule & Submit Availability", this::chooseShifts)
-                    .append("Request Shift Replacement",
-                            this::requestReplacement));
+                    .append("Request Shift Replacement", this::requestReplacement)
+                    .append("Report Additional Hours", this::reportAdditionalHours));
         }
+    }
+
+    private void reportAdditionalHours() {
+        EmployeeAdditionalHoursUI additionalHours = new EmployeeAdditionalHoursUI(this::display);
+        close();
+        additionalHours.display();
     }
 
     private void changePassword() {
