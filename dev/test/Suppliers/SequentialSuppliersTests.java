@@ -9,7 +9,6 @@ import org.junit.jupiter.api.*;
 import java.time.DayOfWeek;
 import java.util.ArrayList;
 import java.util.List;
-
 import static org.junit.jupiter.api.Assertions.*;
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
@@ -22,7 +21,7 @@ public class SequentialSuppliersTests {
     @Test
     @Order(1)
     void step01_loginAsSupplierManager() {
-        SessionManager.getInstance().login(Role.SUPPLIER_MANAGER);
+        SessionManager.getInstance().login("ADMIN", Role.SUPPLIER_MANAGER);
         assertEquals(Role.SUPPLIER_MANAGER, SessionManager.getInstance().getCurrentRole());
     }
 

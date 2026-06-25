@@ -23,7 +23,6 @@ import static org.junit.jupiter.api.Assertions.*;
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 public class SequentialIntegrationTests {
     private TruckDL heavyTruck;
-    private TruckDL lightTruck;
     private DriverDL lightDriver;
     private DriverDL heavyDriver;
     private ShiftDL mondayShift;
@@ -34,9 +33,8 @@ public class SequentialIntegrationTests {
 
     @BeforeAll
     void setUp() {
-        SessionManager.getInstance().login(Role.TRANSPORTATION_MANAGER);
+        SessionManager.getInstance().login("ADMIN", Role.TRANSPORTATION_MANAGER);
         heavyTruck = new TruckDL("TRK-1", "Volvo", 8000.0, 24000.0, false);
-        lightTruck = new TruckDL("TRK-2", "Fiat", 3000.0, 10000.0, false);
         lightDriver = new DriverDL("DRV-1", "Dani", "C1", LocalDate.now().plusYears(1));
         heavyDriver = new DriverDL("DRV-2", "Yossi", "HEAVY", LocalDate.now().plusYears(1));
         mondayShift = new ShiftDL(1, 1, 2026, 26, LocalDateTime.now(), WeekDay.MONDAY, ShiftType.DAY, new HashMap<>(), new HashMap<>());

@@ -92,20 +92,19 @@ public class EmployeesDashboard {
         layout.setPadding(new Insets(20));
         HBox fetchBox = new HBox(10);
         fetchBox.setAlignment(Pos.CENTER_LEFT);
-        TextField myIdField = new TextField();
-        myIdField.setPromptText("Enter your Employee ID");
         Button loadMeBtn = new Button("Load My Data");
         Label welcomeLabel = new Label();
         welcomeLabel.setStyle("-fx-font-weight: bold; -fx-text-fill: #2980b9;");
         loadMeBtn.setOnAction(ignore -> {
             try {
-                EmployeeDL me = employeeController.getMyDetails(myIdField.getText());
+                String myId = SessionManager.getInstance().getLoggedInUserId();
+                EmployeeDL me = employeeController.getMyDetails(myId);
                 welcomeLabel.setText("Welcome, " + me.getName() + " | Job: " + me.getJobScope().name() + " | Salary: ₪" + me.getSalary());
             } catch (Exception ex) {
                 showAlert(Alert.AlertType.ERROR, "Error", ex.getMessage());
             }
         });
-        fetchBox.getChildren().addAll(myIdField, loadMeBtn, welcomeLabel);
+        fetchBox.getChildren().addAll(loadMeBtn, welcomeLabel);
         VBox availBox = new VBox(10);
         availBox.setStyle("-fx-border-color: #bdc3c7; -fx-border-radius: 5; -fx-padding: 15;");
         Label availTitle = new Label("Submit Next Week's Availability");
@@ -119,18 +118,7 @@ public class EmployeesDashboard {
         shiftCombo.setPromptText("Select Shift");
         CheckBox availableCheck = new CheckBox("I am AVAILABLE to work this shift");
         availableCheck.setSelected(true);
-        Button submitAvailBtn = new Button("Submit Availability");
-        submitAvailBtn.setOnAction(ignore -> {
-            try {
-                EmployeeDL me = employeeController.getMyDetails(myIdField.getText());
-                Map<String, Boolean> shifts = new HashMap<>();
-                shifts.put(dayCombo.getValue() + "_" + shiftCombo.getValue(), availableCheck.isSelected());
-                employeeController.updateAvailability(me, shifts);
-                showAlert(Alert.AlertType.INFORMATION, "Success", "Availability Updated!");
-            } catch (Exception ex) {
-                showAlert(Alert.AlertType.ERROR, "Error", "Failed to update availability: " + ex.getMessage());
-            }
-        });
+        Button submitAvailBtn = getSubmitAvailBtn(dayCombo, shiftCombo, availableCheck);
         availGrid.add(dayCombo, 0, 0);
         availGrid.add(shiftCombo, 1, 0);
         availGrid.add(availableCheck, 2, 0);
@@ -147,7 +135,7 @@ public class EmployeesDashboard {
         shiftIdField.setPromptText("Shift ID");
         TextField newEmpIdField = new TextField();
         newEmpIdField.setPromptText("Replacement Employee ID");
-        Button submitReqBtn = getSubmitReqBtn(shiftIdField, myIdField, newEmpIdField);
+        Button submitReqBtn = getSubmitReqBtn(shiftIdField, newEmpIdField);
         reqGrid.add(new Label("Target Shift ID:"), 0, 0);
         reqGrid.add(shiftIdField, 1, 0);
         reqGrid.add(new Label("Replacement Worker ID:"), 0, 1);
@@ -161,11 +149,29 @@ public class EmployeesDashboard {
         return tab;
     }
 
-    private @NotNull Button getSubmitReqBtn(TextField shiftIdField, TextField myIdField, TextField newEmpIdField) {
+    private @NotNull Button getSubmitAvailBtn(ComboBox<String> dayCombo, ComboBox<String> shiftCombo, CheckBox availableCheck) {
+        Button submitAvailBtn = new Button("Submit Availability");
+        submitAvailBtn.setOnAction(ignore -> {
+            try {
+                String myId = SessionManager.getInstance().getLoggedInUserId();
+                EmployeeDL me = employeeController.getMyDetails(myId);
+                Map<String, Boolean> shifts = new HashMap<>();
+                shifts.put(dayCombo.getValue() + "_" + shiftCombo.getValue(), availableCheck.isSelected());
+                employeeController.updateAvailability(me, shifts);
+                showAlert(Alert.AlertType.INFORMATION, "Success", "Availability Updated!");
+            } catch (Exception ex) {
+                showAlert(Alert.AlertType.ERROR, "Error", "Failed to update availability: " + ex.getMessage());
+            }
+        });
+        return submitAvailBtn;
+    }
+
+    private @NotNull Button getSubmitReqBtn(TextField shiftIdField, TextField newEmpIdField) {
         Button submitReqBtn = new Button("Submit Request");
         submitReqBtn.setOnAction(ignore -> {
             try {
-                RequestDL req = new RequestDL(0, new ShiftDL(Integer.parseInt(shiftIdField.getText()), 1, 2026, 26, LocalDateTime.now(), WeekDay.SUNDAY, ShiftType.DAY, new HashMap<>(), new HashMap<>()), myIdField.getText(), newEmpIdField.getText(), "", "WAITING", "WAITING", "WAITING", false);
+                String myId = SessionManager.getInstance().getLoggedInUserId();
+                RequestDL req = new RequestDL(0, new ShiftDL(Integer.parseInt(shiftIdField.getText()), 1, 2026, 26, LocalDateTime.now(), WeekDay.SUNDAY, ShiftType.DAY, new HashMap<>(), new HashMap<>()), myId, newEmpIdField.getText(), "", "WAITING", "WAITING", "WAITING", false);
                 employeeController.submitRequest(req);
                 showAlert(Alert.AlertType.INFORMATION, "Success", "Replacement Request Submitted!");
             } catch (Exception ex) {
@@ -342,14 +348,13 @@ public class EmployeesDashboard {
         constraintsField.setPromptText("Constraints");
         TextField restDaysField = new TextField();
         restDaysField.setPromptText("Yearly Rest Days");
-        CheckBox doublesCheck = new CheckBox("Works Doubles");
         TextField branchIdField = new TextField();
         branchIdField.setPromptText("Branch ID");
         Button hireBtn = new Button("Hire Employee");
         hireBtn.setStyle("-fx-background-color: #27ae60; -fx-text-fill: white; -fx-font-weight: bold;");
         hireBtn.setOnAction(ignore -> {
             try {
-                EmployeeDL newEmp = new EmployeeDL(idField.getText(), nameField.getText(), bankField.getText(), Double.parseDouble(salField.getText()), typeCombo.getValue(), LocalDateTime.now(), scopeCombo.getValue(), new ArrayList<>(), constraintsField.getText().isEmpty() ? "None" : constraintsField.getText(), restDaysField.getText().isEmpty() ? 14 : Integer.parseInt(restDaysField.getText()), WeekDay.SATURDAY, null, doublesCheck.isSelected(), branchIdField.getText().isEmpty() ? 1 : Integer.parseInt(branchIdField.getText()));
+                EmployeeDL newEmp = new EmployeeDL(idField.getText(), nameField.getText(), bankField.getText(), Double.parseDouble(salField.getText()), typeCombo.getValue(), LocalDateTime.now(), scopeCombo.getValue(), new ArrayList<>(), constraintsField.getText().isEmpty() ? "None" : constraintsField.getText(), restDaysField.getText().isEmpty() ? 14 : Integer.parseInt(restDaysField.getText()), WeekDay.SATURDAY, null, true, branchIdField.getText().isEmpty() ? 1 : Integer.parseInt(branchIdField.getText()));
                 hrController.addUpdateEmployee(newEmp);
                 showAlert(Alert.AlertType.INFORMATION, "Success", nameField.getText() + " has been added to the system.");
                 loadBtn.fire();
@@ -366,8 +371,7 @@ public class EmployeesDashboard {
         addGrid.add(constraintsField, 0, 2);
         addGrid.add(restDaysField, 1, 2);
         addGrid.add(branchIdField, 2, 2);
-        addGrid.add(doublesCheck, 0, 3);
-        addGrid.add(hireBtn, 1, 3);
+        addGrid.add(hireBtn, 0, 3);
         hireBox.getChildren().addAll(hireTitle, addGrid);
         VBox updateBox = new VBox(10);
         updateBox.setStyle("-fx-border-color: #bdc3c7; -fx-padding: 15;");
@@ -393,7 +397,6 @@ public class EmployeesDashboard {
         upConstraintsField.setPromptText("Constraints");
         TextField upRestDaysField = new TextField();
         upRestDaysField.setPromptText("Yearly Rest Days");
-        CheckBox upDoublesCheck = new CheckBox("Works Doubles");
         TextField upBranchIdField = new TextField();
         upBranchIdField.setPromptText("Branch ID");
         PasswordField authPasswordField = new PasswordField();
@@ -412,7 +415,6 @@ public class EmployeesDashboard {
                 upTypeCombo.setValue(emp.getSalaryType());
                 upConstraintsField.setText(emp.getConstraints());
                 upRestDaysField.setText(String.valueOf(emp.getYearlyRestDays()));
-                upDoublesCheck.setSelected(emp.isWorkingDoubles());
                 upBranchIdField.setText(String.valueOf(emp.getBranchId()));
                 loadedEmp[0] = emp;
                 updateBtn.setDisable(false);
@@ -431,7 +433,6 @@ public class EmployeesDashboard {
                 empToUpdate.setSalaryType(upTypeCombo.getValue());
                 empToUpdate.setConstraints(upConstraintsField.getText());
                 empToUpdate.setYearlyRestDays(Integer.parseInt(upRestDaysField.getText()));
-                empToUpdate.setWorkingDoubles(upDoublesCheck.isSelected());
                 empToUpdate.setBranchId(Integer.parseInt(upBranchIdField.getText()));
                 hrController.updateEmployeeWithPassword(empToUpdate, authPasswordField.getText());
                 showAlert(Alert.AlertType.INFORMATION, "Success", "Employee updated successfully.");
@@ -452,9 +453,8 @@ public class EmployeesDashboard {
         updateGrid.add(upConstraintsField, 1, 3);
         updateGrid.add(upRestDaysField, 0, 4);
         updateGrid.add(upBranchIdField, 1, 4);
-        updateGrid.add(upDoublesCheck, 0, 5);
-        updateGrid.add(authPasswordField, 0, 6);
-        updateGrid.add(updateBtn, 1, 6);
+        updateGrid.add(authPasswordField, 0, 5);
+        updateGrid.add(updateBtn, 1, 5);
         updateBox.getChildren().addAll(updateTitle, updateGrid);
         formsBox.getChildren().addAll(hireBox, updateBox);
         layout.getChildren().addAll(loadBtn, table, formsBox);

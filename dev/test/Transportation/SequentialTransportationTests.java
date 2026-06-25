@@ -21,7 +21,7 @@ public class SequentialTransportationTests {
     @Test
     @Order(1)
     void step01_loginAsTransportManager() {
-        SessionManager.getInstance().login(Role.TRANSPORTATION_MANAGER);
+        SessionManager.getInstance().login("ADMIN", Role.TRANSPORTATION_MANAGER);
         assertEquals(Role.TRANSPORTATION_MANAGER, SessionManager.getInstance().getCurrentRole());
     }
 

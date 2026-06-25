@@ -15,7 +15,7 @@ public class SequentialInventoryTests {
     @Test
     @Order(1)
     void step01_loginAsInventoryManager() {
-        SessionManager.getInstance().login(Role.INVENTORY_MANAGER);
+        SessionManager.getInstance().login("ADMIN", Role.INVENTORY_MANAGER);
         assertEquals(Role.INVENTORY_MANAGER, SessionManager.getInstance().getCurrentRole());
     }
 

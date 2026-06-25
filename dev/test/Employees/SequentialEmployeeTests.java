@@ -26,7 +26,7 @@ public class SequentialEmployeeTests {
 
     @BeforeAll
     void setUp() {
-        SessionManager.getInstance().login(Role.HR_MANAGER);
+        SessionManager.getInstance().login("ADMIN", Role.HR_MANAGER);
         currentEmployee = new EmployeeDL("EMP123", "Dani", "12-345", 50.0, SalaryType.HOURLY, LocalDateTime.now(), JobScope.FULL_TIME, null, "None", 12, WeekDay.SUNDAY, null, true, 1);
         currentShift = new ShiftDL(1, 1, 2026, 26, LocalDateTime.now(), WeekDay.MONDAY, ShiftType.DAY, new HashMap<>(), new HashMap<>());
         cashierRole = new RoleDL("Cashier");
