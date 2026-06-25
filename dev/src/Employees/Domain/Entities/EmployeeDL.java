@@ -105,4 +105,12 @@ public class EmployeeDL {
                 availabilitySubmission.isWorkingDoubles()
         );
     }
+
+    public boolean isWorkingDoubles() {
+        return availabilitySubmission.isWorkingDoubles();
+    }
+
+    public void setWorkingDoubles(boolean selected) {
+        availabilitySubmission.setWorkingDoubles(selected);
+    }
 }

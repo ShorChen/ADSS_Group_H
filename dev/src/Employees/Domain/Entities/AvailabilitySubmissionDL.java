@@ -30,4 +30,8 @@ public class AvailabilitySubmissionDL {
     public boolean getShift(String key) {
         return shifts.getOrDefault(key, true);
     }
+
+    public void setWorkingDoubles(boolean selected) {
+        workingDoubles = selected;
+    }
 }

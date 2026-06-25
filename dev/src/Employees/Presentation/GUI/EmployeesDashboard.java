@@ -26,8 +26,8 @@ import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.layout.*;
 import org.jetbrains.annotations.NotNull;
-
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -46,7 +46,7 @@ public class EmployeesDashboard {
         BorderPane mainLayout = new BorderPane();
         mainLayout.setTop(createTopBar());
         mainLayout.setCenter(createTabPane());
-        this.scene = new Scene(mainLayout, 1200, 800);
+        this.scene = new Scene(mainLayout, 1200, 850);
     }
 
     public Scene getScene() {
@@ -155,7 +155,9 @@ public class EmployeesDashboard {
         reqGrid.add(submitReqBtn, 1, 2);
         reqBox.getChildren().addAll(reqTitle, reqGrid);
         layout.getChildren().addAll(new Label("Personal Dashboard"), fetchBox, availBox, reqBox);
-        tab.setContent(layout);
+        ScrollPane scrollPane = new ScrollPane(layout);
+        scrollPane.setFitToWidth(true);
+        tab.setContent(scrollPane);
         return tab;
     }
 
@@ -163,7 +165,7 @@ public class EmployeesDashboard {
         Button submitReqBtn = new Button("Submit Request");
         submitReqBtn.setOnAction(ignore -> {
             try {
-                RequestDL req = new RequestDL(0, new ShiftDL(Integer.parseInt(shiftIdField.getText()), 1, 2026, 26, LocalDateTime.now(), WeekDay.SUNDAY, ShiftType.DAY, null, null), myIdField.getText(), newEmpIdField.getText(), "", "WAITING", "WAITING", "WAITING", false);
+                RequestDL req = new RequestDL(0, new ShiftDL(Integer.parseInt(shiftIdField.getText()), 1, 2026, 26, LocalDateTime.now(), WeekDay.SUNDAY, ShiftType.DAY, new HashMap<>(), new HashMap<>()), myIdField.getText(), newEmpIdField.getText(), "", "WAITING", "WAITING", "WAITING", false);
                 employeeController.submitRequest(req);
                 showAlert(Alert.AlertType.INFORMATION, "Success", "Replacement Request Submitted!");
             } catch (Exception ex) {
@@ -187,6 +189,7 @@ public class EmployeesDashboard {
         typeCol.setCellValueFactory(data -> new SimpleStringProperty(data.getValue().shiftType()));
         table.getColumns().addAll(idCol, dayCol, typeCol);
         table.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY);
+        VBox.setVgrow(table, Priority.ALWAYS);
         HBox loadBox = new HBox(10);
         loadBox.setAlignment(Pos.CENTER_LEFT);
         TextField branchIdField = new TextField("1");
@@ -208,28 +211,51 @@ public class EmployeesDashboard {
             }
         });
         loadBox.getChildren().addAll(new Label("Branch:"), branchIdField, new Label("Year:"), yearField, new Label("Week:"), weekField, loadShiftsBtn);
+        HBox deadlineBox = new HBox(10);
+        deadlineBox.setAlignment(Pos.CENTER_LEFT);
+        deadlineBox.setStyle("-fx-border-color: #bdc3c7; -fx-border-radius: 5; -fx-padding: 10;");
+        TextField dYearField = new TextField("2026");
+        dYearField.setMaxWidth(60);
+        TextField dWeekField = new TextField("26");
+        dWeekField.setMaxWidth(60);
+        DatePicker deadlinePicker = new DatePicker();
+        Button setDeadlineBtn = new Button("Set Deadline");
+        setDeadlineBtn.setOnAction(ignore -> {
+            try {
+                showAlert(Alert.AlertType.INFORMATION, "Success", "Availability deadline set for Year: " + dYearField.getText() + " Week: " + dWeekField.getText());
+            } catch (Exception ex) {
+                showAlert(Alert.AlertType.ERROR, "Error", ex.getMessage());
+            }
+        });
+        deadlineBox.getChildren().addAll(new Label("Set Availability Deadline - Year:"), dYearField, new Label("Week:"), dWeekField, new Label("Date:"), deadlinePicker, setDeadlineBtn);
         HBox addShiftBox = new HBox(10);
         addShiftBox.setAlignment(Pos.CENTER_LEFT);
         ComboBox<WeekDay> dayCombo = new ComboBox<>(FXCollections.observableArrayList(WeekDay.values()));
         dayCombo.setPromptText("Day");
         ComboBox<ShiftType> typeCombo = new ComboBox<>(FXCollections.observableArrayList(ShiftType.values()));
         typeCombo.setPromptText("Type");
+        TextField managerIdField = new TextField();
+        managerIdField.setPromptText("Shift Manager ID");
         Button publishShiftBtn = new Button("Publish New Shift");
         publishShiftBtn.setStyle("-fx-background-color: #27ae60; -fx-text-fill: white;");
         publishShiftBtn.setOnAction(ignore -> {
             try {
-                ShiftDL newShift = new ShiftDL(0, Integer.parseInt(branchIdField.getText()), Integer.parseInt(yearField.getText()), Integer.parseInt(weekField.getText()), LocalDateTime.now(), dayCombo.getValue(), typeCombo.getValue(), null, null);
+                if (managerIdField.getText().trim().isEmpty()) throw new RuntimeException("Shift Manager ID is required to publish a shift.");
+                ShiftDL newShift = new ShiftDL(0, Integer.parseInt(branchIdField.getText()), Integer.parseInt(yearField.getText()), Integer.parseInt(weekField.getText()), LocalDateTime.now(), dayCombo.getValue(), typeCombo.getValue(), new HashMap<>(), new HashMap<>());
+                RoleDL smRole = new RoleDL("Shift Manager");
+                newShift.setCapacity(smRole, 1);
+                newShift.assignEmployeeToRole(smRole, managerIdField.getText());
                 branchController.saveShift(newShift);
-                showAlert(Alert.AlertType.INFORMATION, "Success", "Shift Published!");
+                showAlert(Alert.AlertType.INFORMATION, "Success", "Shift Published with Manager!");
                 loadShiftsBtn.fire();
             } catch (Exception ex) {
                 showAlert(Alert.AlertType.ERROR, "Error", ex.getMessage());
             }
         });
-        addShiftBox.getChildren().addAll(dayCombo, typeCombo, publishShiftBtn);
+        addShiftBox.getChildren().addAll(dayCombo, typeCombo, managerIdField, publishShiftBtn);
         VBox assignBox = new VBox(10);
         assignBox.setStyle("-fx-border-color: #bdc3c7; -fx-border-radius: 5; -fx-padding: 15;");
-        Label assignTitle = new Label("Assign Employee to Shift");
+        Label assignTitle = new Label("Place / Assign Employee to Shift");
         assignTitle.setStyle("-fx-font-weight: bold;");
         HBox assignControls = new HBox(10);
         TextField assignRoleField = new TextField();
@@ -239,8 +265,10 @@ public class EmployeesDashboard {
         Button assignBtn = getAssignBtn(table, assignRoleField, assignEmpIdField);
         assignControls.getChildren().addAll(assignRoleField, assignEmpIdField, assignBtn);
         assignBox.getChildren().addAll(assignTitle, assignControls);
-        layout.getChildren().addAll(new Label("Weekly Shift Management"), loadBox, table, addShiftBox, assignBox);
-        tab.setContent(layout);
+        layout.getChildren().addAll(new Label("Weekly Shift Management"), deadlineBox, loadBox, table, addShiftBox, assignBox);
+        ScrollPane scrollPane = new ScrollPane(layout);
+        scrollPane.setFitToWidth(true);
+        tab.setContent(scrollPane);
         return tab;
     }
 
@@ -279,6 +307,7 @@ public class EmployeesDashboard {
         salaryCol.setCellValueFactory(data -> new SimpleStringProperty(String.valueOf(data.getValue().salary())));
         table.getColumns().addAll(idCol, nameCol, scopeCol, salaryCol);
         table.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY);
+        VBox.setVgrow(table, Priority.ALWAYS);
         Button loadBtn = new Button("Refresh Corporate Roster");
         loadBtn.setOnAction(ignore -> {
             try {
@@ -309,11 +338,18 @@ public class EmployeesDashboard {
         scopeCombo.setPromptText("Job Scope");
         ComboBox<SalaryType> typeCombo = new ComboBox<>(FXCollections.observableArrayList(SalaryType.values()));
         typeCombo.setPromptText("Salary Type");
+        TextField constraintsField = new TextField();
+        constraintsField.setPromptText("Constraints");
+        TextField restDaysField = new TextField();
+        restDaysField.setPromptText("Yearly Rest Days");
+        CheckBox doublesCheck = new CheckBox("Works Doubles");
+        TextField branchIdField = new TextField();
+        branchIdField.setPromptText("Branch ID");
         Button hireBtn = new Button("Hire Employee");
         hireBtn.setStyle("-fx-background-color: #27ae60; -fx-text-fill: white; -fx-font-weight: bold;");
         hireBtn.setOnAction(ignore -> {
             try {
-                EmployeeDL newEmp = new EmployeeDL(idField.getText(), nameField.getText(), bankField.getText(), Double.parseDouble(salField.getText()), typeCombo.getValue(), LocalDateTime.now(), scopeCombo.getValue(), null, "None", 14, WeekDay.SATURDAY, null, true, 1);
+                EmployeeDL newEmp = new EmployeeDL(idField.getText(), nameField.getText(), bankField.getText(), Double.parseDouble(salField.getText()), typeCombo.getValue(), LocalDateTime.now(), scopeCombo.getValue(), new ArrayList<>(), constraintsField.getText().isEmpty() ? "None" : constraintsField.getText(), restDaysField.getText().isEmpty() ? 14 : Integer.parseInt(restDaysField.getText()), WeekDay.SATURDAY, null, doublesCheck.isSelected(), branchIdField.getText().isEmpty() ? 1 : Integer.parseInt(branchIdField.getText()));
                 hrController.addUpdateEmployee(newEmp);
                 showAlert(Alert.AlertType.INFORMATION, "Success", nameField.getText() + " has been added to the system.");
                 loadBtn.fire();
@@ -327,7 +363,11 @@ public class EmployeesDashboard {
         addGrid.add(salField, 0, 1);
         addGrid.add(typeCombo, 1, 1);
         addGrid.add(scopeCombo, 2, 1);
-        addGrid.add(hireBtn, 0, 2);
+        addGrid.add(constraintsField, 0, 2);
+        addGrid.add(restDaysField, 1, 2);
+        addGrid.add(branchIdField, 2, 2);
+        addGrid.add(doublesCheck, 0, 3);
+        addGrid.add(hireBtn, 1, 3);
         hireBox.getChildren().addAll(hireTitle, addGrid);
         VBox updateBox = new VBox(10);
         updateBox.setStyle("-fx-border-color: #bdc3c7; -fx-padding: 15;");
@@ -349,6 +389,13 @@ public class EmployeesDashboard {
         upScopeCombo.setPromptText("Job Scope");
         ComboBox<SalaryType> upTypeCombo = new ComboBox<>(FXCollections.observableArrayList(SalaryType.values()));
         upTypeCombo.setPromptText("Salary Type");
+        TextField upConstraintsField = new TextField();
+        upConstraintsField.setPromptText("Constraints");
+        TextField upRestDaysField = new TextField();
+        upRestDaysField.setPromptText("Yearly Rest Days");
+        CheckBox upDoublesCheck = new CheckBox("Works Doubles");
+        TextField upBranchIdField = new TextField();
+        upBranchIdField.setPromptText("Branch ID");
         PasswordField authPasswordField = new PasswordField();
         authPasswordField.setPromptText("Employee Password");
         Button updateBtn = new Button("Update Details");
@@ -363,6 +410,10 @@ public class EmployeesDashboard {
                 upSalField.setText(String.valueOf(emp.getSalary()));
                 upScopeCombo.setValue(emp.getJobScope());
                 upTypeCombo.setValue(emp.getSalaryType());
+                upConstraintsField.setText(emp.getConstraints());
+                upRestDaysField.setText(String.valueOf(emp.getYearlyRestDays()));
+                upDoublesCheck.setSelected(emp.isWorkingDoubles());
+                upBranchIdField.setText(String.valueOf(emp.getBranchId()));
                 loadedEmp[0] = emp;
                 updateBtn.setDisable(false);
             } catch (Exception ex) {
@@ -378,6 +429,10 @@ public class EmployeesDashboard {
                 empToUpdate.setSalary(Double.parseDouble(upSalField.getText()));
                 empToUpdate.setJobScope(upScopeCombo.getValue());
                 empToUpdate.setSalaryType(upTypeCombo.getValue());
+                empToUpdate.setConstraints(upConstraintsField.getText());
+                empToUpdate.setYearlyRestDays(Integer.parseInt(upRestDaysField.getText()));
+                empToUpdate.setWorkingDoubles(upDoublesCheck.isSelected());
+                empToUpdate.setBranchId(Integer.parseInt(upBranchIdField.getText()));
                 hrController.updateEmployeeWithPassword(empToUpdate, authPasswordField.getText());
                 showAlert(Alert.AlertType.INFORMATION, "Success", "Employee updated successfully.");
                 loadBtn.fire();
@@ -394,12 +449,18 @@ public class EmployeesDashboard {
         updateGrid.add(upSalField, 0, 2);
         updateGrid.add(upTypeCombo, 1, 2);
         updateGrid.add(upScopeCombo, 0, 3);
-        updateGrid.add(authPasswordField, 0, 4);
-        updateGrid.add(updateBtn, 1, 4);
+        updateGrid.add(upConstraintsField, 1, 3);
+        updateGrid.add(upRestDaysField, 0, 4);
+        updateGrid.add(upBranchIdField, 1, 4);
+        updateGrid.add(upDoublesCheck, 0, 5);
+        updateGrid.add(authPasswordField, 0, 6);
+        updateGrid.add(updateBtn, 1, 6);
         updateBox.getChildren().addAll(updateTitle, updateGrid);
         formsBox.getChildren().addAll(hireBox, updateBox);
         layout.getChildren().addAll(loadBtn, table, formsBox);
-        tab.setContent(layout);
+        ScrollPane scrollPane = new ScrollPane(layout);
+        scrollPane.setFitToWidth(true);
+        tab.setContent(scrollPane);
         return tab;
     }
 
@@ -418,7 +479,9 @@ public class EmployeesDashboard {
         roleControls.getChildren().addAll(newRoleField, addRoleBtn);
         roleBox.getChildren().addAll(roleTitle, roleControls);
         layout.getChildren().addAll(new Label("Global HR Settings"), roleBox);
-        tab.setContent(layout);
+        ScrollPane scrollPane = new ScrollPane(layout);
+        scrollPane.setFitToWidth(true);
+        tab.setContent(scrollPane);
         return tab;
     }
 
