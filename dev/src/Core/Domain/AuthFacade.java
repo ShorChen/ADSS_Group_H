@@ -1,34 +1,37 @@
 package Core.Domain;
 
 import Core.DataAccess.AuthDAO;
-import Suppliers.Domain.Security.SessionManager;
 
-import java.util.Map;
 import java.util.NoSuchElementException;
 
 @SuppressWarnings("ClassCanBeRecord")
 public class AuthFacade {
-    private final Map<String, Managers> validCodes;
-    // private final AuthDAO authDAO;
-    // if we will implement a window for an admin
+    private final AuthDAO authDAO;
 
     public AuthFacade(AuthDAO authDAO) {
-        // this.authDAO = authDAO;
-        validCodes = authDAO.getAllCodes();
+        this.authDAO = authDAO;
     }
 
-    public Managers login(String code) {
-        Managers managers = validCodes.get(code);
-        if (managers == null) throw new NoSuchElementException("Invalid login code.");
-        SessionManager.getInstance().login(managers);
-        return managers;
+    public Role login(String id, String password) {
+        Role role = authDAO.login(id, password);
+        if (role == null) throw new NoSuchElementException("Invalid Employee ID or Password.");
+        SessionManager.getInstance().login(role);
+        return role;
+    }
+
+    public Role autoLoginSystemTask(Role role) {
+        String employeeId = authDAO.getFirstUserIdByRole(role);
+        if (employeeId == null)
+            throw new IllegalArgumentException("CRITICAL: No employee found in database with role " + role);
+        SessionManager.getInstance().login(role);
+        return role;
     }
 
     public void logout() {
         SessionManager.getInstance().logout();
     }
 
-    public Managers getCurrentRole() {
+    public Role getCurrentRole() {
         return SessionManager.getInstance().getCurrentRole();
     }
 }

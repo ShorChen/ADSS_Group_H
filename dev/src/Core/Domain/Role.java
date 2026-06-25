@@ -1,0 +1,13 @@
+package Core.Domain;
+
+public enum Role {
+    ORDER_MANAGER,
+    INVENTORY_MANAGER,
+    SUPPLIER_MANAGER,
+    TRANSPORTATION_MANAGER,
+    HR_MANAGER,
+    DRIVER,
+    STORE_MANAGER,
+    BRANCH_MANAGER,
+    EMPLOYEE
+}

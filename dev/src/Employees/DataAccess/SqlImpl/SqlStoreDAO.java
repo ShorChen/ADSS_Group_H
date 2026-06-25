@@ -2,6 +2,7 @@ package Employees.DataAccess.SqlImpl;
 
 import Core.DataAccess.DatabaseManager;
 import Employees.DataAccess.StoreDAO;
+import Employees.Domain.Entities.StoreDetailsDL;
 
 import java.sql.*;
 import java.util.ArrayList;
@@ -10,67 +11,58 @@ import java.util.List;
 public class SqlStoreDAO implements StoreDAO {
 
     @Override
-    public List<String> getClosedDays() {
-        List<String> list = new ArrayList<>();
-        String sql = "SELECT day FROM StoreClosedDays";
-        try (Connection conn = DatabaseManager.getConnection(); Statement stmt = conn.createStatement(); ResultSet rs = stmt.executeQuery(sql)) {
-            while (rs.next()) {
-                list.add(rs.getString("day"));
+    public StoreDetailsDL getStoreDetails() {
+        boolean firstStartUp = true;
+        List<String> closedDays = new ArrayList<>();
+
+        try (Connection conn = DatabaseManager.getConnection()) {
+            try (Statement stmt = conn.createStatement();
+                 ResultSet rs = stmt.executeQuery("SELECT firstStartUp FROM StoreSettings WHERE id=1")) {
+                if (rs.next()) firstStartUp = rs.getInt("firstStartUp") == 1;
+            }
+
+            try (Statement stmt = conn.createStatement();
+                 ResultSet rs = stmt.executeQuery("SELECT day FROM StoreClosedDays")) {
+                while (rs.next()) closedDays.add(rs.getString("day"));
             }
         } catch (SQLException e) {
-            throw new RuntimeException("Error loading closed days", e);
+            throw new RuntimeException("Error fetching store details", e);
         }
-        return list;
+
+        return new StoreDetailsDL(firstStartUp, closedDays);
     }
 
     @Override
-    public void setClosedDays(List<String> closedDays) {
+    public void updateStoreDetails(StoreDetailsDL details) {
         try (Connection conn = DatabaseManager.getConnection()) {
             conn.setAutoCommit(false);
-
-            try (Statement stmt = conn.createStatement()) {
-                stmt.executeUpdate("DELETE FROM StoreClosedDays");
-            }
-
-            if (closedDays != null && !closedDays.isEmpty()) {
-                String sql = "INSERT INTO StoreClosedDays(day) VALUES(?)";
-                try (PreparedStatement pstmt = conn.prepareStatement(sql)) {
-                    for (String day : closedDays) {
-                        pstmt.setString(1, day);
-                        pstmt.addBatch();
-                    }
-                    pstmt.executeBatch();
+            try {
+                try (PreparedStatement pstmt = conn.prepareStatement("INSERT OR REPLACE INTO StoreSettings(id, firstStartUp) VALUES(1, ?)")) {
+                    pstmt.setInt(1, details.isFirstStartUp() ? 1 : 0);
+                    pstmt.executeUpdate();
                 }
+
+                try (Statement stmt = conn.createStatement()) {
+                    stmt.executeUpdate("DELETE FROM StoreClosedDays");
+                }
+
+                if (details.getClosedDays() != null && !details.getClosedDays().isEmpty()) {
+                    String sql = "INSERT INTO StoreClosedDays(day) VALUES(?)";
+                    try (PreparedStatement pstmt = conn.prepareStatement(sql)) {
+                        for (String day : details.getClosedDays()) {
+                            pstmt.setString(1, day);
+                            pstmt.addBatch();
+                        }
+                        pstmt.executeBatch();
+                    }
+                }
+                conn.commit();
+            } catch (SQLException e) {
+                conn.rollback();
+                throw e;
             }
-
-            conn.commit();
         } catch (SQLException e) {
-            throw new RuntimeException("Error saving closed days", e);
-        }
-    }
-
-    @Override
-    public boolean isFirstStartUp() {
-        String sql = "SELECT firstStartUp FROM StoreSettings WHERE id=1";
-        try (Connection conn = DatabaseManager.getConnection(); PreparedStatement pstmt = conn.prepareStatement(sql)) {
-            ResultSet rs = pstmt.executeQuery();
-            if (rs.next()) {
-                return rs.getInt("firstStartUp") == 1;
-            }
-        } catch (SQLException e) {
-            throw new RuntimeException("Error loading store settings", e);
-        }
-        return true;
-    }
-
-    @Override
-    public void setFirstStartUp(boolean firstStartUp) {
-        String sql = "INSERT OR REPLACE INTO StoreSettings(id, firstStartUp) VALUES(1, ?)";
-        try (Connection conn = DatabaseManager.getConnection(); PreparedStatement pstmt = conn.prepareStatement(sql)) {
-            pstmt.setInt(1, firstStartUp ? 1 : 0);
-            pstmt.executeUpdate();
-        } catch (SQLException e) {
-            throw new RuntimeException("Error saving first startup status", e);
+            throw new RuntimeException("Error saving store details", e);
         }
     }
 }

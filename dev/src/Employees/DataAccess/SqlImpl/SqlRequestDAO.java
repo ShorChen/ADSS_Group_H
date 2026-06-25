@@ -1,11 +1,9 @@
 package Employees.DataAccess.SqlImpl;
 
 import Core.DataAccess.DatabaseManager;
-import Employees.DataAccess.Entities.Keys.BranchWeekKey;
-import Employees.DataAccess.Entities.RequestEntity;
-import Employees.DataAccess.Entities.ShiftEntity;
 import Employees.DataAccess.RequestDAO;
-import Employees.DataAccess.ShiftDAO;
+import Employees.Domain.Entities.RequestDL;
+import Employees.Domain.Entities.ShiftDL;
 
 import java.sql.*;
 import java.util.ArrayList;
@@ -13,23 +11,25 @@ import java.util.List;
 
 public class SqlRequestDAO implements RequestDAO {
 
-    private final ShiftDAO shiftDAO = new SqlShiftDAO();
+    private final SqlShiftDAO shiftDAO = new SqlShiftDAO();
 
     @Override
-    public void addUpdateRequest(RequestEntity request) {
+    public void addUpdateRequest(RequestDL request) {
         String sql = "INSERT OR REPLACE INTO Requests(requestId, shiftId, prevEmployee, newEmployee, manager, prevApproved, newApproved, managerApproved, denied) VALUES(?,?,?,?,?,?,?,?,?)";
-        try (Connection conn = DatabaseManager.getConnection(); PreparedStatement pstmt = conn.prepareStatement(sql)) {
-            // אם זו בקשה חדשה (נניח ש-0 זה ללא ID), נוכל להשתמש ב-INSERT רגיל, אבל REPLACE יטפל בזה.
-            if (request.requestId() > 0) pstmt.setInt(1, request.requestId());
+        try (Connection conn = DatabaseManager.getConnection();
+             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+
+            if (request.getRequestId() > 0) pstmt.setInt(1, request.getRequestId());
             else pstmt.setNull(1, Types.INTEGER);
-            pstmt.setInt(2, request.shift().shiftId());
-            pstmt.setString(3, request.prevEmployee());
-            pstmt.setString(4, request.newEmployee());
-            pstmt.setString(5, request.manager());
-            pstmt.setString(6, request.prevApproved());
-            pstmt.setString(7, request.newApproved());
-            pstmt.setString(8, request.managerApproved());
-            pstmt.setInt(9, request.denied() ? 1 : 0);
+
+            pstmt.setInt(2, request.getShift().getShiftId());
+            pstmt.setString(3, request.getPrevEmployeeId());
+            pstmt.setString(4, request.getNewEmployeeId());
+            pstmt.setString(5, request.getManagerId());
+            pstmt.setString(6, request.getPrevApproved());
+            pstmt.setString(7, request.getNewApproved());
+            pstmt.setString(8, request.getManagerApproved());
+            pstmt.setInt(9, request.isDenied() ? 1 : 0);
             pstmt.executeUpdate();
         } catch (SQLException e) {
             throw new RuntimeException("Error saving request", e);
@@ -37,40 +37,12 @@ public class SqlRequestDAO implements RequestDAO {
     }
 
     @Override
-    public boolean exists(RequestEntity request) {
-        String sql = "SELECT 1 FROM Requests WHERE requestId=? OR (shiftId=? AND prevEmployee=? AND newEmployee=?)";
-        try (Connection conn = DatabaseManager.getConnection(); PreparedStatement pstmt = conn.prepareStatement(sql)) {
-            pstmt.setInt(1, request.requestId());
-            pstmt.setInt(2, request.shift().shiftId());
-            pstmt.setString(3, request.prevEmployee());
-            pstmt.setString(4, request.newEmployee());
-            return pstmt.executeQuery().next();
-        } catch (SQLException e) {
-            throw new RuntimeException("Error checking request", e);
-        }
-    }
-
-    @Override
-    public List<RequestEntity> getPendingRequests(String id) {
-        List<RequestEntity> list = new ArrayList<>();
-        String sql = "SELECT * FROM Requests WHERE prevEmployee=? OR newEmployee=? OR manager=?";
-        try (Connection conn = DatabaseManager.getConnection(); PreparedStatement pstmt = conn.prepareStatement(sql)) {
-            pstmt.setString(1, id);
-            pstmt.setString(2, id);
-            pstmt.setString(3, id);
-            ResultSet rs = pstmt.executeQuery();
-            while (rs.next()) list.add(mapResultSetToEntity(rs));
-        } catch (SQLException e) {
-            throw new RuntimeException("Error loading pending requests", e);
-        }
-        return list;
-    }
-
-    @Override
-    public List<RequestEntity> getAll() {
-        List<RequestEntity> list = new ArrayList<>();
+    public List<RequestDL> getAll() {
+        List<RequestDL> list = new ArrayList<>();
         String sql = "SELECT * FROM Requests";
-        try (Connection conn = DatabaseManager.getConnection(); Statement stmt = conn.createStatement(); ResultSet rs = stmt.executeQuery(sql)) {
+        try (Connection conn = DatabaseManager.getConnection();
+             Statement stmt = conn.createStatement();
+             ResultSet rs = stmt.executeQuery(sql)) {
             while (rs.next()) list.add(mapResultSetToEntity(rs));
         } catch (SQLException e) {
             throw new RuntimeException("Error loading all requests", e);
@@ -78,25 +50,19 @@ public class SqlRequestDAO implements RequestDAO {
         return list;
     }
 
-    private RequestEntity mapResultSetToEntity(ResultSet rs) throws SQLException {
+    private RequestDL mapResultSetToEntity(ResultSet rs) throws SQLException {
         int shiftId = rs.getInt("shiftId");
-        ShiftEntity shift = shiftDAO.getShiftById(shiftId);
+        ShiftDL shift = shiftDAO.getShiftById(shiftId);
 
-        return new RequestEntity(
+        return new RequestDL(
                 rs.getInt("requestId"),
                 shift,
-                new BranchWeekKey(
-                        rs.getInt("branchId"),
-                        rs.getInt("year"),
-                        rs.getInt("week")
-                ),
-        rs.getString("prevEmployee"),
+                rs.getString("prevEmployee"),
                 rs.getString("newEmployee"),
                 rs.getString("manager"),
                 rs.getString("prevApproved"),
                 rs.getString("newApproved"),
                 rs.getString("managerApproved"),
-                rs.getString("role"),
                 rs.getInt("denied") == 1
         );
     }

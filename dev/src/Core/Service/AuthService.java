@@ -1,7 +1,7 @@
 package Core.Service;
 
 import Core.Domain.AuthFacade;
-import Core.Domain.Managers;
+import Core.Domain.Role;
 
 @SuppressWarnings("ClassCanBeRecord")
 public class AuthService {
@@ -11,10 +11,10 @@ public class AuthService {
         this.authFacade = authFacade;
     }
 
-    public Response<Managers> login(String code) {
+    public Response<Role> login(String id, String password) {
         try {
-            Managers managers = authFacade.login(code);
-            return new Response<>(managers);
+            Role role = authFacade.login(id, password);
+            return new Response<>(role);
         } catch (Exception ex) {
             return new Response<>(ex.getMessage());
         }
@@ -30,11 +30,20 @@ public class AuthService {
     }
 
     @SuppressWarnings("unused")
-    public Response<Managers> getCurrentRole() {
+    public Response<Role> getCurrentRole() {
         try {
             return new Response<>(authFacade.getCurrentRole());
         } catch (Exception ex) {
             return new Response<>(ex.getMessage());
+        }
+    }
+
+    public Response<Role> autoLoginSystemTask(Role role) {
+        try {
+            Role authorizedRole = authFacade.autoLoginSystemTask(role);
+            return new Response<>(authorizedRole);
+        } catch (Exception e) {
+            return new Response<>("Auto-Login Failed: " + e.getMessage());
         }
     }
 }

@@ -1,13 +1,7 @@
 package Employees.DataAccess;
-
-import java.util.List;
+import Employees.Domain.Entities.StoreDetailsDL;
 
 public interface StoreDAO {
-    List<String> getClosedDays();
-
-    void setClosedDays(List<String> closedDays);
-
-    boolean isFirstStartUp();
-
-    void setFirstStartUp(boolean firstStartUp);
+    StoreDetailsDL getStoreDetails();
+    void updateStoreDetails(StoreDetailsDL details);
 }

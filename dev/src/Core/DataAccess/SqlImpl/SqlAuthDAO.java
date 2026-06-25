@@ -2,7 +2,7 @@ package Core.DataAccess.SqlImpl;
 
 import Core.DataAccess.AuthDAO;
 import Core.DataAccess.DatabaseManager;
-import Core.Domain.Managers;
+import Core.Domain.Role;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -15,52 +15,66 @@ import java.util.Map;
 public class SqlAuthDAO implements AuthDAO {
 
     @Override
-    public void addCode(String code, Managers managers) {
-        String sql = "INSERT INTO AuthCodes(code, role) VALUES(?,?)";
+    public void addAuthAccount(String employeeId, String password, Role role) {
+        String sql = "INSERT INTO EmployeeAuth(employeeId, password, systemRole) VALUES(?,?,?)";
         try (Connection conn = DatabaseManager.getConnection();
              PreparedStatement pstmt = conn.prepareStatement(sql)) {
-            pstmt.setString(1, code);
-            pstmt.setString(2, managers.name());
+            pstmt.setString(1, employeeId);
+            pstmt.setString(2, password);
+            pstmt.setString(3, role.name());
             pstmt.executeUpdate();
         } catch (SQLException e) {
-            throw new RuntimeException("Error saving auth code", e);
+            throw new RuntimeException("Error saving auth account", e);
         }
     }
 
     @Override
-    public void removeCode(String code) {
-        String sql = "DELETE FROM AuthCodes WHERE code = ?";
+    public void removeAuthAccount(String employeeId) {
+        String sql = "DELETE FROM EmployeeAuth WHERE employeeId = ?";
         try (Connection conn = DatabaseManager.getConnection();
              PreparedStatement pstmt = conn.prepareStatement(sql)) {
-            pstmt.setString(1, code);
+            pstmt.setString(1, employeeId);
             pstmt.executeUpdate();
         } catch (SQLException e) {
-            throw new RuntimeException("Error deleting auth code", e);
+            throw new RuntimeException("Error deleting auth account", e);
         }
     }
 
     @Override
-    public void updateCode(String code, Managers managers) {
-        String sql = "UPDATE AuthCodes SET role = ? WHERE code = ?";
+    public void updateAuthRole(String employeeId, Role role) {
+        String sql = "UPDATE EmployeeAuth SET systemRole = ? WHERE employeeId = ?";
         try (Connection conn = DatabaseManager.getConnection();
              PreparedStatement pstmt = conn.prepareStatement(sql)) {
-            pstmt.setString(1, managers.name());
-            pstmt.setString(2, code);
+            pstmt.setString(1, role.name());
+            pstmt.setString(2, employeeId);
             pstmt.executeUpdate();
         } catch (SQLException e) {
-            throw new RuntimeException("Error updating auth code", e);
+            throw new RuntimeException("Error updating auth role", e);
         }
     }
 
     @Override
-    public Managers getRole(String code) {
-        String sql = "SELECT role FROM AuthCodes WHERE code = ?";
+    public void updatePassword(String employeeId, String newPassword) {
+        String sql = "UPDATE EmployeeAuth SET password = ? WHERE employeeId = ?";
         try (Connection conn = DatabaseManager.getConnection();
              PreparedStatement pstmt = conn.prepareStatement(sql)) {
-            pstmt.setString(1, code);
+            pstmt.setString(1, newPassword);
+            pstmt.setString(2, employeeId);
+            pstmt.executeUpdate();
+        } catch (SQLException e) {
+            throw new RuntimeException("Error updating password", e);
+        }
+    }
+
+    @Override
+    public Role getRole(String employeeId) {
+        String sql = "SELECT systemRole FROM EmployeeAuth WHERE employeeId = ?";
+        try (Connection conn = DatabaseManager.getConnection();
+             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+            pstmt.setString(1, employeeId);
             ResultSet rs = pstmt.executeQuery();
             if (rs.next()) {
-                return Managers.valueOf(rs.getString("role"));
+                return Role.valueOf(rs.getString("systemRole"));
             }
         } catch (SQLException e) {
             throw new RuntimeException("Error fetching role", e);
@@ -69,18 +83,54 @@ public class SqlAuthDAO implements AuthDAO {
     }
 
     @Override
-    public Map<String, Managers> getAllCodes() {
-        Map<String, Managers> codes = new HashMap<>();
-        String sql = "SELECT * FROM AuthCodes";
+    public Map<String, Role> getAllAuthAccounts() {
+        Map<String, Role> accounts = new HashMap<>();
+        String sql = "SELECT employeeId, systemRole FROM EmployeeAuth";
         try (Connection conn = DatabaseManager.getConnection();
              Statement stmt = conn.createStatement();
              ResultSet rs = stmt.executeQuery(sql)) {
             while (rs.next()) {
-                codes.put(rs.getString("code"), Managers.valueOf(rs.getString("role")));
+                accounts.put(rs.getString("employeeId"), Role.valueOf(rs.getString("systemRole")));
             }
         } catch (SQLException e) {
-            throw new RuntimeException("Error fetching all codes", e);
+            throw new RuntimeException("Error fetching all auth accounts", e);
         }
-        return codes;
+        return accounts;
+    }
+
+    @Override
+    public Role login(String id, String password) {
+        String query = "SELECT systemRole, password FROM EmployeeAuth WHERE employeeId = ?";
+        try (Connection conn = DatabaseManager.getConnection();
+             PreparedStatement pstmt = conn.prepareStatement(query)) {
+            pstmt.setString(1, id);
+            ResultSet rs = pstmt.executeQuery();
+            if (rs.next()) {
+                String dbPassword = rs.getString("password");
+                String systemRole = rs.getString("systemRole");
+                if (password.equals(dbPassword)) {
+                    return Role.valueOf(systemRole.toUpperCase());
+                }
+            }
+        } catch (Exception e) {
+            throw new RuntimeException("Database error during authentication: " + e.getMessage());
+        }
+        return null;
+    }
+
+    @Override
+    public String getFirstUserIdByRole(Role role) {
+        String sql = "SELECT employeeId FROM EmployeeAuth WHERE systemRole = ? LIMIT 1";
+        try (Connection conn = DatabaseManager.getConnection();
+             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+            pstmt.setString(1, role.name());
+            ResultSet rs = pstmt.executeQuery();
+            if (rs.next()) {
+                return rs.getString("employeeId");
+            }
+        } catch (SQLException e) {
+            throw new RuntimeException("Error fetching user by role", e);
+        }
+        return null;
     }
 }

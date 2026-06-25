@@ -1,7 +1,7 @@
 package Suppliers.Presentation.Controller;
 
-import Core.Domain.Managers;
-import Suppliers.Domain.Security.SessionManager;
+import Core.Domain.Role;
+import Core.Domain.SessionManager;
 import Suppliers.Presentation.DTO.*;
 import Suppliers.Service.Core.SupplierService;
 import Suppliers.Service.DTO.*;
@@ -22,7 +22,7 @@ public class SupplierController {
     }
 
     private void ensureSupplierManager() {
-        SessionManager.getInstance().requireRole(Managers.SUPPLIER_MANAGER);
+        SessionManager.getInstance().requireRole(Role.SUPPLIER_MANAGER);
     }
 
     public SupplierPL addSupplier(String name, String businessNumber, String address, String iban, String paymentTerms) throws Exception {

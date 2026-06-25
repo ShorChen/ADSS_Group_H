@@ -1,12 +1,12 @@
 package Core.App;
 
-import Core.DataAccess.DatabaseManager;
+import Core.Domain.Role;
 import Core.Navigation.AppNavigator;
 import Employees.Presentation.GUI.EmployeesDashboard;
 import Inventory.Presentation.GUI.InventoryDashboard;
 import Suppliers.Presentation.GUI.OrderDashboard;
 import Suppliers.Presentation.GUI.SupplierDashboard;
-import Transportation.Presentation.GUI.TransportDashboard;
+import Transportation.Presentation.GUI.TransportationDashboard;
 
 import Core.Controller.ControllerFactory;
 import javafx.application.Application;
@@ -38,31 +38,31 @@ public class MainApp extends Application implements AppNavigator {
     }
 
     @Override
-    public void showSupplierManagerDashboard() {
+    public void showSuppliersDashboard() {
         SupplierDashboard dashboard = new SupplierDashboard(this);
         switchScene(dashboard.getScene());
     }
 
     @Override
-    public void showOrderManagerDashboard() {
+    public void showOrderDashboard() {
         OrderDashboard dashboard = new OrderDashboard(this);
         switchScene(dashboard.getScene());
     }
 
     @Override
-    public void showInventoryManagerDashboard() {
+    public void showInventoryDashboard() {
         InventoryDashboard id = new InventoryDashboard(this);
         switchScene(id.getScene());
     }
 
     @Override
-    public void showTransportationManagerDashboard() {
-        TransportDashboard td = new TransportDashboard(this);
+    public void showTransportationDashboard() {
+        TransportationDashboard td = new TransportationDashboard(this);
         switchScene(td.getScene());
     }
 
     @Override
-    public void showEmployeesManagerDashboard() {
+    public void showEmployeesDashboard() {
         EmployeesDashboard wd = new EmployeesDashboard(this);
         switchScene(wd.getScene());
     }
@@ -81,7 +81,7 @@ public class MainApp extends Application implements AppNavigator {
         if (args.length > 0 && args[0].equals("--auto")) {
             System.out.println("Starting Headless Automatic Order Execution...");
             try {
-                ControllerFactory.getInstance().getAuthController().login("ORD123");
+                ControllerFactory.getInstance().getAuthController().autoLoginSystemTask(Role.ORDER_MANAGER);
                 int count = ControllerFactory.getInstance().getOrderController().executeAutomaticOrders();
                 System.out.println("SUCCESS: Generated " + count + " automatic orders for today.");
             } catch (Exception e) {

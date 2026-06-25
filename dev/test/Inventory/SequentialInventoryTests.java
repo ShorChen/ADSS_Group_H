@@ -1,8 +1,8 @@
 package Inventory;
 
-import Core.Domain.Managers;
+import Core.Domain.Role;
 import Inventory.Domain.Entities.*;
-import Suppliers.Domain.Security.SessionManager;
+import Core.Domain.SessionManager;
 import org.junit.jupiter.api.*;
 import java.time.LocalDate;
 import static org.junit.jupiter.api.Assertions.*;
@@ -15,8 +15,8 @@ public class SequentialInventoryTests {
     @Test
     @Order(1)
     void step01_loginAsInventoryManager() {
-        SessionManager.getInstance().login(Managers.INVENTORY_MANAGER);
-        assertEquals(Managers.INVENTORY_MANAGER, SessionManager.getInstance().getCurrentRole());
+        SessionManager.getInstance().login(Role.INVENTORY_MANAGER);
+        assertEquals(Role.INVENTORY_MANAGER, SessionManager.getInstance().getCurrentRole());
     }
 
     @Test

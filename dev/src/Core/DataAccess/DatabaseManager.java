@@ -24,7 +24,6 @@ public class DatabaseManager {
         String manufacturersTable = "CREATE TABLE IF NOT EXISTS Manufacturers (businessNumber TEXT NOT NULL, name TEXT NOT NULL, PRIMARY KEY(businessNumber, name), FOREIGN KEY(businessNumber) REFERENCES Suppliers(businessNumber) ON DELETE CASCADE);";
         String productLinesTable = "CREATE TABLE IF NOT EXISTS ProductLines (agreementId INTEGER, catalogId INTEGER, name TEXT NOT NULL, basePrice REAL NOT NULL, quantity INTEGER NOT NULL, PRIMARY KEY(agreementId, catalogId), FOREIGN KEY(agreementId) REFERENCES Agreements(agreementId) ON DELETE CASCADE);";
         String discountsTable = "CREATE TABLE IF NOT EXISTS Discounts (agreementId INTEGER, catalogId INTEGER, minQuantity INTEGER, discountPercentage REAL, PRIMARY KEY(agreementId, catalogId, minQuantity), FOREIGN KEY(agreementId) REFERENCES Agreements(agreementId) ON DELETE CASCADE);";
-        String authTable = "CREATE TABLE IF NOT EXISTS AuthCodes (code TEXT PRIMARY KEY, role TEXT NOT NULL);";
         String ordersTable = "CREATE TABLE IF NOT EXISTS Orders (orderId INTEGER PRIMARY KEY AUTOINCREMENT, businessNumber TEXT NOT NULL, supplierName TEXT, address TEXT, contactPhone TEXT, orderDate TEXT NOT NULL);";
         String orderItemsTable = "CREATE TABLE IF NOT EXISTS OrderItems (orderId INTEGER, catalogId INTEGER, productName TEXT, quantity INTEGER, listPrice REAL, discount REAL, finalPrice REAL, PRIMARY KEY(orderId, catalogId), FOREIGN KEY(orderId) REFERENCES Orders(orderId) ON DELETE CASCADE);";
         String categoriesTable = "CREATE TABLE IF NOT EXISTS Categories (categoryId INTEGER PRIMARY KEY AUTOINCREMENT, name TEXT NOT NULL, parentId INTEGER, FOREIGN KEY(parentId) REFERENCES Categories(categoryId) ON DELETE CASCADE);";
@@ -37,18 +36,18 @@ public class DatabaseManager {
         String deliveriesTable = "CREATE TABLE IF NOT EXISTS Deliveries (deliveryId INTEGER PRIMARY KEY AUTOINCREMENT, date TEXT NOT NULL, departureTime TEXT NOT NULL, status TEXT NOT NULL, truckLicense TEXT NOT NULL, driverId TEXT NOT NULL, originSite TEXT NOT NULL, FOREIGN KEY(truckLicense) REFERENCES Trucks(licenseNumber), FOREIGN KEY(driverId) REFERENCES Drivers(employeeId), FOREIGN KEY(originSite) REFERENCES Sites(siteName));";
         String deliveryDestinationsTable = "CREATE TABLE IF NOT EXISTS DeliveryDestinations (destId INTEGER PRIMARY KEY AUTOINCREMENT, deliveryId INTEGER NOT NULL, destinationSite TEXT NOT NULL, routeOrder INTEGER NOT NULL, FOREIGN KEY(deliveryId) REFERENCES Deliveries(deliveryId) ON DELETE CASCADE, FOREIGN KEY(destinationSite) REFERENCES Sites(siteName));";
         String cargoItemsTable = "CREATE TABLE IF NOT EXISTS CargoItems (cargoId INTEGER PRIMARY KEY AUTOINCREMENT, destId INTEGER NOT NULL, itemName TEXT NOT NULL, weight REAL NOT NULL, quantity INTEGER NOT NULL, FOREIGN KEY(destId) REFERENCES DeliveryDestinations(destId) ON DELETE CASCADE);";
-
-        String employeesTable = "CREATE TABLE IF NOT EXISTS Employees (employeeId TEXT PRIMARY KEY, name TEXT NOT NULL, bankAccount TEXT NOT NULL, salary REAL NOT NULL, salaryType TEXT NOT NULL, dateOfEmployment TEXT NOT NULL, jobScope TEXT NOT NULL, constraints TEXT, yearlyRestDays INTEGER NOT NULL, weeklyRestDay TEXT NOT NULL, password TEXT NOT NULL, workingDoubles INTEGER NOT NULL, active INTEGER NOT NULL, branchId INTEGER NOT NULL);";
+        String employeesTable = "CREATE TABLE IF NOT EXISTS Employees (employeeId TEXT PRIMARY KEY, name TEXT NOT NULL, bankAccount TEXT NOT NULL, salary REAL NOT NULL, salaryType TEXT NOT NULL, dateOfEmployment TEXT NOT NULL, jobScope TEXT NOT NULL, constraints TEXT, yearlyRestDays INTEGER NOT NULL, weeklyRestDay TEXT NOT NULL, workingDoubles INTEGER NOT NULL, active INTEGER NOT NULL, branchId INTEGER NOT NULL);";
+        String employeeAuthTable = "CREATE TABLE IF NOT EXISTS EmployeeAuth (employeeId TEXT PRIMARY KEY, password TEXT NOT NULL, systemRole TEXT NOT NULL, FOREIGN KEY(employeeId) REFERENCES Employees(employeeId) ON DELETE CASCADE);";
         String employeeRolesTable = "CREATE TABLE IF NOT EXISTS EmployeeRoles (employeeId TEXT, roleName TEXT, PRIMARY KEY(employeeId, roleName), FOREIGN KEY(employeeId) REFERENCES Employees(employeeId) ON DELETE CASCADE);";
         String employeeAvailabilityTable = "CREATE TABLE IF NOT EXISTS EmployeeAvailability (employeeId TEXT, day TEXT, shiftType TEXT, isAvailable INTEGER, PRIMARY KEY(employeeId, day, shiftType), FOREIGN KEY(employeeId) REFERENCES Employees(employeeId) ON DELETE CASCADE);";
-        String branchesTable = "CREATE TABLE IF NOT EXISTS Branches (branchId INTEGER PRIMARY KEY, location TEXT NOT NULL, branchManagerId TEXT, year INTEGER, week INTEGER);";        String shiftsTable = "CREATE TABLE IF NOT EXISTS Shifts (shiftId INTEGER PRIMARY KEY AUTOINCREMENT, branchId INTEGER, year INTEGER, week INTEGER, startDate TEXT, day TEXT, shiftType TEXT);";
+        String branchesTable = "CREATE TABLE IF NOT EXISTS Branches (branchId INTEGER PRIMARY KEY, location TEXT NOT NULL, branchManagerId TEXT, year INTEGER, week INTEGER);";
+        String shiftsTable = "CREATE TABLE IF NOT EXISTS Shifts (shiftId INTEGER PRIMARY KEY AUTOINCREMENT, branchId INTEGER, year INTEGER, week INTEGER, startDate TEXT, day TEXT, shiftType TEXT);";
         String shiftEmployeesTable = "CREATE TABLE IF NOT EXISTS ShiftEmployees (shiftId INTEGER, mapKey TEXT, mapValue TEXT, FOREIGN KEY(shiftId) REFERENCES Shifts(shiftId) ON DELETE CASCADE);";
         String shiftAdditionalHoursTable = "CREATE TABLE IF NOT EXISTS ShiftAdditionalHours (shiftId INTEGER, employeeId TEXT, hours REAL, FOREIGN KEY(shiftId) REFERENCES Shifts(shiftId) ON DELETE CASCADE);";
         String requestsTable = "CREATE TABLE IF NOT EXISTS Requests (requestId INTEGER PRIMARY KEY AUTOINCREMENT, shiftId INTEGER, prevEmployee TEXT, newEmployee TEXT, manager TEXT, prevApproved TEXT, newApproved TEXT, managerApproved TEXT, denied INTEGER, FOREIGN KEY(shiftId) REFERENCES Shifts(shiftId) ON DELETE CASCADE);";
         String rolesTable = "CREATE TABLE IF NOT EXISTS Roles (roleName TEXT PRIMARY KEY);";
         String storeSettingsTable = "CREATE TABLE IF NOT EXISTS StoreSettings (id INTEGER PRIMARY KEY CHECK (id = 1), firstStartUp INTEGER NOT NULL);";
         String storeClosedDaysTable = "CREATE TABLE IF NOT EXISTS StoreClosedDays (day TEXT PRIMARY KEY);";
-
         try (Connection conn = getConnection(); Statement stmt = conn.createStatement()) {
             stmt.execute(suppliersTable);
             stmt.execute(contactsTable);
@@ -56,7 +55,6 @@ public class DatabaseManager {
             stmt.execute(manufacturersTable);
             stmt.execute(productLinesTable);
             stmt.execute(discountsTable);
-            stmt.execute(authTable);
             stmt.execute(ordersTable);
             stmt.execute(orderItemsTable);
             stmt.execute(categoriesTable);
@@ -70,6 +68,7 @@ public class DatabaseManager {
             stmt.execute(deliveryDestinationsTable);
             stmt.execute(cargoItemsTable);
             stmt.execute(employeesTable);
+            stmt.execute(employeeAuthTable);
             stmt.execute(employeeRolesTable);
             stmt.execute(employeeAvailabilityTable);
             stmt.execute(branchesTable);
@@ -80,7 +79,6 @@ public class DatabaseManager {
             stmt.execute(rolesTable);
             stmt.execute(storeSettingsTable);
             stmt.execute(storeClosedDaysTable);
-
         } catch (SQLException e) {
             e.printStackTrace();
         }
@@ -89,11 +87,6 @@ public class DatabaseManager {
     @SuppressWarnings("CallToPrintStackTrace")
     public static void seedDatabase() {
         try (Connection conn = getConnection(); Statement stmt = conn.createStatement()) {
-            stmt.execute("INSERT OR IGNORE INTO AuthCodes(code, role) VALUES('ORD123', 'ORDER_MANAGER')");
-            stmt.execute("INSERT OR IGNORE INTO AuthCodes(code, role) VALUES('INV123', 'INVENTORY_MANAGER')");
-            stmt.execute("INSERT OR IGNORE INTO AuthCodes(code, role) VALUES('SUP123', 'SUPPLIER_MANAGER')");
-            stmt.execute("INSERT OR IGNORE INTO AuthCodes(code, role) VALUES('TRANS123', 'TRANSPORTATION_MANAGER')");
-            stmt.execute("INSERT OR IGNORE INTO AuthCodes(code, role) VALUES('HR123', 'HR_MANAGER')");
             stmt.execute("INSERT OR IGNORE INTO Suppliers(businessNumber, name, address, bankAccount, paymentTerms) VALUES('1111', 'Tnuva', 'Tel Aviv', 'IL1111111111111111111111111', 'NET30')");
             stmt.execute("INSERT OR IGNORE INTO Suppliers(businessNumber, name, address, bankAccount, paymentTerms) VALUES('2222', 'Osem', 'Petah Tikva', 'IL2222222222222222222222222', 'EOM')");
             stmt.execute("INSERT OR IGNORE INTO Suppliers(businessNumber, name, address, bankAccount, paymentTerms) VALUES('3333', 'Strauss', 'Haifa', 'IL3333333333333333333333333', 'NET60')");
@@ -157,20 +150,46 @@ public class DatabaseManager {
             stmt.execute("INSERT OR IGNORE INTO CargoItems(cargoId, destId, itemName, weight, quantity) VALUES(2, 1, 'Cheese Boxes', 200.0, 5)");
             stmt.execute("INSERT OR IGNORE INTO CargoItems(cargoId, destId, itemName, weight, quantity) VALUES(3, 2, 'Bamba Crates', 150.0, 20)");
             stmt.execute("INSERT OR IGNORE INTO CargoItems(cargoId, destId, itemName, weight, quantity) VALUES(4, 3, 'Bread Trays', 300.0, 15)");
-
             stmt.execute("INSERT OR IGNORE INTO Roles(roleName) VALUES('Manager'), ('Branch Manager'), ('Driver'), ('Storekeeper'), ('Shift Manager'), ('Cashier')");
             stmt.execute("INSERT OR IGNORE INTO StoreSettings(id, firstStartUp) VALUES(1, 0)");
             stmt.execute("INSERT OR IGNORE INTO StoreClosedDays(day) VALUES('SATURDAY')");
             stmt.execute("INSERT OR IGNORE INTO Branches(branchId, location) VALUES(1, 'Tel Aviv - Dizengoff')");
             stmt.execute("INSERT OR IGNORE INTO Branches(branchId, location) VALUES(2, 'Haifa - Herzl')");
-            stmt.execute("INSERT OR IGNORE INTO Employees(employeeId, name, bankAccount, salary, salaryType, dateOfEmployment, jobScope, constraints, yearlyRestDays, weeklyRestDay, password, workingDoubles, active, branchId) VALUES('E001', 'Noa Chen', '12-345-678', 65.0, 'HOURLY', '2025-01-01T08:00:00', 'FULL_TIME', 'None', 14, 'SATURDAY', 'pass123', 1, 1, 1)");
-            stmt.execute("INSERT OR IGNORE INTO Employees(employeeId, name, bankAccount, salary, salaryType, dateOfEmployment, jobScope, constraints, yearlyRestDays, weeklyRestDay, password, workingDoubles, active, branchId) VALUES('E002', 'Raziel Zanati', '98-765-432', 55.0, 'HOURLY', '2025-06-15T08:00:00', 'PART_TIME', 'Only Morning Shifts', 10, 'SATURDAY', 'pass456', 0, 1, 1)");
-            stmt.execute("INSERT OR IGNORE INTO EmployeeRoles(employeeId, roleName) VALUES('E001', 'Manager')");
-            stmt.execute("INSERT OR IGNORE INTO EmployeeRoles(employeeId, roleName) VALUES('E001', 'Shift Manager')");
-            stmt.execute("INSERT OR IGNORE INTO EmployeeRoles(employeeId, roleName) VALUES('E002', 'Cashier')");
+            stmt.execute("INSERT OR IGNORE INTO Employees(employeeId, name, bankAccount, salary, salaryType, dateOfEmployment, jobScope, constraints, yearlyRestDays, weeklyRestDay, workingDoubles, active, branchId) VALUES('INV123', 'David Smith', '11-111-111', 15000.0, 'GLOBALLY', '2024-01-01T08:00:00', 'FULL_TIME', 'None', 20, 'SATURDAY', 0, 1, 1)");
+            stmt.execute("INSERT OR IGNORE INTO Employees(employeeId, name, bankAccount, salary, salaryType, dateOfEmployment, jobScope, constraints, yearlyRestDays, weeklyRestDay, workingDoubles, active, branchId) VALUES('ORD123', 'Sarah Johnson', '22-222-222', 15000.0, 'GLOBALLY', '2024-01-01T08:00:00', 'FULL_TIME', 'None', 20, 'SATURDAY', 0, 1, 1)");
+            stmt.execute("INSERT OR IGNORE INTO Employees(employeeId, name, bankAccount, salary, salaryType, dateOfEmployment, jobScope, constraints, yearlyRestDays, weeklyRestDay, workingDoubles, active, branchId) VALUES('TRANS123', 'Michael Brown', '33-333-333', 15000.0, 'GLOBALLY', '2024-01-01T08:00:00', 'FULL_TIME', 'None', 20, 'SATURDAY', 0, 1, 1)");
+            stmt.execute("INSERT OR IGNORE INTO Employees(employeeId, name, bankAccount, salary, salaryType, dateOfEmployment, jobScope, constraints, yearlyRestDays, weeklyRestDay, workingDoubles, active, branchId) VALUES('HR123', 'Emma Wilson', '44-444-444', 16000.0, 'GLOBALLY', '2023-05-01T08:00:00', 'FULL_TIME', 'None', 25, 'SATURDAY', 0, 1, 1)");
+            stmt.execute("INSERT OR IGNORE INTO Employees(employeeId, name, bankAccount, salary, salaryType, dateOfEmployment, jobScope, constraints, yearlyRestDays, weeklyRestDay, workingDoubles, active, branchId) VALUES('BRN123', 'James Davis', '55-555-555', 18000.0, 'GLOBALLY', '2022-03-15T08:00:00', 'FULL_TIME', 'None', 25, 'SATURDAY', 0, 1, 1)");
+            stmt.execute("INSERT OR IGNORE INTO Employees(employeeId, name, bankAccount, salary, salaryType, dateOfEmployment, jobScope, constraints, yearlyRestDays, weeklyRestDay, workingDoubles, active, branchId) VALUES('SUP123', 'Stuart Smith', '66-666-666', 15000.0, 'GLOBALLY', '2024-01-01T08:00:00', 'FULL_TIME', 'None', 20, 'SATURDAY', 0, 1, 1)");
+            stmt.execute("INSERT OR IGNORE INTO Employees(employeeId, name, bankAccount, salary, salaryType, dateOfEmployment, jobScope, constraints, yearlyRestDays, weeklyRestDay, workingDoubles, active, branchId) VALUES('EMP001', 'John Doe', '12-345-678', 50.0, 'HOURLY', '2025-01-01T08:00:00', 'FULL_TIME', 'None', 14, 'SATURDAY', 1, 1, 1)");
+            stmt.execute("INSERT OR IGNORE INTO Employees(employeeId, name, bankAccount, salary, salaryType, dateOfEmployment, jobScope, constraints, yearlyRestDays, weeklyRestDay, workingDoubles, active, branchId) VALUES('EMP002', 'Jane Smith', '98-765-432', 45.0, 'HOURLY', '2025-06-15T08:00:00', 'PARTIAL', 'Only Morning Shifts', 10, 'SATURDAY', 0, 1, 1)");
+            stmt.execute("INSERT OR IGNORE INTO Employees(employeeId, name, bankAccount, salary, salaryType, dateOfEmployment, jobScope, constraints, yearlyRestDays, weeklyRestDay, workingDoubles, active, branchId) VALUES('EMP003', 'Robert Taylor', '45-678-912', 48.0, 'HOURLY', '2025-08-20T08:00:00', 'PARTIAL', 'None', 12, 'SATURDAY', 1, 1, 1)");
+            stmt.execute("INSERT OR IGNORE INTO Employees(employeeId, name, bankAccount, salary, salaryType, dateOfEmployment, jobScope, constraints, yearlyRestDays, weeklyRestDay, workingDoubles, active, branchId) VALUES('EMP004', 'Linda White', '55-666-777', 60.0, 'HOURLY', '2024-11-11T08:00:00', 'FULL_TIME', 'No Nights', 15, 'SATURDAY', 0, 1, 1)");
+            stmt.execute("INSERT OR IGNORE INTO Employees(employeeId, name, bankAccount, salary, salaryType, dateOfEmployment, jobScope, constraints, yearlyRestDays, weeklyRestDay, workingDoubles, active, branchId) VALUES('D001', 'Moshe Levi', '11-222-333', 12000.0, 'GLOBALLY', '2023-01-10T08:00:00', 'FULL_TIME', 'None', 18, 'SATURDAY', 0, 1, 1)");
+            stmt.execute("INSERT OR IGNORE INTO Employees(employeeId, name, bankAccount, salary, salaryType, dateOfEmployment, jobScope, constraints, yearlyRestDays, weeklyRestDay, workingDoubles, active, branchId) VALUES('D002', 'David Cohen', '22-333-444', 11000.0, 'GLOBALLY', '2023-02-15T08:00:00', 'FULL_TIME', 'None', 18, 'SATURDAY', 0, 1, 1)");
+            stmt.execute("INSERT OR IGNORE INTO Employees(employeeId, name, bankAccount, salary, salaryType, dateOfEmployment, jobScope, constraints, yearlyRestDays, weeklyRestDay, workingDoubles, active, branchId) VALUES('D003', 'Rami Golan', '33-444-555', 13000.0, 'GLOBALLY', '2022-10-05T08:00:00', 'FULL_TIME', 'None', 20, 'SATURDAY', 0, 1, 1)");
+            stmt.execute("INSERT OR IGNORE INTO EmployeeAuth(employeeId, password, systemRole) VALUES('INV123', 'pass123', 'INVENTORY_MANAGER')");
+            stmt.execute("INSERT OR IGNORE INTO EmployeeAuth(employeeId, password, systemRole) VALUES('ORD123', 'pass123', 'ORDER_MANAGER')");
+            stmt.execute("INSERT OR IGNORE INTO EmployeeAuth(employeeId, password, systemRole) VALUES('TRANS123', 'pass123', 'TRANSPORTATION_MANAGER')");
+            stmt.execute("INSERT OR IGNORE INTO EmployeeAuth(employeeId, password, systemRole) VALUES('HR123', 'pass123', 'HR_MANAGER')");
+            stmt.execute("INSERT OR IGNORE INTO EmployeeAuth(employeeId, password, systemRole) VALUES('BRN123', 'pass123', 'BRANCH_MANAGER')");
+            stmt.execute("INSERT OR IGNORE INTO EmployeeAuth(employeeId, password, systemRole) VALUES('SUP123', 'pass123', 'SUPPLIER_MANAGER')");
+            stmt.execute("INSERT OR IGNORE INTO EmployeeAuth(employeeId, password, systemRole) VALUES('EMP001', 'pass123', 'EMPLOYEE')");
+            stmt.execute("INSERT OR IGNORE INTO EmployeeAuth(employeeId, password, systemRole) VALUES('EMP002', 'pass123', 'EMPLOYEE')");
+            stmt.execute("INSERT OR IGNORE INTO EmployeeAuth(employeeId, password, systemRole) VALUES('EMP003', 'pass123', 'EMPLOYEE')");
+            stmt.execute("INSERT OR IGNORE INTO EmployeeAuth(employeeId, password, systemRole) VALUES('EMP004', 'pass123', 'EMPLOYEE')");
+            stmt.execute("INSERT OR IGNORE INTO EmployeeAuth(employeeId, password, systemRole) VALUES('D001', 'pass123', 'DRIVER')");
+            stmt.execute("INSERT OR IGNORE INTO EmployeeAuth(employeeId, password, systemRole) VALUES('D002', 'pass123', 'DRIVER')");
+            stmt.execute("INSERT OR IGNORE INTO EmployeeAuth(employeeId, password, systemRole) VALUES('D003', 'pass123', 'DRIVER')");
+            stmt.execute("INSERT OR IGNORE INTO EmployeeRoles(employeeId, roleName) VALUES('EMP001', 'Shift Manager')");
+            stmt.execute("INSERT OR IGNORE INTO EmployeeRoles(employeeId, roleName) VALUES('EMP002', 'Cashier')");
+            stmt.execute("INSERT OR IGNORE INTO EmployeeRoles(employeeId, roleName) VALUES('EMP003', 'Storekeeper')");
+            stmt.execute("INSERT OR IGNORE INTO EmployeeRoles(employeeId, roleName) VALUES('EMP004', 'Cashier')");
+            stmt.execute("INSERT OR IGNORE INTO EmployeeRoles(employeeId, roleName) VALUES('D001', 'Driver')");
+            stmt.execute("INSERT OR IGNORE INTO EmployeeRoles(employeeId, roleName) VALUES('D002', 'Driver')");
+            stmt.execute("INSERT OR IGNORE INTO EmployeeRoles(employeeId, roleName) VALUES('D003', 'Driver')");
             stmt.execute("INSERT OR IGNORE INTO Shifts(shiftId, branchId, year, week, startDate, day, shiftType) VALUES(1, 1, 2026, 26, '2026-06-25T08:00:00', 'THURSDAY', 'MORNING')");
-            stmt.execute("INSERT OR IGNORE INTO Requests(requestId, shiftId, prevEmployee, newEmployee, manager, prevApproved, newApproved, managerApproved, denied) VALUES(1, 1, 'E001', 'E002', 'M001', 'APPROVED', 'WAITING', 'WAITING', 0)");
-
+            stmt.execute("INSERT OR IGNORE INTO Requests(requestId, shiftId, prevEmployee, newEmployee, manager, prevApproved, newApproved, managerApproved, denied) VALUES(1, 1, 'EMP001', 'EMP004', 'BRN123', 'APPROVED', 'WAITING', 'WAITING', 0)");
         } catch (SQLException e) {
             e.printStackTrace();
         }

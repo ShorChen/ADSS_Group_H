@@ -1,7 +1,7 @@
 package Transportation;
 
-import Core.Domain.Managers;
-import Suppliers.Domain.Security.SessionManager;
+import Core.Domain.Role;
+import Core.Domain.SessionManager;
 import Transportation.Domain.Entities.*;
 import org.junit.jupiter.api.*;
 import java.time.LocalDate;
@@ -16,13 +16,13 @@ public class SequentialTransportationTests {
     private DriverDL currentDriver;
     private SiteDL originSite;
     private DeliveryDL currentDelivery;
-    private final TransportationManager manager = new TransportationManager("TRANS123", "Main Manager");
+    private final TransportationManagerDL manager = new TransportationManagerDL("TRANS123", "Main Manager");
 
     @Test
     @Order(1)
     void step01_loginAsTransportManager() {
-        SessionManager.getInstance().login(Managers.TRANSPORTATION_MANAGER);
-        assertEquals(Managers.TRANSPORTATION_MANAGER, SessionManager.getInstance().getCurrentRole());
+        SessionManager.getInstance().login(Role.TRANSPORTATION_MANAGER);
+        assertEquals(Role.TRANSPORTATION_MANAGER, SessionManager.getInstance().getCurrentRole());
     }
 
     @Test

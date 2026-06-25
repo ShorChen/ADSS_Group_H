@@ -3,12 +3,15 @@ package Core.Controller;
 import Inventory.Presentation.Controller.InventoryController;
 import Suppliers.Presentation.Controller.OrderController;
 import Suppliers.Presentation.Controller.SupplierController;
-import Transportation.Presentation.Controller.TransportController;
+import Transportation.DataAccess.SqlImpl.SqlTransportationDAO;
+import Transportation.DataAccess.TransportationDAO;
+import Transportation.Domain.Facades.TransportationFacade;
+import Transportation.Presentation.Controller.TransportationController;
 import Core.Service.AuthService;
 import Suppliers.Service.Core.OrderService;
 import Suppliers.Service.Core.SupplierService;
 import Inventory.Service.Core.InventoryService;
-import Transportation.Service.Core.TransportService;
+import Transportation.Service.Core.TransportationService;
 import Core.Domain.AuthFacade;
 import Suppliers.Domain.Facades.OrderFacade;
 import Suppliers.Domain.Facades.SupplierFacade;
@@ -17,7 +20,15 @@ import Core.DataAccess.SqlImpl.SqlAuthDAO;
 import Suppliers.DataAccess.SqlImpl.SqlOrderDAO;
 import Suppliers.DataAccess.SqlImpl.SqlSupplierDAO;
 import Inventory.DataAccess.SqlImpl.SqlInventoryDAO;
-import Employees.Service.ShiftService;
+
+// --- NEW IMPORTS FOR EMPLOYEES MODULE ---
+import Employees.Domain.Facades.EmployeesFacade;
+import Employees.Service.Core.HRService;
+import Employees.Service.Core.BranchManagerService;
+import Employees.Service.Core.EmployeeService;
+import Employees.Presentation.Controller.HRController;
+import Employees.Presentation.Controller.BranchManagerController;
+import Employees.Presentation.Controller.EmployeeController;
 
 public class ControllerFactory {
     private static ControllerFactory instance;
@@ -25,12 +36,23 @@ public class ControllerFactory {
     private SupplierController supplierController;
     private OrderController orderController;
     private InventoryController inventoryController;
-    private TransportController transportController;
+    private TransportationController transportationController;
+
     private SupplierFacade supplierFacade;
     private SupplierService supplierService;
     private OrderService orderService;
     private InventoryService inventoryService;
-    private TransportService transportService;
+    private TransportationService transportationService;
+
+    // --- NEW INSTANCE VARIABLES ---
+    private EmployeesFacade employeesFacade;
+    private HRService hrService;
+    private BranchManagerService branchManagerService;
+    private EmployeeService employeeService;
+
+    private HRController hrController;
+    private BranchManagerController branchManagerController;
+    private EmployeeController employeeController;
 
     private ControllerFactory() {}
 
@@ -82,18 +104,53 @@ public class ControllerFactory {
         return inventoryController;
     }
 
-    private TransportService getTransportService() {
-        if (transportService == null) {
-            Transportation.DataAccess.TransportDAO transportDAO = new Transportation.DataAccess.SqlImpl.SqlTransportDAO();
-            Transportation.Domain.Facades.TransportFacade transportFacade = new Transportation.Domain.Facades.TransportFacade(transportDAO);
-            ShiftService shiftService = new ShiftService();
-            transportService = new TransportService(transportFacade, transportDAO, shiftService);
-        }
-        return transportService;
+    // --- NEW EMPLOYEE FACTORY METHODS ---
+    private EmployeesFacade getEmployeesFacade() {
+        if (employeesFacade == null) employeesFacade = new EmployeesFacade();
+        return employeesFacade;
     }
 
-    public TransportController getTransportController() {
-        if (transportController == null) transportController = new TransportController(getTransportService());
-        return transportController;
+    public HRService getHRService() {
+        if (hrService == null) hrService = new HRService(getEmployeesFacade());
+        return hrService;
+    }
+
+    public HRController getHRController() {
+        if (hrController == null) hrController = new HRController(getHRService());
+        return hrController;
+    }
+
+    public BranchManagerService getBranchManagerService() {
+        if (branchManagerService == null) branchManagerService = new BranchManagerService(getEmployeesFacade());
+        return branchManagerService;
+    }
+
+    public BranchManagerController getBranchManagerController() {
+        if (branchManagerController == null) branchManagerController = new BranchManagerController(getBranchManagerService());
+        return branchManagerController;
+    }
+
+    public EmployeeService getEmployeeService() {
+        if (employeeService == null) employeeService = new EmployeeService(getEmployeesFacade());
+        return employeeService;
+    }
+
+    public EmployeeController getEmployeeController() {
+        if (employeeController == null) employeeController = new EmployeeController(getEmployeeService());
+        return employeeController;
+    }
+
+    private TransportationService getTransportService() {
+        if (transportationService == null) {
+            TransportationDAO transportationDAO = new SqlTransportationDAO();
+            TransportationFacade transportationFacade = new TransportationFacade(transportationDAO);
+            transportationService = new TransportationService(transportationFacade, transportationDAO, getBranchManagerService());
+        }
+        return transportationService;
+    }
+
+    public TransportationController getTransportController() {
+        if (transportationController == null) transportationController = new TransportationController(getTransportService());
+        return transportationController;
     }
 }

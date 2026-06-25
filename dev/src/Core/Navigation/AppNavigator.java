@@ -2,9 +2,9 @@ package Core.Navigation;
 
 public interface AppNavigator {
     void showLoginScreen();
-    void showSupplierManagerDashboard();
-    void showOrderManagerDashboard();
-    void showInventoryManagerDashboard();
-    void showTransportationManagerDashboard();
-    void showEmployeesManagerDashboard();
+    void showSuppliersDashboard();
+    void showOrderDashboard();
+    void showInventoryDashboard();
+    void showTransportationDashboard();
+    void showEmployeesDashboard();
 }

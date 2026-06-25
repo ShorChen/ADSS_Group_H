@@ -2,65 +2,73 @@ package Employees.DataAccess.SqlImpl;
 
 import Core.DataAccess.DatabaseManager;
 import Employees.DataAccess.EmployeeDAO;
-import Employees.DataAccess.Entities.AvailabilitySubmissionEntity;
-import Employees.DataAccess.Entities.EmployeeEntity;
-import Employees.DataAccess.Entities.Keys.ShiftEntityKey;
+import Employees.Domain.Entities.EmployeeDL;
+import Employees.Domain.Entities.AvailabilitySubmissionDL;
+import Employees.Domain.Entities.RoleDL;
+import Employees.Shared.Enums.*;
 
 import java.sql.*;
 import java.time.LocalDateTime;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 public class SqlEmployeeDAO implements EmployeeDAO {
 
     @Override
-    public void addUpdateEmployee(EmployeeEntity employee) {
-        String sql = "INSERT OR REPLACE INTO Employees(employeeId, name, bankAccount, salary, salaryType, dateOfEmployment, jobScope, constraints, yearlyRestDays, weeklyRestDay, password, workingDoubles, active, branchId) VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?)";
+    public void addUpdateEmployee(EmployeeDL employee) {
+        String sql = "INSERT OR REPLACE INTO Employees(employeeId, name, bankAccount, salary, salaryType, dateOfEmployment, jobScope, constraints, yearlyRestDays, weeklyRestDay, workingDoubles, active, branchId) VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?)";
 
         try (Connection conn = DatabaseManager.getConnection()) {
             conn.setAutoCommit(false);
 
             try (PreparedStatement pstmt = conn.prepareStatement(sql)) {
-                pstmt.setString(1, employee.id());
-                pstmt.setString(2, employee.name());
-                pstmt.setString(3, employee.bankAccount());
-                pstmt.setDouble(4, employee.salary());
-                pstmt.setString(5, employee.salaryType());
-                pstmt.setString(6, employee.dateOfEmployment().toString());
-                pstmt.setString(7, employee.jobScope());
-                pstmt.setString(8, employee.constraints());
-                pstmt.setInt(9, employee.yearlyRestDays());
-                pstmt.setString(10, employee.weeklyRestDay());
-                pstmt.setString(11, employee.password());
-                pstmt.setInt(12, employee.availabilitySubmission().workingDoubles() ? 1 : 0);
-                pstmt.setInt(13, employee.active() ? 1 : 0);
-                pstmt.setInt(14, employee.branchId());
+                pstmt.setString(1, employee.getId());
+                pstmt.setString(2, employee.getName());
+                pstmt.setString(3, employee.getBankAccount());
+                pstmt.setDouble(4, employee.getSalary());
+                pstmt.setString(5, employee.getSalaryType().name());
+                pstmt.setString(6, employee.getDateOfEmployment().toString());
+                pstmt.setString(7, employee.getJobScope().name());
+                pstmt.setString(8, employee.getConstraints());
+                pstmt.setInt(9, employee.getYearlyRestDays());
+                pstmt.setString(10, employee.getWeeklyRestDay().name());
+
+                boolean worksDoubles = employee.getAvailabilitySubmission() != null && employee.getAvailabilitySubmission().isWorkingDoubles();
+                pstmt.setInt(11, worksDoubles ? 1 : 0);
+                pstmt.setInt(12, employee.isActive() ? 1 : 0);
+                pstmt.setInt(13, employee.getBranchId());
                 pstmt.executeUpdate();
 
+                // 1. Save Roles (FIXED: Iterating as RoleDL, saving string tag)
                 try (PreparedStatement delRoles = conn.prepareStatement("DELETE FROM EmployeeRoles WHERE employeeId=?")) {
-                    delRoles.setString(1, employee.id());
+                    delRoles.setString(1, employee.getId());
                     delRoles.executeUpdate();
                 }
-                if (!employee.qualifiedRoles().isEmpty()) {
+                if (employee.getQualifiedRoles() != null && !employee.getQualifiedRoles().isEmpty()) {
                     try (PreparedStatement insRole = conn.prepareStatement("INSERT INTO EmployeeRoles(employeeId, roleName) VALUES(?,?)")) {
-                        for (String role : employee.qualifiedRoles()) {
-                            insRole.setString(1, employee.id());
-                            insRole.setString(2, role);
+                        for (RoleDL role : employee.getQualifiedRoles()) {
+                            insRole.setString(1, employee.getId());
+                            insRole.setString(2, role.getTag());
                             insRole.addBatch();
                         }
                         insRole.executeBatch();
                     }
                 }
 
+                // 2. Save Availability
                 try (PreparedStatement delShifts = conn.prepareStatement("DELETE FROM EmployeeAvailability WHERE employeeId=?")) {
-                    delShifts.setString(1, employee.id());
+                    delShifts.setString(1, employee.getId());
                     delShifts.executeUpdate();
                 }
-                if (employee.availabilitySubmission() != null && employee.availabilitySubmission().shifts() != null) {
+                if (employee.getAvailabilitySubmission() != null && employee.getAvailabilitySubmission().getShifts() != null) {
                     try (PreparedStatement insShift = conn.prepareStatement("INSERT INTO EmployeeAvailability(employeeId, day, shiftType, isAvailable) VALUES(?,?,?,?)")) {
-                        for (Map.Entry<ShiftEntityKey, Boolean> entry : employee.availabilitySubmission().shifts().entrySet()) {
-                            insShift.setString(1, employee.id());
-                            insShift.setString(2, entry.getKey().day());
-                            insShift.setString(3, entry.getKey().type());
+                        for (Map.Entry<String, Boolean> entry : employee.getAvailabilitySubmission().getShifts().entrySet()) {
+                            String[] parts = entry.getKey().split("_");
+                            insShift.setString(1, employee.getId());
+                            insShift.setString(2, parts[0]); // Day
+                            insShift.setString(3, parts[1]); // Type
                             insShift.setInt(4, Boolean.TRUE.equals(entry.getValue()) ? 1 : 0);
                             insShift.addBatch();
                         }
@@ -79,48 +87,47 @@ public class SqlEmployeeDAO implements EmployeeDAO {
     }
 
     @Override
-    public EmployeeEntity getEmployee(String id) {
+    public EmployeeDL getEmployee(String id) {
         String sql = "SELECT * FROM Employees WHERE employeeId=?";
-        try (Connection conn = DatabaseManager.getConnection(); PreparedStatement pstmt = conn.prepareStatement(sql)) {
+        try (Connection conn = DatabaseManager.getConnection();
+             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+
             pstmt.setString(1, id);
             ResultSet rs = pstmt.executeQuery();
             if (rs.next()) {
-                List<String> roles = new ArrayList<>();
+                List<RoleDL> roles = new ArrayList<>();
                 try (PreparedStatement pstmtRoles = conn.prepareStatement("SELECT roleName FROM EmployeeRoles WHERE employeeId=?")) {
                     pstmtRoles.setString(1, id);
                     ResultSet rsRoles = pstmtRoles.executeQuery();
-                    while (rsRoles.next()) roles.add(rsRoles.getString("roleName"));
+                    while (rsRoles.next()) roles.add(new RoleDL(rsRoles.getString("roleName")));
                 }
 
-                Map<ShiftEntityKey, Boolean> shifts = new HashMap<>();
+                Map<String, Boolean> shifts = new HashMap<>();
                 try (PreparedStatement pstmtShifts = conn.prepareStatement("SELECT day, shiftType, isAvailable FROM EmployeeAvailability WHERE employeeId=?")) {
                     pstmtShifts.setString(1, id);
                     ResultSet rsShifts = pstmtShifts.executeQuery();
                     while (rsShifts.next()) {
-                        shifts.put(
-                                new ShiftEntityKey(rsShifts.getString("day"), rsShifts.getString("shiftType")),
-                                rsShifts.getInt("isAvailable") == 1
-                        );
+                        String key = rsShifts.getString("day") + "_" + rsShifts.getString("shiftType");
+                        shifts.put(key, rsShifts.getInt("isAvailable") == 1);
                     }
                 }
 
-                AvailabilitySubmissionEntity availability = new AvailabilitySubmissionEntity(
+                AvailabilitySubmissionDL availability = new AvailabilitySubmissionDL(
                         id, shifts, rs.getInt("workingDoubles") == 1
                 );
 
-                return new EmployeeEntity(
+                return new EmployeeDL(
                         rs.getString("employeeId"),
                         rs.getString("name"),
                         rs.getString("bankAccount"),
                         rs.getDouble("salary"),
-                        rs.getString("salaryType"),
+                        SalaryType.valueOf(rs.getString("salaryType")),
                         LocalDateTime.parse(rs.getString("dateOfEmployment")),
-                        rs.getString("jobScope"),
+                        JobScope.valueOf(rs.getString("jobScope")),
                         roles,
                         rs.getString("constraints"),
                         rs.getInt("yearlyRestDays"),
-                        rs.getString("weeklyRestDay"),
-                        rs.getString("password"),
+                        WeekDay.valueOf(rs.getString("weeklyRestDay")),
                         availability,
                         rs.getInt("active") == 1,
                         rs.getInt("branchId")
@@ -133,42 +140,17 @@ public class SqlEmployeeDAO implements EmployeeDAO {
     }
 
     @Override
-    public boolean exists(String id) {
-        return getEmployee(id) != null;
-    }
-
-    @Override
-    public boolean updatePassword(String id, String oldPass, String newPass) {
-        EmployeeEntity employee = getEmployee(id);
-        if (employee == null || !employee.checkPassword(oldPass)) return false;
-
-        addUpdateEmployee(employee.changePassword(newPass));
-        return true;
-    }
-
-    @Override
-    public void deactivateEmployee(String id) {
-        EmployeeEntity employee = getEmployee(id);
-        if (employee == null) throw new IllegalArgumentException("No employee found");
-
-        addUpdateEmployee(employee.changeActivityStatus(false));
-    }
-
-    @Override
-    public List<EmployeeEntity> getEmployeesWithRole(String roleName) {
-        List<EmployeeEntity> list = new ArrayList<>();
-        String sql = "SELECT employeeId FROM EmployeeRoles WHERE roleName=?";
-        try (Connection conn = DatabaseManager.getConnection(); PreparedStatement pstmt = conn.prepareStatement(sql)) {
-            pstmt.setString(1, roleName);
-            ResultSet rs = pstmt.executeQuery();
+    public List<EmployeeDL> getAllEmployees() {
+        List<EmployeeDL> list = new ArrayList<>();
+        String sql = "SELECT employeeId FROM Employees";
+        try (Connection conn = DatabaseManager.getConnection();
+             Statement stmt = conn.createStatement();
+             ResultSet rs = stmt.executeQuery(sql)) {
             while (rs.next()) {
-                EmployeeEntity emp = getEmployee(rs.getString("employeeId"));
-                if (emp != null) {
-                    list.add(emp);
-                }
+                list.add(getEmployee(rs.getString("employeeId")));
             }
         } catch (SQLException e) {
-            throw new RuntimeException("Error loading employees by role", e);
+            throw new RuntimeException("Error fetching all employees", e);
         }
         return list;
     }

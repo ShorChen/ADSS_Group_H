@@ -2,8 +2,7 @@ package Employees.DataAccess.SqlImpl;
 
 import Core.DataAccess.DatabaseManager;
 import Employees.DataAccess.BranchDAO;
-import Employees.DataAccess.Entities.BranchEntity;
-import Employees.DataAccess.Entities.Keys.WeekKey;
+import Employees.Domain.Entities.BranchDL;
 
 import java.sql.*;
 import java.util.ArrayList;
@@ -12,39 +11,19 @@ import java.util.List;
 public class SqlBranchDAO implements BranchDAO {
 
     @Override
-    public List<String> getAllBranchLocations() {
-        List<String> locations = new ArrayList<>();
-        String sql = "SELECT DISTINCT location FROM Branches";
-        try (Connection conn = DatabaseManager.getConnection(); Statement stmt = conn.createStatement(); ResultSet rs = stmt.executeQuery(sql)) {
-            while (rs.next()) locations.add(rs.getString("location"));
-        } catch (SQLException e) {
-            throw new RuntimeException("Error loading branch locations", e);
-        }
-        return locations;
-    }
-
-    @Override
-    public boolean exists(int branchId) {
-        String sql = "SELECT 1 FROM Branches WHERE branchId=?";
-        try (Connection conn = DatabaseManager.getConnection(); PreparedStatement pstmt = conn.prepareStatement(sql)) {
-            pstmt.setInt(1, branchId);
-            return pstmt.executeQuery().next();
-        } catch (SQLException e) {
-            throw new RuntimeException("Error checking branch", e);
-        }
-    }
-
-    @Override
-    public List<BranchEntity> getAllBranches() {
-        List<BranchEntity> list = new ArrayList<>();
+    public List<BranchDL> getAllBranches() {
+        List<BranchDL> list = new ArrayList<>();
         String sql = "SELECT * FROM Branches";
-        try (Connection conn = DatabaseManager.getConnection(); Statement stmt = conn.createStatement(); ResultSet rs = stmt.executeQuery(sql)) {
+        try (Connection conn = DatabaseManager.getConnection();
+             Statement stmt = conn.createStatement();
+             ResultSet rs = stmt.executeQuery(sql)) {
             while (rs.next())
-                list.add(new BranchEntity(
+                list.add(new BranchDL(
                         rs.getInt("branchId"),
                         rs.getString("location"),
                         rs.getString("branchManagerId"),
-                        new WeekKey(rs.getInt("year"), rs.getInt("week"))
+                        rs.getInt("year"),
+                        rs.getInt("week")
                 ));
         } catch (SQLException e) {
             throw new RuntimeException("Error loading branches", e);
@@ -53,36 +32,18 @@ public class SqlBranchDAO implements BranchDAO {
     }
 
     @Override
-    public void addUpdateBranch(BranchEntity branch) {
+    public void addUpdateBranch(BranchDL branch) {
         String sql = "INSERT OR REPLACE INTO Branches(branchId, location, branchManagerId, year, week) VALUES(?,?,?,?,?)";
-        try (Connection conn = DatabaseManager.getConnection(); PreparedStatement pstmt = conn.prepareStatement(sql)) {
-            pstmt.setInt(1, branch.branchId());
-            pstmt.setString(2, branch.location());
-            pstmt.setString(3, branch.branchManagerId());
-            pstmt.setInt(4, branch.startDate().year());
-            pstmt.setInt(5, branch.startDate().week());
+        try (Connection conn = DatabaseManager.getConnection();
+             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+            pstmt.setInt(1, branch.getBranchId());
+            pstmt.setString(2, branch.getLocation());
+            pstmt.setString(3, branch.getBranchManagerId());
+            pstmt.setInt(4, branch.getYear());
+            pstmt.setInt(5, branch.getWeek());
             pstmt.executeUpdate();
         } catch (SQLException e) {
             throw new RuntimeException("Error saving branch", e);
-        }
-    }
-
-    @Override
-    public BranchEntity get(int branchId) {
-        String sql = "SELECT * FROM Branches WHERE branchId=?";
-        try (Connection conn = DatabaseManager.getConnection(); PreparedStatement pstmt = conn.prepareStatement(sql)) {
-            pstmt.setInt(1, branchId);
-            ResultSet rs = pstmt.executeQuery();
-            if (!rs.next()) return null;
-
-            return new BranchEntity(
-                    rs.getInt("branchId"),
-                    rs.getString("location"),
-                    rs.getString("branchManagerId"),
-                    new WeekKey(rs.getInt("year"), rs.getInt("week"))
-            );
-        } catch (SQLException e) {
-            throw new RuntimeException("Error loading branch", e);
         }
     }
 }

@@ -1,198 +1,108 @@
 package Employees;
 
-import Employees.Context.SessionManager;
-import Employees.DataAccess.Pools.EmployeePool;
-import Employees.Domain.DTO.EmployeeSL;
-import Employees.Domain.DTO.RoleSL;
-import Employees.Domain.DTO.ShiftKey;
-import Employees.Service.EmployeeService;
+import Core.Domain.Role;
+import Core.Domain.SessionManager;
+import Employees.Domain.Entities.AvailabilitySubmissionDL;
+import Employees.Domain.Entities.EmployeeDL;
+import Employees.Domain.Entities.RoleDL;
+import Employees.Domain.Entities.ShiftDL;
 import Employees.Shared.Enums.JobScope;
 import Employees.Shared.Enums.SalaryType;
 import Employees.Shared.Enums.ShiftType;
 import Employees.Shared.Enums.WeekDay;
 import org.junit.jupiter.api.*;
-
-import java.util.*;
-
+import java.time.LocalDateTime;
+import java.util.HashMap;
+import java.util.Map;
 import static org.junit.jupiter.api.Assertions.*;
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 public class SequentialEmployeeTests {
-
-    private final EmployeeService employeeService = new EmployeeService();
-    private final int branchId = 1;
+    private EmployeeDL currentEmployee;
+    private ShiftDL currentShift;
+    private RoleDL cashierRole;
+    private RoleDL shiftManagerRole;
 
     @BeforeAll
     void setUp() {
-        EmployeePool.free();
-    }
-
-    @AfterAll
-    void tearDown() {
-        EmployeePool.free();
+        SessionManager.getInstance().login(Role.HR_MANAGER);
+        currentEmployee = new EmployeeDL("EMP123", "Dani", "12-345", 50.0, SalaryType.HOURLY, LocalDateTime.now(), JobScope.FULL_TIME, null, "None", 12, WeekDay.SUNDAY, null, true, 1);
+        currentShift = new ShiftDL(1, 1, 2026, 26, LocalDateTime.now(), WeekDay.MONDAY, ShiftType.DAY, new HashMap<>(), new HashMap<>());
+        cashierRole = new RoleDL("Cashier");
+        shiftManagerRole = new RoleDL("Shift Manager");
     }
 
     @Test
     @Order(1)
-    void step01_addEmployee_ValidNewEmployee() {
-        EmployeeSL emp = createTestEmployee("123", "Dani", true);
-        String currentPassword = employeeService.addEmployee(emp);
-        assertFalse(currentPassword.isEmpty(), "Password should not be empty");
-        assertTrue(employeeService.containsEmployee("123"));
+    void test01_addRolesToEmployee_Success() {
+        currentEmployee.addQualifiedRoles(cashierRole, shiftManagerRole);
+        assertEquals(2, currentEmployee.getQualifiedRoles().size());
+        assertEquals("Cashier", currentEmployee.getQualifiedRoles().getFirst().getTag());
     }
 
     @Test
     @Order(2)
-    void step02_addEmployee_ExistingId_ThrowsException() {
-        EmployeeSL emp2 = createTestEmployee("123", "Yossi", true);
-        assertThrows(IllegalArgumentException.class, () -> employeeService.addEmployee(emp2));
+    void test02_addDuplicateRoleToEmployee_Ignored() {
+        currentEmployee.addQualifiedRoles(cashierRole);
+        assertEquals(2, currentEmployee.getQualifiedRoles().size());
     }
 
     @Test
     @Order(3)
-    void step03_deactivateEmployee_ActiveEmployee() {
-        employeeService.addEmployee(createTestEmployee("111", "Rina", true));
-        employeeService.deactivateEmployee(branchId,"111");
-        assertFalse(employeeService.getEmployeeDetails("111").isActive(), "Employee status should be false");
+    void test03_verifyAvailabilityLogic_SpecificShiftFalse() {
+        Map<String, Boolean> shiftsMap = new HashMap<>();
+        shiftsMap.put("MONDAY_DAY", false);
+        AvailabilitySubmissionDL availability = new AvailabilitySubmissionDL(currentEmployee.getId(), shiftsMap, false);
+        currentEmployee.setAvailabilitySubmission(availability);
+        assertFalse(currentEmployee.getAvailabilitySubmission().getShift("MONDAY_DAY"));
     }
 
     @Test
     @Order(4)
-    void step04_deactivateEmployee_AlreadyInactive_ThrowsException() {
-        employeeService.addEmployee(createTestEmployee("222", "Bob", false));
-        assertThrows(IllegalArgumentException.class, () -> employeeService.deactivateEmployee(branchId,"222"));
+    void test04_verifyAvailabilityLogic_UnspecifiedShiftDefaultsTrue() {
+        assertTrue(currentEmployee.getAvailabilitySubmission().getShift("TUESDAY_EVENING"));
     }
 
     @Test
     @Order(5)
-    void step05_deactivateEmployee_NonExistent_ReturnsFalse() {
-        boolean result = employeeService.deactivateEmployee(branchId,"999");
-        assertFalse(result);
+    void test05_shiftCapacity_SetAndRetrieve() {
+        currentShift.setCapacity(cashierRole, 1);
+        assertEquals(1, currentShift.getCapacity(cashierRole));
     }
 
     @Test
     @Order(6)
-    void step06_updateAvailability_ValidEmployee() {
-        employeeService.addEmployee(createTestEmployee("333", "Shir", true));
-        Set<ShiftKey> unavailable = new HashSet<>();
-        unavailable.add(new ShiftKey(WeekDay.SUNDAY, ShiftType.EVENING));
-        assertDoesNotThrow(() -> employeeService.updateAvailability("333", unavailable, true));
-        EmployeeSL updated = employeeService.getEmployeeDetails("333");
-        assertTrue(updated.isWorkingDoubles());
-        assertTrue(updated.getUnavailableShifts().containsKey(WeekDay.SUNDAY));
+    void test06_shiftAssignEmployee_Success() {
+        currentShift.assignEmployeeToRole(cashierRole, currentEmployee.getId());
+        assertTrue(currentShift.doesEmployeeWork(currentEmployee.getId()));
+        assertTrue(currentShift.shiftRequiresRole(cashierRole));
     }
 
     @Test
     @Order(7)
-    void step07_updateAvailability_NonExistent_ThrowsException() {
-        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () -> {
-            employeeService.updateAvailability("404", new HashSet<>(), false);
-        });
-        assertTrue(exception.getMessage().contains("not found"));
+    void test07_shiftAssignEmployee_ExceedsCapacity_ThrowsException() {
+        assertThrows(IllegalArgumentException.class, () -> currentShift.assignEmployeeToRole(cashierRole, "EMP999"));
     }
 
     @Test
     @Order(8)
-    void step08_getEmployeeDetails_ExistingEmployee() {
-        EmployeeSL emp = createTestEmployee("444", "Alice", true);
-        employeeService.addEmployee(emp);
-        EmployeeSL retrieved = employeeService.getEmployeeDetails("444");
-        assertNotNull(retrieved, "Employee should be found");
-        assertEquals("444", retrieved.getId());
-        assertEquals("Alice", retrieved.getName());
+    void test08_shiftReplaceEmployee_Success() {
+        currentShift.replaceEmployees(cashierRole, currentEmployee.getId(), "EMP555");
+        assertTrue(currentShift.doesEmployeeWork("EMP555"));
+        assertFalse(currentShift.doesEmployeeWork(currentEmployee.getId()));
     }
 
     @Test
     @Order(9)
-    void step09_getEmployeeDetails_NonExistent_ReturnsNull() {
-        EmployeeSL retrieved = employeeService.getEmployeeDetails("9999");
-        assertNull(retrieved, "Non-existent employee should return null");
+    void test09_shiftReplaceEmployee_NotWorking_ThrowsException() {
+        assertThrows(IllegalArgumentException.class, () -> currentShift.replaceEmployees(cashierRole, "EMP_GHOST", "EMP_NEW"));
     }
 
     @Test
     @Order(10)
-    void step10_updateEmployee_ExistingEmployee() {
-        EmployeeSL emp = createTestEmployee("555", "Bob", true);
-        String pass = employeeService.addEmployee(emp);
-        EmployeeSL updatedEmp = new EmployeeSL(
-                "555", "Bob Updated", "123456", 60.0, SalaryType.HOURLY,
-                SessionManager.now(), JobScope.FULL_TIME, new ArrayList<>(),
-                "None", 12, WeekDay.SUNDAY,
-                false, new HashMap<>(), true, 1
-        );
-        boolean result = employeeService.updateEmployee(updatedEmp, pass);
-        assertTrue(result, "Update should succeed");
-        EmployeeSL retrieved = employeeService.getEmployeeDetails("555");
-        assertEquals("Bob Updated", retrieved.getName());
-        assertEquals(60.0, retrieved.getSalary());
-    }
-
-    @Test
-    @Order(11)
-    void step11_updateEmployee_NonExistent_ReturnsFalse() {
-        EmployeeSL emp = createTestEmployee("666", "Charlie", true);
-        boolean result = employeeService.updateEmployee(emp, "password");
-        assertFalse(result, "Update should fail for non-existent employee");
-    }
-
-    @Test
-    @Order(12)
-    void step12_getAvailableEmployees_WithRoles() {
-        EmployeeSL emp1 = createTestEmployeeWithRoles("777", "David", RoleSL.Cashier);
-        EmployeeSL emp2 = createTestEmployeeWithRoles("888", "Eve", RoleSL.Cashier);
-        employeeService.addEmployee(emp1);
-        employeeService.addEmployee(emp2);
-        Set<ShiftKey> unavailable = new HashSet<>();
-        unavailable.add(new ShiftKey(WeekDay.SUNDAY, ShiftType.DAY));
-        employeeService.updateAvailability("888", unavailable, false);
-        List<EmployeeSL> available = employeeService.getAvailableEmployees(WeekDay.SUNDAY, ShiftType.DAY, RoleSL.Cashier);
-        assertEquals(1, available.size(), "Only one employee should be available");
-        assertEquals("777", available.getFirst().getId());
-    }
-
-    @Test
-    @Order(13)
-    void step13_getAvailableEmployees_NoEmployeesWithRole_ReturnsEmpty() {
-        List<EmployeeSL> available = employeeService.getAvailableEmployees(WeekDay.MONDAY, ShiftType.EVENING, RoleSL.MANAGER);
-        assertTrue(available.isEmpty(), "No employees with manager role should be available");
-    }
-
-    @Test
-    @Order(14)
-    void step14_containsRole_EmployeeHasRole() {
-        EmployeeSL emp = createTestEmployeeWithRoles("999", "Frank", RoleSL.Storekeeper);
-        employeeService.addEmployee(emp);
-        assertTrue(employeeService.containsRole("999", RoleSL.Storekeeper), "Employee should have the storekeeper role");
-    }
-
-    @Test
-    @Order(15)
-    void step15_containsRole_EmployeeDoesNotHaveRole() {
-        EmployeeSL emp = createTestEmployeeWithRoles("101", "Grace", RoleSL.Cashier);
-        employeeService.addEmployee(emp);
-        assertFalse(employeeService.containsRole("101", RoleSL.MANAGER), "Employee should not have the manager role");
-    }
-
-    @Test
-    @Order(16)
-    void step16_containsRole_NonExistentEmployee_ThrowsException() {
-        assertThrows(IllegalArgumentException.class, () -> employeeService.containsRole("202", RoleSL.Cashier));
-    }
-
-    private EmployeeSL createTestEmployee(String id, String name, boolean isActive) {
-        return new EmployeeSL(
-                id, name, "123456", 50.0, SalaryType.HOURLY,
-                SessionManager.now(), JobScope.FULL_TIME, new ArrayList<>(),
-                "None", 12, WeekDay.SUNDAY, false, new HashMap<>(), isActive, 1
-        );
-    }
-
-    private EmployeeSL createTestEmployeeWithRoles(String id, String name, RoleSL... roles) {
-        return new EmployeeSL(
-                id, name, "123456", 50.0, SalaryType.HOURLY,
-                SessionManager.now(), JobScope.FULL_TIME, Arrays.asList(roles),
-                "None", 12, WeekDay.SUNDAY, false, new HashMap<>(), true, 1
-        );
+    void test10_verifySessionSecurity() {
+        SessionManager.getInstance().logout();
+        assertThrows(SecurityException.class, () -> SessionManager.getInstance().getCurrentRole());
     }
 }
