@@ -48,6 +48,7 @@ public class DatabaseManager {
         String rolesTable = "CREATE TABLE IF NOT EXISTS Roles (roleName TEXT PRIMARY KEY);";
         String storeSettingsTable = "CREATE TABLE IF NOT EXISTS StoreSettings (id INTEGER PRIMARY KEY CHECK (id = 1), firstStartUp INTEGER NOT NULL);";
         String storeClosedDaysTable = "CREATE TABLE IF NOT EXISTS StoreClosedDays (day TEXT PRIMARY KEY);";
+        String shiftDeadlinesTable = "CREATE TABLE IF NOT EXISTS ShiftDeadlines (branchId INTEGER, year INTEGER, week INTEGER, deadline TEXT, PRIMARY KEY(branchId, year, week));";
         try (Connection conn = getConnection(); Statement stmt = conn.createStatement()) {
             stmt.execute(suppliersTable);
             stmt.execute(contactsTable);
@@ -79,6 +80,7 @@ public class DatabaseManager {
             stmt.execute(rolesTable);
             stmt.execute(storeSettingsTable);
             stmt.execute(storeClosedDaysTable);
+            stmt.execute(shiftDeadlinesTable);
         } catch (SQLException e) {
             e.printStackTrace();
         }

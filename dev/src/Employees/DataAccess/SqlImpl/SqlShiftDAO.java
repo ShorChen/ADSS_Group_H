@@ -113,6 +113,48 @@ public class SqlShiftDAO implements ShiftDAO {
         return null;
     }
 
+    @Override
+    public List<ShiftDL> getShiftsByBranch(int branchId) {
+        List<ShiftDL> shifts = new ArrayList<>();
+        String sql = "SELECT shiftId FROM Shifts WHERE branchId=? ORDER BY year DESC, week DESC, day, shiftType";
+        try (Connection conn = DatabaseManager.getConnection();
+             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+            pstmt.setInt(1, branchId);
+            ResultSet rs = pstmt.executeQuery();
+            while (rs.next()) {
+                shifts.add(getShiftById(rs.getInt("shiftId")));
+            }
+        } catch (SQLException e) { throw new RuntimeException("Error loading branch shifts", e); }
+        return shifts;
+    }
+
+    @Override
+    public void saveDeadline(int branchId, int year, int week, String deadline) {
+        String sql = "INSERT OR REPLACE INTO ShiftDeadlines(branchId, year, week, deadline) VALUES(?,?,?,?)";
+        try (Connection conn = DatabaseManager.getConnection();
+             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+            pstmt.setInt(1, branchId);
+            pstmt.setInt(2, year);
+            pstmt.setInt(3, week);
+            pstmt.setString(4, deadline);
+            pstmt.executeUpdate();
+        } catch (SQLException e) { throw new RuntimeException("Error saving deadline", e); }
+    }
+
+    @Override
+    public String getDeadline(int branchId, int year, int week) {
+        String sql = "SELECT deadline FROM ShiftDeadlines WHERE branchId=? AND year=? AND week=?";
+        try (Connection conn = DatabaseManager.getConnection();
+             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+            pstmt.setInt(1, branchId);
+            pstmt.setInt(2, year);
+            pstmt.setInt(3, week);
+            ResultSet rs = pstmt.executeQuery();
+            if (rs.next()) return rs.getString("deadline");
+        } catch (SQLException e) { throw new RuntimeException("Error loading deadline", e); }
+        return null;
+    }
+
     private void saveShiftMaps(Connection conn, int shiftId, Map<RoleDL, Set<String>> employees, Map<String, Float> additionalHours) throws SQLException {
         try (PreparedStatement delEmp = conn.prepareStatement("DELETE FROM ShiftEmployees WHERE shiftId=?");
              PreparedStatement delHrs = conn.prepareStatement("DELETE FROM ShiftAdditionalHours WHERE shiftId=?")) {

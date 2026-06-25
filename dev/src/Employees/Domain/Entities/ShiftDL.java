@@ -78,10 +78,23 @@ public class ShiftDL {
 
     public void assignEmployeeToRole(RoleDL role, String employeeId) {
         Set<String> current = employees.computeIfAbsent(role, k -> new HashSet<>());
-        if (doesEmployeeWork(employeeId))
-            throw new IllegalArgumentException("Employee already assigned");
+        if (doesEmployeeWork(employeeId)) {
+            // Shift Manager is allowed to fill exactly ONE extra role per shift
+            RoleDL currentRole = getEmployeeShiftRole(employeeId);
+            boolean isShiftManager = currentRole != null &&
+                    currentRole.getTag().equalsIgnoreCase("Shift Manager");
+            if (!isShiftManager)
+                throw new IllegalArgumentException("Employee is already assigned to this shift");
+            // Count non-Shift-Manager assignments for this employee
+            long extraRoles = employees.entrySet().stream()
+                    .filter(e -> !e.getKey().getTag().equalsIgnoreCase("Shift Manager")
+                            && e.getValue().contains(employeeId))
+                    .count();
+            if (extraRoles >= 1)
+                throw new IllegalArgumentException("Shift Manager can only fill one extra role per shift");
+        }
         if (current.size() >= capacities.getOrDefault(role, 0))
-            throw new IllegalArgumentException("Capacity exceeded");
+            throw new IllegalArgumentException("Capacity exceeded for role: " + role.getTag());
         current.add(employeeId);
     }
 

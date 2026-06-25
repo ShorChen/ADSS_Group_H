@@ -23,6 +23,13 @@ public class EmployeesFacade {
     public List<ShiftDL> getShiftsByBranchAndWeek(int branchId, int year, int week) {
         return shiftDAO.getShiftsByBranchAndWeek(branchId, year, week);
     }
+    public List<ShiftDL> getShiftsByBranch(int branchId) { return shiftDAO.getShiftsByBranch(branchId); }
+    public void saveDeadline(int branchId, int year, int week, String deadline) {
+        shiftDAO.saveDeadline(branchId, year, week, deadline);
+    }
+    public String getDeadline(int branchId, int year, int week) {
+        return shiftDAO.getDeadline(branchId, year, week);
+    }
 
     // --- ROLES & STORE ---
     public List<String> getAllRoles() { return roleDAO.getAllRoles(); }

@@ -26,4 +26,13 @@ public class EmployeeController {
         me.setAvailabilitySubmission(new Employees.Domain.Entities.AvailabilitySubmissionDL(me.getId(), shifts, false));
         Core.Controller.ControllerFactory.getInstance().getHRController().addUpdateEmployee(me);
     }
+
+    /**
+     * Reports additional hours for a day shift the employee worked.
+     * Validated at the service layer.
+     */
+    public void reportAdditionalHours(String employeeId, int shiftId, float hours) {
+        Response<String> res = service.reportAdditionalHours(employeeId, shiftId, hours);
+        if (!res.isSuccess()) throw new RuntimeException(res.getErrorMessage());
+    }
 }
