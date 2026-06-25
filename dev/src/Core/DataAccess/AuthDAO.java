@@ -12,4 +12,5 @@ public interface AuthDAO {
     Map<String, Role> getAllAuthAccounts();
     Role login(String id, String password);
     String getFirstUserIdByRole(Role role);
+    boolean verifyPassword(String id, String password);
 }

@@ -18,11 +18,23 @@ public class HRController {
         if (!res.isSuccess()) throw new RuntimeException(res.getErrorMessage());
     }
 
+    public void updateEmployeeWithPassword(EmployeeDL emp, String password) {
+        Response<Boolean> res = Core.Controller.ControllerFactory.getInstance().getEmployeeService().updateEmployee(emp, password);
+        if (!res.isSuccess() || (res.getData() != null && !res.getData())) {
+            throw new RuntimeException(res.getErrorMessage() != null ? res.getErrorMessage() : "Authorization failed: Invalid password.");
+        }
+    }
+
     public List<EmployeePL> getAllEmployees() {
         Response<List<EmployeeSL>> res = service.getAllEmployees();
         if (!res.isSuccess()) throw new RuntimeException(res.getErrorMessage());
         return res.getData().stream()
                 .map(sl -> new EmployeePL(sl.id(), sl.name(), sl.bankAccount(), sl.salary(), sl.salaryType(), sl.dateOfEmployment(), sl.jobScope(), sl.constraints(), sl.yearlyRestDays(), sl.weeklyRestDay(), sl.workingDoubles(), sl.active(), sl.branchId()))
                 .collect(Collectors.toList());
+    }
+
+    public void addRole(String roleName) {
+        Core.Service.Response<String> res = service.addRole(roleName);
+        if (!res.isSuccess()) throw new RuntimeException(res.getErrorMessage());
     }
 }

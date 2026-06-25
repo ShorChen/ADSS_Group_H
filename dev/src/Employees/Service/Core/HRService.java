@@ -21,6 +21,15 @@ public class HRService {
         }
     }
 
+    public Core.Service.Response<String> addRole(String roleName) {
+        try {
+            facade.addRole(roleName);
+            return new Core.Service.Response<>("Success");
+        } catch (Exception e) {
+            return new Core.Service.Response<>(e.getMessage());
+        }
+    }
+
     public Response<List<EmployeeSL>> getAllEmployees() {
         try {
             List<EmployeeSL> list = facade.getAllEmployees().stream()

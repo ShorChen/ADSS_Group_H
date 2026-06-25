@@ -27,6 +27,10 @@ public class AuthFacade {
         return role;
     }
 
+    public boolean verifyPassword(String id, String password) {
+        return authDAO.verifyPassword(id, password);
+    }
+
     public void logout() {
         SessionManager.getInstance().logout();
     }

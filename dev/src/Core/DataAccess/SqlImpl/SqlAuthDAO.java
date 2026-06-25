@@ -4,11 +4,7 @@ import Core.DataAccess.AuthDAO;
 import Core.DataAccess.DatabaseManager;
 import Core.Domain.Role;
 
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.sql.Statement;
+import java.sql.*;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -116,6 +112,20 @@ public class SqlAuthDAO implements AuthDAO {
             throw new RuntimeException("Database error during authentication: " + e.getMessage());
         }
         return null;
+    }
+
+    @Override
+    public boolean verifyPassword(String id, String password) {
+        String sql = "SELECT password FROM Passwords WHERE employeeId = ?";
+        try (Connection conn = DatabaseManager.getConnection();
+             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+            pstmt.setString(1, id);
+            ResultSet rs = pstmt.executeQuery();
+            if (rs.next()) return rs.getString("password").equals(password);
+        } catch (Exception e) {
+            throw new RuntimeException("Database error: " + e.getMessage());
+        }
+        return false;
     }
 
     @Override

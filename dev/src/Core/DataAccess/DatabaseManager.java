@@ -188,7 +188,7 @@ public class DatabaseManager {
             stmt.execute("INSERT OR IGNORE INTO EmployeeRoles(employeeId, roleName) VALUES('D001', 'Driver')");
             stmt.execute("INSERT OR IGNORE INTO EmployeeRoles(employeeId, roleName) VALUES('D002', 'Driver')");
             stmt.execute("INSERT OR IGNORE INTO EmployeeRoles(employeeId, roleName) VALUES('D003', 'Driver')");
-            stmt.execute("INSERT OR IGNORE INTO Shifts(shiftId, branchId, year, week, startDate, day, shiftType) VALUES(1, 1, 2026, 26, '2026-06-25T08:00:00', 'THURSDAY', 'MORNING')");
+            stmt.execute("INSERT OR IGNORE INTO Shifts(shiftId, branchId, year, week, startDate, day, shiftType) VALUES(1, 1, 2026, 26, '2026-06-25T08:00:00', 'THURSDAY', 'DAY')");
             stmt.execute("INSERT OR IGNORE INTO Requests(requestId, shiftId, prevEmployee, newEmployee, manager, prevApproved, newApproved, managerApproved, denied) VALUES(1, 1, 'EMP001', 'EMP004', 'BRN123', 'APPROVED', 'WAITING', 'WAITING', 0)");
         } catch (SQLException e) {
             e.printStackTrace();

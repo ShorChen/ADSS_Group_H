@@ -29,6 +29,15 @@ public class AuthService {
         }
     }
 
+    public Response<Boolean> verifyPassword(String id, String password) {
+        try {
+            boolean isValid = authFacade.verifyPassword(id, password);
+            return new Response<>(isValid);
+        } catch (Exception e) {
+            return new Response<>(e.getMessage());
+        }
+    }
+
     @SuppressWarnings("unused")
     public Response<Role> getCurrentRole() {
         try {

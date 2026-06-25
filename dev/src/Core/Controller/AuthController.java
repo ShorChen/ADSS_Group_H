@@ -24,6 +24,12 @@ public class AuthController {
         if (!response.isSuccess()) throw new RuntimeException(response.getErrorMessage());
     }
 
+    public Response<Boolean> verifyPassword(String id, String password) {
+        Response<Boolean> res = authService.verifyPassword(id, password);
+        if (!res.isSuccess()) throw new RuntimeException(res.getErrorMessage());
+        return res;
+    }
+
     @SuppressWarnings("UnusedReturnValue")
     public Role autoLoginSystemTask(Role role) {
         Response<Role> response = authService.autoLoginSystemTask(role);

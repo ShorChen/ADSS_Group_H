@@ -21,4 +21,9 @@ public class EmployeeController {
         Response<String> res = service.submitRequest(req);
         if (!res.isSuccess()) throw new RuntimeException(res.getErrorMessage());
     }
+
+    public void updateAvailability(EmployeeDL me, java.util.Map<String, Boolean> shifts) {
+        me.setAvailabilitySubmission(new Employees.Domain.Entities.AvailabilitySubmissionDL(me.getId(), shifts, false));
+        Core.Controller.ControllerFactory.getInstance().getHRController().addUpdateEmployee(me);
+    }
 }
